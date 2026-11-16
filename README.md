@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.7, 2026-11-16. Paper/backtest only.
+Version 0.5.8, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -94,6 +94,12 @@ soft lock, pre-funded lock, or synthetic edge — and a soft lock opens
 at half size with a written kill condition. Strategy A is synthetic
 edge by the same classification, not a locked trade. The full rules
 are in [`SKILL.md`](SKILL.md) §13.
+
+Unified execution cycle ([`SKILL.md`](SKILL.md) §16): the §13 cycle
+pulled out so any multi-venue trade can use it — load state,
+reconcile, score closes, score opens, bracket, plan, wait for yes,
+closes first, persist. Procedure only; live runs still need §14's
+three requirements.
 **On the three majors the 70% threshold almost never triggers** —
 mean net APR is only ~5% (p99 22–54%); BTC's max spread in 208 days
 was 111.7% for a single hour, ETH never reached 70% (max 67.2%).

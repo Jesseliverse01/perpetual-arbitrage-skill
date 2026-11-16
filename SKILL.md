@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.7, 2026-11-16. Paper/backtest only.
+Version 0.5.8, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -53,7 +53,8 @@ It covers five ideas, all on public data:
 Around those strategies sit the tools that keep you honest: a staged
 workflow (§1), a debate-style evaluation pipeline (§2), a 0–10 signal
 scorer (§3), a live scanner (§9), a cross-venue matcher (§4), and a
-multi-venue scanner for Strategy E (§13). Everything runs on public
+multi-venue scanner for Strategy E (§13), and a unified execution
+cycle (§16) that any multi-venue trade can use. Everything runs on public
 APIs. Nothing needs a key. CCXT (§15) is an optional extra — the same
 venue data through one library, for readers who prefer it. The core
 scripts do not need it.
@@ -985,6 +986,48 @@ this VM's proxy, not a CCXT bug.
 Live execution still needs §14's three requirements (funded accounts
 on ≥ 2 venues, API access, the user's explicit per-action approval).
 CCXT changes how data is read, not what is authorized.
+
+## 16. Unified execution cycle — one cycle, many venues
+
+Strategy E's cycle (§13) works for any trade that needs two venues,
+not just Strategy E. This section pulls it out so it stands on its
+own. Same steps, same discipline — no new numbers, no new thresholds.
+
+When one trade needs two venues, you do not run two trades. You run
+one cycle:
+
+1. Load state — open positions, cooldown, history. If the state file
+   is missing or corrupt, stop. Never trade from memory.
+2. Fetch — funding and prices on every venue, same hour, same coins.
+3. Reconcile — compare what the venues say you hold with what your
+   state says. A leg the venue shows but the state does not is an
+   orphan: close it or record it before you open anything new. A leg
+   the state shows but the venue does not is drift: trust the venue,
+   fix the state.
+4. Score closes — every open position, in priority order (hard stop →
+   max hold → smart negatives → low APR).
+5. Score opens — only what passes every filter, at most 3 new opens
+   per cycle.
+6. Bracket — stop and take-profit for every planned open, written
+   before the plan is approved.
+7. Plan — one page: what closes, what opens, sizes, legs, lock class,
+   weakest leg, kill condition.
+8. Wait — nothing executes until the user says yes. A plan without a
+   yes is a draft.
+9. Execute closes first, then opens. If an open leg fails, close the
+   other leg at once. Never leave a one-legged trade.
+10. Persist — write the new state before the cycle ends. A trade that
+    is not written down did not happen.
+
+State lives in the same three files §13 names (positions, cooldown,
+history). One place holds the credentials — never in the repo, never
+in chat. One view shows balances across venues. One signing flow per
+venue.
+
+None of this runs live on its own. §14's three requirements still
+gate every live run: funded accounts on at least two venues, API
+access, and the user's explicit per-action approval for each exact
+plan.
 
 ## Sources
 
