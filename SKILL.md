@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.5, 2026-11-16. Paper/backtest only.
+Version 0.5.6, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -321,7 +321,7 @@ The PnL came from price moves. Here is why: extreme funding is a
 really a **positioning / mean-reversion signal** — buy the dip when
 shorts are paying hard, exit when funding normalizes — not a carry
 harvest. Real funding harvest needs leverage or longer holds, and both
-add risk. Do not sell this as "passive funding income".
+add risk. Do not sell this as "passive funding income". By the lock classification in §13, this is synthetic edge — a directional position with a funding tailwind, not a locked trade. Never call it arbitrage.
 
 ---
 
@@ -372,6 +372,16 @@ public backtest of that shape produced **0 trades** (no spot leg in
 the engine). Hyperliquid spot books exist only for a few coins
 (BTC, ETH, SOL…). The hedged version needs a multi-leg runtime and spot
 borrow/short access. Do not run it without one.
+
+The net edge, when you do size one:
+
+```
+net_basis = futures_price − spot_price
+net_edge  = net_basis − entry_fees − exit_fees − funding − borrow − carry_cost
+annualized_edge = net_edge / spot_price × (365 / days_to_expiry)
+```
+
+Every cost line has to be in there before the edge counts. If the hedge needs rolling, or the borrow is uncertain, the edge is synthetic, not locked (§13). Annualized edge is the number you compare with the funding APRs in §6 and §13.
 
 ### C. Cross-exchange funding spread
 
@@ -649,6 +659,22 @@ effective leverage = min(10, 5, leg maxes), per-exchange margin cap
 check, balance check (≥ leg collat × 1.1). Stop at 3 new opens per
 cycle.
 
+### Lock quality — classify before you size
+
+Not every spread is a locked trade. Classify each proposed open before you size it. The class decides the size and what you write down with it.
+
+| Class | What it means | What follows |
+|---|---|---|
+| **True lock** | Both legs fillable now at known prices — same asset, same size, margin pre-funded on both venues. Price moves cancel. Only the funding spread and the fees remain. | Full size. |
+| **Soft lock** | The hedge exists, but one leg may move or fail before both fill. Thin book, one venue's data missing, spread history too short to verify, slippage or basis check not computable. | Half size (REDUCE). Write the kill condition down first: what closes the first leg if the second never fills. Fill the constrained leg first — thinner book, tighter margin, slower venue. |
+| **Pre-funded lock** | The trade only opens as far as both venue accounts are funded. Capacity is the smaller funded balance, not the scanner's notional. | Size to the smaller funded balance. In paper mode this does not bind. It binds the moment the cycle goes live. |
+| **Synthetic edge** | Positive expectation, no locked payout. One leg's funding without the hedge, or a spread that only pays if the price moves your way. | Not Strategy E. Never open it as an arb, and never call it arbitrage. |
+
+Two more rules, same idea:
+
+- **Stale data kills the candidate.** A funding reading older than the last hour mark is stale. Drop the candidate. Never carry a stale reading into the next cycle.
+- **The plan records the class.** Step 8 lists, per proposed open: lock class, weakest leg, kill condition. A soft lock with no written kill condition does not open.
+
 ### Close rules — priority order, first match wins
 
 For each open arb, evaluated every hour:
@@ -701,7 +727,7 @@ wait for the user".
    recompute uPnL from the two venues' marks and `net_usd`.
 5. **Decide closes** — the priority order above.
 6. **Decide opens** — the filters above, from the scanner's ranked
-   list, max 3 per cycle.
+   list, max 3 per cycle. Classify each proposed open (lock quality, below) before sizing.
 7. **Bracket SL/TP (paper)** — record the intended stop per leg
    (SL trigger = liquidation price + 5% buffer toward entry; cross-leg
    TP = the other leg's SL price; omit TPs if they don't clear the
@@ -711,8 +737,8 @@ wait for the user".
 8. **Build the plan** — Markdown: state (open arbs, margin used,
    aggregate uPnL/funding/NET, cooldowns), proposed closes with
    reason + expected realized, proposed opens with legs, net APR,
-   collat/notional, basis, per-leg slippage (if known), capital after
-   the plan.
+   collat/notional, basis, per-leg slippage (if known), lock class,
+   weakest leg, kill condition, capital after the plan.
 9. **Wait for the user** — a paper plan is executed (recorded) only on
    their explicit "yes" for that exact plan. "yes close only" / "yes
    open only" for partial; anything else = monitor and exit.
@@ -720,7 +746,7 @@ wait for the user".
     determine win/loss (realized = uPnL + funding − fees), update
     cooldown (loss → increment + timestamp; win → delete entry).
     Then opens: insert with `apr_history=[netApr]`,
-    `peak_funding_cum=0`, `funding_breakeven_achieved=false`.
+    `peak_funding_cum=0`, `funding_breakeven_achieved=false`. Record the constrained leg first. If the other leg cannot be recorded in the same cycle, remove the first leg's record and log why — never leave a one-leg arb in the book.
 11. **Write state back** — atomically (write `.tmp`, rename);
     append `CYCLE_DONE` with summary stats.
 

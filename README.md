@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.5, 2026-11-16. Paper/backtest only.
+Version 0.5.6, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -29,7 +29,7 @@ It covers five ideas, all on public data, all paper/backtest only.
 | Strategy | Status |
 |---|---|
 | **A. Funding harvest (long-only)** | ✅ Validated — the default |
-| B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits |
+| B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits, including the net-edge formula ([`SKILL.md`](SKILL.md) §8) |
 | C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), execution not backtested |
 | D. Funding squeeze | Experimental (backtest was negative) |
 | **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py)) — paper only; live execution needs accounts + API access on ≥2 venues (not set up yet) |
@@ -88,6 +88,12 @@ numbers are kept here once, for transparency.
 
 Exit: 1× smart_decl_6; no stop-losses, no max-holds. The one trade
 held 19h, opened at 74.61% APR, long Lighter / short Hyperliquid.
+
+Lock quality: every proposed open is classified first — true lock,
+soft lock, pre-funded lock, or synthetic edge — and a soft lock opens
+at half size with a written kill condition. Strategy A is synthetic
+edge by the same classification, not a locked trade. The full rules
+are in [`SKILL.md`](SKILL.md) §13.
 **On the three majors the 70% threshold almost never triggers** —
 mean net APR is only ~5% (p99 22–54%); BTC's max spread in 208 days
 was 111.7% for a single hour, ETH never reached 70% (max 67.2%).
