@@ -2,8 +2,9 @@
 
 A trading skill for **perpetual futures arbitrage on Hyperliquid** — with a
 runnable backtest, a parameter sweep, a 0-10 signal scorer, a live scanner,
-and a cross-venue funding-spread matcher. Paper/backtest only.
-**Not financial advice.**
+a cross-venue funding-spread matcher, and a Vooi-grade delta-neutral
+strategy (Strategy E) with its own multi-venue scanner and backtest.
+Paper/backtest only. **Not financial advice.**
 
 ## What it covers
 
@@ -13,6 +14,7 @@ and a cross-venue funding-spread matcher. Paper/backtest only.
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits |
 | C. Cross-exchange funding spread | ✅ Detection implemented (`scripts/cross_venue.py`), execution not backtested |
 | D. Funding squeeze | Experimental (backtest was negative) |
+| **E. Delta-neutral cross-venue funding harvest (Vooi-grade)** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs a VOOI account + token (Jesse has none) |
 
 **Strategy A — the validated setup:** long a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -26,6 +28,78 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | Size | $100 notional, 1x per coin |
 | Fees | 0.035% taker per side |
 | Coins | BTC, ETH, HYPE |
+
+## v0.4 — what's new ("Vooi-grade, open source")
+
+Strategy E, adapted from the `vooi-app` org (`vooi-funding-bot-example`
+STRATEGY.md + `vooi-funding-arb-cycle` skill + `vooi-mcp`):
+
+1. **Strategy E — delta-neutral cross-venue funding harvest** — long
+   the venue paying funding, short the venue charging it, same asset,
+   same size ($50 notional per leg, $10 collat × 5x effective
+   leverage). Full Vooi decision cycle as a procedure (reconcile →
+   closes in priority order → opens with filters → bracket → plan →
+   approval → closes first, then opens → persist state), with the
+   Vooi defaults stated explicitly. **Paper/backtest/scan only in
+   this skill** — live execution goes through the VOOI Perps API/MCP
+   and needs a VOOI account + bearer token + Jesse's per-action
+   approval (none of which exists now).
+2. **Live multi-venue scanner** (`scripts/multivenue_scan.py`) —
+   Hyperliquid + Lighter (whose `/funding-rates` endpoint reports
+   funding for HL, Lighter, Binance AND Bybit in one call — this is
+   how Binance/Bybit rates become readable from this VM despite
+   their direct APIs being geo-blocked) + Aster (works) + OKX
+   (candidates only). Best pair per coin, Vooi open filters where
+   computable from public data.
+3. **Strategy E backtest** (`scripts/backtest_strategy_e.py`) — real
+   HL-vs-Lighter backtest, same 208-day window, Vooi close rules
+   (hard stop −$1.00 → max hold 96h → smart_neg → smart_decl →
+   low_apr), real basis-drift price PnL. Honest result below.
+
+## Strategy E backtest — honest result (v0.4)
+
+`results/backtest-strategy-e-2026-11-16-208d.json`, run with
+`python3 scripts/backtest_strategy_e.py --days 208 --coins BTC ETH HYPE`.
+Data: Hyperliquid fundingHistory + candles, Lighter fundings history
++ markPriceCandles (all public, no keys, no lookahead). Full data
+existed for all three coins (4,985–4,993h of 4,992).
+
+| Coin | Trades | Win | PnL | Funding | Price (basis) |
+|---|---|---|---|---|---|---|
+| BTC | 0 | — | $0 | $0 | $0 |
+| ETH | 0 | — | $0 | $0 | $0 |
+| HYPE | 5 | 80% | +$0.19 | +$0.14 | +$0.23 |
+| **Combined** | **5** | **80%** | **+$0.19** | **+$0.14** | **+$0.23** |
+
+Exits: 4× low_apr_6, 1× smart_decl_6; no stop-losses, no max-holds.
+Holds 13–45h. **On the three majors the 70% threshold almost never
+triggers** — mean net APR is only ~5% (p99 22–54%); BTC's max spread
+in 208 days was 111.7% for a single hour, ETH never reached 70% (max
+67.2%). **+$0.19 in 208 days is not a return stream, it is proof the
+machinery works.** The strategy's real opportunity set is the full
+200+ coin universe (the live scan below found 9 in-band candidates
+across all coins, vs 0 on the three majors). Do NOT lower the 70%
+threshold to manufacture trades on majors — friction dominates below
+it. Backtest limits: volume gates not applied (no historical volume),
+slippage not modeled, hard stop evaluated at hour closes only,
+Lighter funding missing ~7 of 4,992 hours. Capital base differs from
+Strategy A ($20 margin per arb) — compare PnL in USD, not raw
+return_pct.
+
+### Live multi-venue scan — first run (2026-11-16 ~10:00 UTC)
+
+`results/multivenue-scan-2026-11-16-1000.json` — all four direct
+venues OK (HL 235 coins; Lighter endpoint 231 coins across 4 venues;
+Aster 750; OKX 22 matched). 285 coins on ≥ 2 venues, 31 candidates
+with net APR ≥ 50%, **0 PASS**. Top 5 spreads are all SKIP (above
+the 200% hard cap): SKR +1,873.4%, BIRB +773.8%, PRL +493.9%, SAGA
++434.2%, BOT +389.4% — spikes on illiquid books, exactly what the
+cap exists to reject. In-band (70–120%), all WATCH: HYUNDAI 117.4%,
+LIT 93.6%, AZTEC 91.5% (blacklisted), RESOLV 82.8%, W 77.9%, CC
+77.2% (blacklisted), SOPH 74.5%, ARC 73.3%, GMX 73.0% (volume gate).
+None is PASS — the spike filters need spread history, only
+computable for HL↔Lighter pairs, and none of these nine has its best
+pair there.
 
 ## v0.3 — what's new
 
@@ -154,6 +228,9 @@ python3 scripts/score.py --apr=-0.183 --apr-history=-0.05,-0.08,... \
 python3 scripts/backtest_funding.py --days 208 --coins BTC ETH HYPE --out results/backtest-YYYY-MM-DD.json
 python3 scripts/backtest_funding.py --days 208 --coins BTC ETH HYPE --min-score 6 --out results/scored.json
 python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
+
+python3 scripts/multivenue_scan.py              # Strategy E live scanner -> results/multivenue-scan-YYYY-MM-DD-HHMM.json
+python3 scripts/backtest_strategy_e.py --days 208 --coins BTC ETH HYPE --out results/backtest-strategy-e-YYYY-MM-DD.json
 ```
 
 Stdlib only (Python 3). No keys, no trading, no installs.

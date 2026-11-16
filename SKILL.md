@@ -1,11 +1,55 @@
 ---
 name: perpetual-arbitrage
-description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, and funding-squeeze setups. v0.3 adds a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline adapted from Tauric's TradingAgents, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), and a cross-venue funding-spread matcher (scripts/cross_venue.py). Includes runnable backtests (scripts/backtest_funding.py, scripts/sweep.py) on Hyperliquid's public API only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
+description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E, Vooi-grade). v0.3 adds a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline adapted from Tauric's TradingAgents, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), and a cross-venue funding-spread matcher (scripts/cross_venue.py). v0.4 adds Strategy E (delta-neutral HL vs Lighter funding harvest with the full Vooi decision cycle), a live multi-venue scanner (scripts/multivenue_scan.py), and a Strategy E backtest (scripts/backtest_strategy_e.py). Includes runnable backtests (scripts/backtest_funding.py, scripts/sweep.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
 ---
 
 # Perpetual Arbitrage
 
-Version 0.3, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+Version 0.4 ("Vooi-grade, open source"), 2026-11-16. Created at Jesse's
+request. Paper/backtest only.
+
+## What changed in v0.4
+
+v0.3 added evaluation discipline around the single-venue rule. v0.4
+adds the **second, delta-neutral strategy** — the Vooi pattern —
+borrowed from the `vooi-app` org (see Sources):
+
+1. **Strategy E — delta-neutral cross-venue funding harvest** (§13):
+   long the venue paying funding, short the venue charging it, same
+   asset, same size. The full Vooi decision cycle as a procedure
+   (load state -> fetch live data -> reconcile drift/orphans ->
+   update per-arb metrics -> decide closes in priority order ->
+   decide opens with filters -> bracket SL/TP -> plan -> wait for
+   "yes" -> execute closes first, then opens -> persist state), with
+   the Vooi defaults stated explicitly (MIN_NET_APR 70%, leg collat
+   $10, max notional $100, max hold 96h, stop 5%, cooldown 2
+   losses / 48h). **In this skill Strategy E is paper/backtest/scan
+   only.** Live execution goes through the VOOI Perps API / MCP,
+   which needs a VOOI account with balance on >= 2 venues + a bearer
+   token (Jesse has none) + his explicit per-action approval (§14).
+2. **Live multi-venue scanner** (`scripts/multivenue_scan.py`, §13):
+   Hyperliquid + Lighter (whose `/funding-rates` endpoint reports
+   funding for HL, Lighter, Binance AND Bybit in one call — this is
+   how Binance/Bybit rates become readable from this VM despite
+   their direct APIs being geo-blocked) + Aster (works) + OKX
+   (candidates only). Best pair per coin, Vooi open filters where
+   computable from public data, ranked table + JSON in `results/`.
+3. **Strategy E backtest** (`scripts/backtest_strategy_e.py`, §13):
+   real HL-vs-Lighter backtest over the same 208-day window, with
+   the Vooi close rules and real basis-drift price PnL (not assumed
+   zero). The honest result: on BTC/ETH/HYPE the 70% threshold
+   almost never triggers — 5 trades in 208 days, +$0.19. The
+   strategy's opportunity set is the full 200+ coin universe, not
+   the three majors.
+4. **Vooi as the unified execution option** (§14): the VOOI Perps
+   API / MCP tools, the account/token requirements, the venue
+   quirks, and the approval gate. Documented, not wired in.
+
+**What did NOT change:** the v0.2 validated defaults for Strategy A
+(entry APR < -10%, exit APR >= 0, stop -5%, 24h timeout, $100
+notional 1x, long-only, BTC/ETH/HYPE) and the v0.3 scorer, scanner,
+matcher, workflow, and pipeline. Do not change them without a fresh
+sweep + out-of-sample check.
 
 ## What changed in v0.3
 
@@ -375,10 +419,12 @@ borrow/short access. Do not run it without one.
 Same asset, different funding on two venues (e.g. HL vs OKX): long
 where funding is negative, short where positive — collect both sides in
 theory. In practice: funded accounts on both venues, margin on both
-sides, transfer latency, spread closes fast. Detection is now
-implemented (`scripts/cross_venue.py`, §4); execution is not
-backtested here — screen live funding on both venues before building
-anything.
+sides, transfer latency, spread closes fast. Detection is implemented
+(`scripts/cross_venue.py`, §4); the full delta-neutral version of
+this idea — with sizing, close rules, cooldown, and a backtest — is
+now **Strategy E (§13)**. What §13 adds over this section: a real
+two-leg trade (not a detection), the Vooi 70% entry band, and a
+208-day HL-vs-Lighter backtest.
 
 ### D. Funding squeeze (variant of A — higher risk)
 
@@ -435,6 +481,27 @@ https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP`
 (`/v5/market/tickers`) returns 403 from this VM (geo-blocked) — both
 are attempted best-effort in `cross_venue.py` and skipped gracefully.
 
+Lighter public API `https://mainnet.zklighter.elliot.ai/api/v1` (no
+key; docs at https://docs.lighter.xyz/api):
+
+| Data | Request | Notes |
+|---|---|---|
+| Cross-venue funding rates | `GET /funding-rates` | ONE call returns funding for hyperliquid, lighter, binance, bybit. `rate` is an **8h-normalized rate for every venue**: APR = rate x 3 x 365 (verified live 2026-11-16: HL BTC rate 7.786e-05 -> 8.53% APR vs HL live 8.51%). This is how Binance/Bybit rates are readable from this VM. |
+| Funding history (Lighter leg) | `GET /fundings?market_id=N&resolution=1h&start_timestamp=&end_timestamp=&count_back=0` | Max 750 rows/call — chunk 30d. `rate` is a **PERCENT string** (0.0012 means 0.0012% = 1.2e-05/hour), signed by `direction` (+rate when `long`, −rate when `short`). Calibrated live: Lighter BTC 0.0012% long == funding-rates Lighter BTC 8h rate 9.6e-05 -> hourly 1.2e-05. `timestamp` is seconds, hour-aligned, payment at the hour mark. |
+| Mark-price candles | `GET /markPriceCandles?market_id=N&resolution=1h&start_timestamp=&end_timestamp=&count_back=0` | OHLC marks. **Caps at 500 rows/call** — chunk 20d (480h), not 30d (a 30d chunk silently returns only the last 500h). |
+| Market ids | `GET /orderBooks` | `market_id` per perp symbol (BTC 1, ETH 0, HYPE 24). Also returns `taker_fee` per market (0.0000 on these markets). |
+| Last-24h prices | `GET /marketPriceCharts?market_ids=1,0` | 24 hourly marks per market — not enough for a backtest; use `markPriceCandles`. |
+
+Funding on Lighter (docs/trading/funding): payments at each hour
+mark; rate = clamp(premium, ±BigClamp 4%)/8 — the premium is
+distributed over 8h like CEXs. Normal hourly rate 0.00125%
+(InterestRate 0.01% / 8), same floor as Hyperliquid.
+
+Aster public API (no key, works from this VM):
+`GET https://fapi.asterdex.com/fapi/v1/premiumIndex` (bulk, all
+symbols) or `?symbol=BTCUSDT`. `lastFundingRate` is an 8h rate:
+APR = rate x 3 x 365. Funds every 8h.
+
 Rate limit (Hyperliquid): 1,200 weight/minute per IP. Funding row
 `time` is the payment time at the END of its hour; a row with time in
 (candle_open, candle_close] is the payment for holding that hour.
@@ -459,6 +526,12 @@ python3 scripts/backtest_funding.py --days 208 --end 2026-11-16 \
                                             # scored variant (v0.3, see §7)
 python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
                                             # 48-combo grid + out-of-sample validation
+
+python3 scripts/multivenue_scan.py           # Strategy E live scanner
+                                            # -> results/multivenue-scan-YYYY-MM-DD-HHMM.json
+python3 scripts/backtest_strategy_e.py --days 208 --end 2026-11-16 \
+    --coins BTC ETH HYPE --out results/backtest-strategy-e-YYYY-MM-DD.json
+                                            # Strategy E backtest (HL vs Lighter, Vooi rules)
 ```
 
 - Stdlib only, no keys, no trading. Entry/exit evaluated at hourly closes
@@ -484,6 +557,309 @@ python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
 6. A spread flagged by the cross-venue matcher is a detection, not a
    trade. It still has to pass the liquidity gate and the full
    pipeline before any position.
+7. Strategy E in this skill is paper/backtest/scan only. A PASS from
+   the multi-venue scanner authorizes a *paper* cycle only. Live
+   execution needs a VOOI account with balance on >= 2 venues + a
+   bearer token (Jesse has none) + his explicit per-action approval
+   for that exact plan (§14). Never present Vooi execution as
+   available now.
+8. Do not lower Strategy E's 70% MIN_NET_APR to manufacture trades
+   on majors. The threshold exists because friction dominates below
+   it. If the opportunity set looks thin, widen the *universe*
+   (more coins), not the threshold.
+
+## 13. Strategy E — delta-neutral cross-venue funding harvest (Vooi-grade)
+
+The Vooi pattern: **long the venue paying funding, short the venue
+charging it — same asset, same size, opposite sides.** The legs cancel
+price exposure; what remains is the funding-rate spread, collected
+hourly while the spread holds. Everything else is risk management
+around that trade. Adapted from the `vooi-app` org's
+`vooi-funding-bot-example` (`docs/STRATEGY.md`, the single source of
+strategy truth) and the `vooi-funding-arb-cycle` skill. The algorithm
+and defaults below are Vooi's; the implementation here is public-data
+only (paper/backtest/scan).
+
+### The trade, in one table
+
+| Rule | Value |
+|---|---|
+| Legs | Long venue with the lower (more negative) funding rate; short venue with the higher rate. Same asset, same notional. |
+| Leg collateral | **$10 per leg** ($20 margin per arb) |
+| Leg notional | **$50** (effective leverage 5 = target 10, capped at 5) |
+| Max notional | $100 per position; max margin $120 per exchange; max 12 open arbs; max 3 new opens per cycle |
+| Entry | Net APR = (short-venue rate − long-venue rate) × 24 × 365 in **[70%, 120%]** (hard cap 200% — above that is a spike or a data error, never a trade) |
+| Funding accrual | Per hour: (short rate − long rate) × $50 |
+| Max hold | **96h**; min hold **12h** (soft exits blocked before 12h) |
+| Stop-loss | **−5% of (leg collat × 2) = −$1.00 net**, fires any time, even before min hold |
+| Safe floor | `max(open_net_apr × 0.70, 70%)` — soft exits only fire below it, unless funding breakeven is already achieved |
+| Cooldown | **2 consecutive losing closes → 48h block** on that asset; a winning close resets it |
+| Fees modeled | HL taker 0.035% per side on the HL leg; Lighter taker 0% on these markets (from `orderBooks` `taker_fee` 0.0000). Slippage NOT modeled (no historical book data). |
+| Friction estimate (breakeven flag only) | (leg notional × 2) × 15bps × 2 = **$0.30** per arb; breakeven achieved when peak funding > $0.30 × 1.5 = **$0.45** (sticky once true) |
+
+### Open filters (in order, reject on first failure)
+
+From the Vooi cycle skill, adapted to what public data can check
+(§13 scanner notes which are computable live):
+
+1. Asset not in the **blacklist**: YZY, STBL, 2Z, CC, CHIP, VVV,
+   MEGA, AZTEC, JTO, STABLE, alias:mu, alias:bmnr, EIGEN, WLFI,
+   XMR, PYTH, ZRO, CRV. (Note the overlap with this skill's own
+   illiquid-trap list: SKR, MELANIA, CC, NIL, INIT, SOPH.)
+2. Asset not on cooldown (2 losses within 48h).
+3. Asset not already open in another arb (one arb per asset).
+4. 70% ≤ net APR ≤ min(120%, 200%).
+5. `apr_24h ≥ 0` AND `apr_7d ≥ 0` (trailing means of the net APR —
+   no headline-only spikes).
+6. `apr_1h / apr_24h ≤ 5` and `apr_24h / apr_7d ≤ 3`.
+7. Both legs' vol24h ≥ $100k, per-leg ≥ $250k — **only where the
+   venue exposes volume** (Hyperliquid `dayNtlVlm` does;
+   Lighter/Aster/OKX funding endpoints do not). Not applied where
+   uncomputable; the row is flagged `volume_unknown`.
+8. Both legs in the target exchanges (Hyperliquid, Lighter; Aster
+   included in the scanner as a third venue).
+
+For survivors, in net-APR-descending order: slippage check
+(≤ 200bps per leg — needs the Vooi API, not computable from public
+data), entry-price basis check (≤ 30bps adverse basis — same),
+effective leverage = min(10, 5, leg maxes), per-exchange margin cap
+check, balance check (≥ leg collat × 1.1). Stop at 3 new opens per
+cycle.
+
+### Close rules — priority order, first match wins
+
+For each open arb, evaluated every hour:
+
+1. **`hard_stop_loss`** — `net_usd < −$1.00`. Fires regardless of
+   min hold. (`net_usd = uPnL + funding_cum`, where uPnL is real
+   basis drift — see the backtest notes.)
+2. **`max_hold`** — held > 96h. Fires regardless of min hold.
+3. **Min-hold gate** — held < 12h: skip the soft exits below, mark
+   HOLD.
+4. **`smart_neg_3`** — last 3 spread readings ALL < −10% APR (the
+   spread reversed), and (current APR < safe floor OR breakeven
+   already achieved).
+5. **`smart_decl_6`** — last 7 readings strictly declining, same
+   floor condition.
+6. **`low_apr_6`** — last 6 readings ALL < 10% APR, AND funding
+   breakeven NOT achieved. (Once funding has paid back friction
+   ×1.5, low APR alone does not justify closing.)
+
+### The Vooi decision cycle (procedure, not code)
+
+One cycle = load state → fetch live data → reconcile → update
+metrics → decide closes → decide opens → bracket SL/TP → plan →
+wait for "yes" → execute closes first, then opens → persist state.
+In this skill the cycle is a **paper procedure** run by the agent;
+the execution step (§14) is replaced by "record the paper plan and
+wait for Jesse".
+
+1. **Load state** — `results/strategy-e-positions.json` and
+   `results/strategy-e-cooldown.json` (same fields as the Vooi
+   `positions.json` / `cooldown.json`: `arb_id`, `asset`,
+   `long_exchange`, `short_exchange`, `opened_at`, `open_net_apr`,
+   `leg_collat_usd`, `leg_notional_usd`, `effective_leverage`,
+   `apr_history` (last 24), `peak_funding_cum`,
+   `funding_breakeven_achieved`; cooldown: `consecutive_losses`,
+   `last_loss_ts`). Append-only log: `results/strategy-e-history.ndjson`
+   (events `CYCLE_STARTED`, `OPEN_PROPOSED`, `CLOSE_PROPOSED`,
+   `CYCLE_DONE`, ...). Missing files start empty.
+2. **Fetch live data** — run `scripts/multivenue_scan.py` (all venues
+   at once) for opportunities; read the paper positions file for the
+   open book.
+3. **Reconcile** — paper positions have no venue drift (nothing is
+   live), so this step is a consistency check: every open paper arb
+   still has a live spread reading; a coin whose spread data went
+   missing is flagged, not silently kept.
+4. **Update per-arb metrics** — append the current net APR to
+   `apr_history` (last 24); accrue funding from the two venues'
+   hourly rates; update `peak_funding_cum` and the breakeven flag;
+   recompute uPnL from the two venues' marks and `net_usd`.
+5. **Decide closes** — the priority order above.
+6. **Decide opens** — the filters above, from the scanner's ranked
+   list, max 3 per cycle.
+7. **Bracket SL/TP (paper)** — record the intended stop per leg
+   (SL trigger = liquidation price + 5% buffer toward entry; cross-leg
+   TP = the other leg's SL price; omit TPs if they don't clear the
+   entry on both sides). For Hyperliquid, prices clamp to 5 sig figs.
+   In paper mode the bracket is a *record*, not an order — the
+   cycle's hard stop is what actually protects the paper position.
+8. **Build the plan** — Markdown: state (open arbs, margin used,
+   aggregate uPnL/funding/NET, cooldowns), proposed closes with
+   reason + expected realized, proposed opens with legs, net APR,
+   collat/notional, basis, per-leg slippage (if known), capital after
+   the plan.
+9. **Wait for Jesse** — a paper plan is executed (recorded) only on
+   his explicit "yes" for that exact plan. "yes close only" / "yes
+   open only" for partial; anything else = monitor and exit.
+10. **Execute (paper)** — closes first: remove from positions,
+    determine win/loss (realized = uPnL + funding − fees), update
+    cooldown (loss → increment + timestamp; win → delete entry).
+    Then opens: insert with `apr_history=[netApr]`,
+    `peak_funding_cum=0`, `funding_breakeven_achieved=false`.
+11. **Write state back** — atomically (write `.tmp`, rename);
+    append `CYCLE_DONE` with summary stats.
+
+### Honest numbers (Vooi's own words)
+
+- Realistic ballpark: **low single-digit % monthly**, highly variable.
+- Worst case: lose **10–20% of position notional** (venue outages,
+  half-leg fills, sudden funding flips).
+- Friction is real: at 5–7¢ per arb on $50 notional, a position needs
+  **~40–70 hours** of funding accrual to break even.
+- The Vooi bot examples were **AI-generated and tested before
+  publication** — testing does not make them risk-free.
+- Dominant loss mode: **decay before breakeven** — the spread
+  collapses before funding covers friction. Then adverse basis on
+  entry, half-leg events, and venue/API outages.
+
+### Backtest — HL vs Lighter, 208 days (2026-04-22 → 2026-11-16)
+
+`scripts/backtest_strategy_e.py`, results in
+`results/backtest-strategy-e-2026-11-16-208d.json`. Same window as
+the v0.2 validation. Full data existed for all three coins
+(HL funding 4,992h, Lighter fundings 4,985h of 4,992, both candle
+series 4,991–4,993h). One fix found while running it: Lighter's
+`/markPriceCandles` caps at 500 rows/call, so the script chunks
+20d (480h), not 30d — a 30d chunk silently returns only the last
+500h.
+
+| Coin | Trades | Win | PnL | Funding | Price (basis) | Fees |
+|---|---|---|---|---|---|---|
+| BTC | 0 | — | $0 | $0 | $0 | $0 |
+| ETH | 0 | — | $0 | $0 | $0 | $0 |
+| HYPE | 5 | 80% | +$0.19 | +$0.14 | +$0.23 | −$0.18 |
+| **Combined** | **5** | **80%** | **+$0.19** | **+$0.14** | **+$0.23** | **−$0.18** |
+
+Exits: 4× `low_apr_6`, 1× `smart_decl_6`; no stop-losses, no
+max-holds. Holds 13–45h (all above the 12h min hold). Open APRs
+74–114% (inside the band). Signals seen: BTC 4,818 / ETH 4,818 /
+HYPE 4,700 — nearly all filtered.
+
+**The honest result: on the three majors, the 70% threshold almost
+never triggers.** Diagnostic on the full spread series (4,985h per
+coin): mean net APR is only ~5% (BTC 4.64%, ETH 4.51%, HYPE 6.50%);
+p99 is 21.5% / 23.5% / 54.3%. BTC's max spread in 208 days was
+111.7% — one hour, which failed the trailing-mean/ratio filters
+(a 1-hour spike). ETH never reached 70% at all (max 67.2%). HYPE
+had 20 hours ≥ 70%, 16 in band, 4 passing all filters (the 5th
+trade came from the early window once the candle fix landed).
+
+**Conclusion: Strategy E on BTC/ETH/HYPE is a "wait for a rare
+event" strategy — +$0.19 in 208 days, 5 trades, is not a return
+stream, it is a proof that the machinery works.** The strategy's
+real opportunity set is the full 200+ coin universe: the live
+scanner (§13, below) found 9 in-band candidates on 2026-11-16
+across all coins, vs 0 on the three majors. Do NOT lower the 70%
+threshold to manufacture trades on majors — the threshold exists
+because friction dominates below it (Vooi's own tuning note). The
+next validation step, if Jesse wants it, is a backtest over the
+full coin universe (the data exists per coin; the run is just
+longer), not a threshold cut.
+
+**Backtest limits (stated, not hidden):** volume gates NOT applied
+(no historical per-venue volume in public endpoints); slippage NOT
+modeled; hard stop evaluated at hour closes only (Vooi cycle
+cadence), not intra-hour; Lighter funding history missing ~7 of
+4,992 hours (those hours accrue no funding and skip soft exits);
+capital base differs from Strategy A ($20 margin per arb for $50
+notional per leg vs $100 notional 1x) — compare PnL in USD and
+return-on-margin, not raw return_pct, across strategies.
+
+### Live multi-venue scan — first run (2026-11-16 ~10:00 UTC)
+
+`scripts/multivenue_scan.py` →
+`results/multivenue-scan-2026-11-16-1000.json`. All four direct
+venues OK: Hyperliquid 235 coins; Lighter funding-rates 231 coins
+across binance/bybit/hyperliquid/lighter; Aster 750 coins; OKX 22
+matched (candidates only). 285 coins on ≥ 2 venues, 31 candidates
+with net APR ≥ 50%.
+
+**Top 5 spreads (all SKIP — above the 200% hard cap):**
+
+| Rank | Coin | Long | Short | Net APR |
+|---:|---|---|---|---:|
+| 1 | SKR | bybit −3,611.3% | aster −1,738.0% | **+1,873.4%** |
+| 2 | BIRB | bybit −1,404.0% | aster −630.2% | **+773.8%** |
+| 3 | PRL | lighter −463.4% | aster +30.6% | **+493.9%** |
+| 4 | SAGA | aster +5.5% | hyperliquid +439.7% | **+434.2%** |
+| 5 | BOT | bybit −661.9% | lighter −272.4% | **+389.4%** |
+
+These are spikes on illiquid books — exactly what the 120% MAX and
+200% hard cap exist to reject. **In-band (70–120%), all WATCH:**
+HYUNDAI 117.4% (binance→bybit), LIT 93.6% (HL→aster), AZTEC 91.5%
+(blacklisted), RESOLV 82.8% (aster→HL), W 77.9% (HL→okx), CC 77.2%
+(blacklisted), SOPH 74.5% (HL→aster), ARC 73.3% (aster→bybit), GMX
+73.0% (HL volume below the $250k per-leg gate). None is PASS: the
+spike filters need spread history, which is only computable for
+HL↔Lighter pairs, and none of these nine has its best pair on
+HL↔Lighter. WATCH means "worth watching", not "open now".
+
+## 14. Vooi as the execution option (unified API/MCP)
+
+Strategy E's live execution path is the **VOOI Perps API** — one
+API for Hyperliquid, Lighter, Aster, trade.xyz, and Kinetiq
+(500+ markets, incl. RWA perps). It is documented here, **not
+wired in**, and not available now.
+
+**What it needs (all three, no exceptions):**
+
+1. A **VOOI Perps account** with balance on **at least two venues**
+   (Hyperliquid + Lighter; Aster supported in code, off by default
+   in the bot).
+2. A **VOOI bearer token** — generated at
+   https://ultra.vooi.io/api-tokens. Jesse has none; never ask him
+   to paste one in chat. Reads need the token too — there is no
+   public/keyless mode.
+3. Jesse's **explicit per-action approval** for each exact plan
+   (the cycle skill enforces this; the server may 401/403
+   otherwise). His standing rule governs every real order.
+
+**Endpoints:** REST API docs at https://perps-api.vooi.io/docs;
+MCP server at `https://perps-api.vooi.io/mcp` (auth:
+`Authorization: Bearer <VOOI_API_TOKEN>`). In Muse, arbitrary MCP
+servers are not wired the way they are in Claude Code — the pattern
+(one API, ranked funding strategies, batch orders) is used via the
+REST API instead. Do not claim the MCP server is connected to Muse
+unless it has actually been wired in.
+
+**Tools (from the `vooi-funding-arb-cycle` skill):**
+
+| Purpose | Tool |
+|---|---|
+| List ranked arb opportunities | `get_funding_strategies` |
+| Pricing / fees / liq price | `get_quotes` |
+| Slippage estimate | `estimate_slippage` |
+| Market metadata (decimals, max leverage) | `get_markets` |
+| Account balances | `get_accounts` |
+| Open positions (with `fundingFee`) | `get_positions` |
+| Outstanding orders (SL/TP audit) | `get_open_orders` |
+| Place orders (legs + bracket) | `batch_create_orders` (preferred), `create_order` (fallback) |
+| Cancel orders | `cancel_order`, `batch_cancel_orders` |
+| Historical spread | `get_funding_spread_chart` |
+
+Never use deposit / withdraw / transfer / leverage / margin-mode /
+broker-approval tools in a routine cycle — those are explicit
+user-initiated operations, surfaced separately.
+
+**Venue quirks (from the cycle skill — they bite at execution):**
+
+- Lighter ignores `clientOrderId` when a bracket is present — match
+  Lighter orders by (baseSymbol, side, size) in reconcile.
+- Hyperliquid bracket prices need max 5 sig figs (and max
+  `6 - baseDecimals` decimal places) — round before sending.
+- Aster does not support bracket `stopLoss`/`takeProfit` — use a
+  separate trigger order instead, or omit SL/TP.
+- Aster funding fields are `null` in `get_positions` — fall back to
+  estimating funding from `get_funding_spread_chart` × held hours.
+- A write failing with **401** = stale token: stop the cycle, surface
+  it, do not retry. A write failing with **5xx**: do NOT retry
+  automatically (the original may have committed on-venue → double
+  open) — surface the error verbatim.
+- **Half-leg risk is the killer.** If one leg fills and the other
+  fails, roll back immediately (reduce-only market close on the
+  filled leg); if rollback fails, emit `EMERGENCY_UNWIND_NEEDED`
+  and STOP the cycle.
 
 ## Sources
 
@@ -520,3 +896,16 @@ python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
   spread, detection-only. Borrowed the matching idea: match the same
   coin across venues by normalized symbol and compute the funding
   spread. Detection only, no execution — same as here.
+- **Vooi** (github.com/vooi-app — priority reference for v0.4):
+  `vooi-funding-bot-example` (`docs/STRATEGY.md`, the single source
+  of strategy truth — the 70% entry band, the close rules, the
+  cooldown, the friction math, and the honest numbers in §13 are
+  Vooi's, adapted to public data); the `vooi-funding-arb-cycle`
+  skill (the decision-cycle algorithm in §13 — load state, fetch,
+  reconcile, update metrics, closes in priority order, opens with
+  filters, bracket, plan, approval, executes closes first, persist);
+  `vooi-mcp` (the Perps MCP tools and the venue quirks in §14);
+  `vooi-mm-bot-example` (the delta-neutral market-making bot —
+  noted as a reference only, not adapted here). Algorithm and
+  defaults borrowed; code not copied; no Vooi API calls are made
+  from this skill (no token exists).
