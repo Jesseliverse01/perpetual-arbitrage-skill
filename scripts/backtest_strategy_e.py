@@ -7,7 +7,24 @@ The trade: long the venue paying funding, short the venue charging it,
 same asset, same size ($50 notional per leg). Legs cancel price
 exposure; what remains is the funding-rate spread, collected hourly
 while the spread holds. Close rules, sizing, cooldown and filters are
-the Strategy E defaults, adapted to public data:
+the Strategy E defaults, adapted to public data.
+
+Two corrections in v0.5.3 (the original v0.4 run is superseded):
+  - Funding accrues from the position's FIXED legs each hour:
+    (rate of the short venue - rate of the long venue) x $50. The
+    original accrued from the best direction each hour, so funding
+    could only ever increase — it never subtracted when the spread
+    reversed against the open pair.
+  - Spread history is SIGNED per direction (long HL / short Lighter:
+    r_li - r_hl; long Lighter / short HL: r_hl - r_li). The original
+    recorded the ABSOLUTE spread (higher minus lower rate, always
+    >= 0), which made the apr_24h/apr_7d >= 0 entry filters trivially
+    true and made smart_neg_3 (last 3 readings < -10%) unreachable.
+    Entry trailing means are now computed on the signed series for
+    the candidate direction; an open position's apr_hist holds the
+    signed spread for that pair's direction, so it can go negative
+    and the close rules work as designed. The entry-band check stays
+    on the current hour's net APR magnitude.
 
   leg collat $10, effective leverage 5 (target 10, cap 5) -> leg
   notional $50; max hold 96h; min hold 12h (soft exits blocked before);
@@ -43,6 +60,12 @@ Honest limits (read before quoting any number):
   - No slippage model; entries/exits fill at hour-close marks.
   - The hard stop is evaluated at hour closes (hourly cycle cadence),
     not intra-hour — a fast basis move inside one hour is missed.
+  - Per-leg liquidation is NOT modeled: the hard stop is checked at
+    hour closes only, so a leg liquidating intra-hour (or a venue
+    outage mid-hour) is not in the model — a real two-leg position
+    can lose one leg while the other stays open. That was not
+    observed in the published historical window; it is a stated
+    model limit, not a claim it cannot happen.
   - Lighter funding history is missing ~7 of 4992 hours in the window;
     missing hours accrue no funding and skip soft-exit evaluation.
   - Capital base differs from Strategy A ($100 notional 1x per coin):
@@ -218,16 +241,25 @@ def simulate(coin, hours, hl_rate, li_rate, hl_close, li_close):
                     pos = None
             continue
         hours_with_data += 1
-        # Net spread APR this hour: long the lower-rate venue.
+        # Signed spread for the "long HL / short Lighter" orientation.
+        # (v0.5.3: this used to be the ABSOLUTE spread, which made the
+        # apr_24h/apr_7d >= 0 filters trivially true and smart_neg_3
+        # unreachable. The other orientation is its exact negative.)
+        signed_hl = (r_li - r_hl) * 24 * 365
+        spread_hist.append(signed_hl)
+        # Candidate direction this hour: long the lower-rate venue.
         if r_hl <= r_li:
             long_venue, r_long, r_short = "hyperliquid", r_hl, r_li
+            dir_sign = 1.0
         else:
             long_venue, r_long, r_short = "lighter", r_li, r_hl
-        net_apr = (r_short - r_long) * 24 * 365
-        spread_hist.append(net_apr)
-        apr_24h = (sum(spread_hist[-24:]) / len(spread_hist[-24:])
+            dir_sign = -1.0
+        net_apr = (r_short - r_long) * 24 * 365  # magnitude at entry
+        # Trailing means for the CANDIDATE direction (signed): the
+        # >= 0 filters are real filters now, not trivially true.
+        apr_24h = (dir_sign * sum(spread_hist[-24:]) / len(spread_hist[-24:])
                    if len(spread_hist) >= 24 else None)
-        apr_7d = (sum(spread_hist[-168:]) / len(spread_hist[-168:])
+        apr_7d = (dir_sign * sum(spread_hist[-168:]) / len(spread_hist[-168:])
                   if len(spread_hist) >= 168 else None)
 
         if pos is None:
@@ -258,12 +290,23 @@ def simulate(coin, hours, hl_rate, li_rate, hl_close, li_close):
             continue
 
         # --- position open: accrue funding, update marks, evaluate closes
-        pos["funding"] += (r_short - r_long) * N
+        # Funding accrues from the position's FIXED legs (v0.5.3: this
+        # used to re-derive the legs every hour, so funding could only
+        # ever increase — it never subtracted when the spread reversed
+        # against the open pair). It can go negative now.
+        if pos["long_venue"] == "hyperliquid":
+            pos["funding"] += (r_li - r_hl) * N
+        else:
+            pos["funding"] += (r_hl - r_li) * N
         pos["peak_funding"] = max(pos["peak_funding"], pos["funding"])
         if not pos["fb_achieved"] and pos["peak_funding"] > FB_THRESHOLD_USD:
             pos["fb_achieved"] = True
         pos["hours"] += 1
-        pos["apr_hist"].append(net_apr)
+        # Signed spread for THIS pair's direction (can go negative —
+        # that is what makes smart_neg_3 reachable).
+        pos_dir = 1.0 if pos["long_venue"] == "hyperliquid" else -1.0
+        cur_signed = pos_dir * signed_hl
+        pos["apr_hist"].append(cur_signed)
         # uPnL from basis drift (both legs' mark moves vs entry)
         upnl = upnl_now(pos, p_hl, p_li, N)
         net_usd = upnl + pos["funding"]
@@ -278,7 +321,11 @@ def simulate(coin, hours, hl_rate, li_rate, hl_close, li_close):
         else:
             safe_floor = max(pos["open_net_apr"] * SAFE_FLOOR_MULT, MIN_NET_APR)
             check_floor = not (pos["fb_achieved"])  # fb skips the floor
-            below_floor = (net_apr < safe_floor) or (not check_floor)
+            # Signed current spread for this pair's direction: when the
+            # spread reverses it goes negative, which is exactly when
+            # smart_neg_3 should be allowed to fire (the absolute
+            # magnitude would hide the reversal).
+            below_floor = (cur_signed < safe_floor) or (not check_floor)
             h = pos["apr_hist"]
             if below_floor and len(h) >= NEGATIVE_WINDOW \
                     and all(x < SMART_NEG_VALUE_FLOOR for x in h[-NEGATIVE_WINDOW:]):
@@ -393,10 +440,16 @@ def main():
             "warmup_h": WARMUP_HOURS,
         },
         "notes": [
+            "v0.5.3 (corrected re-run): funding accrues from the "
+            "position's fixed legs and spread history is signed per "
+            "direction — the v0.4 run accrued funding from the best "
+            "direction each hour and used the absolute spread, which "
+            "made smart_neg_3 unreachable. See SKILL.md §13.",
             "Volume gates NOT applied (no historical per-venue volume in "
             "public endpoints). Slippage NOT modeled (no historical book "
             "data). Hard stop evaluated at hour closes only (hourly "
-            "cycle cadence), not intra-hour.",
+            "cycle cadence), not intra-hour. Per-leg liquidation is NOT "
+            "modeled (a leg liquidating intra-hour is not in the model).",
             "Lighter fundings `rate` is a PERCENT string, signed by "
             "`direction` (calibrated live 2026-11-16).",
         ],

@@ -1,11 +1,11 @@
 ---
 name: perpetual-arbitrage
-description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
+description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when the user asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
 ---
 
 # Perpetual Arbitrage
 
-Version 0.5.2, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+Version 0.5.3, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -68,7 +68,7 @@ it is marked optional.
 | **1. Scan** | `scripts/scan.py` fetches all 235 Hyperliquid perps, scores every coin below -10% APR, prints a ranked table, saves JSON + markdown in `results/`. | Ranked candidate list with scores |
 | **2. Verify** | For each PASS candidate, check the numbers yourself: re-read the current funding rate and mark price from `metaAndAssetCtxs`; check the coin actually trades (volume/OI from the same response); check the funding history for the last 24h (is this a 1-hour spike or a sustained print?). A candidate whose numbers do not reproduce is dropped here. | Verified facts per candidate |
 | **3. Score** | `scripts/score.py` 0-10 score (see §3). A signal below 6 is WATCH/SKIP and does not go to debate. | Score + dimension breakdown |
-| **4. Debate** | The multi-agent pipeline (§2): three analysts in parallel, then Bull vs Bear, then the Risk Manager verdict. | GO / NO-GO / REDUCE + reasons |
+| **4. Debate** | The multi-agent pipeline (§2): three analyst roles in turn, then Bull vs Bear, then the Risk Manager verdict. | GO / NO-GO / REDUCE + reasons |
 | **5. Decide** | The decision is the Risk Manager's verdict, sized by the score and the debate: GO = take the paper position at the validated size; REDUCE = take it at half size (or watch one more hour); NO-GO = skip and log why. No decision without a logged verdict. | Position (or explicit skip) |
 | **6. Report** | Append the decision to the scan's markdown summary and to the decision log (§2). One JSON + one short markdown summary per scan, in `results/`. | `results/scan-YYYY-MM-DD-HHMM.{json,md}` + decision log |
 
@@ -84,7 +84,15 @@ Think of it as a small team arguing about one trade. Five seats, each
 with its own job. The agent plays every seat in turn — this is a
 procedure to follow, not a program, and it never places a trade.
 
-The seats, in order: Analyst Team (parallel specialists) -> Bull/Bear
+One honest limit, before you use it: this pipeline runs on ONE model
+in ONE context, in order. The analysts, Bull/Bear, and Risk Manager
+are roles the same model plays — not independent agents. There is no
+real context isolation and nothing actually runs in parallel. The
+debate is a forced two-sided self-check: the same model argues both
+sides, and it can end up agreeing with itself. Treat the verdict as
+a single-model judgment, not a consensus.
+
+The seats, in order: Analyst Team (three specialist roles) -> Bull/Bear
 debate -> Trader decision -> Risk Management team -> Fund Manager
 approval. Every evaluation keeps a decision log, and every number must
 be computable from data available at that moment (no peeking at the
@@ -92,8 +100,9 @@ future).
 
 ### The seats
 
-**Analysts — run in parallel, each with its own inputs. No analyst
-sees another analyst's conclusion before writing its own.**
+**Analysts — three specialist roles, played one after another, each
+with its own inputs.** Answer each role's questions from that role's
+inputs only; do not carry one role's conclusion into the next.
 
 | Analyst | Inputs | Must answer |
 |---|---|---|
@@ -125,7 +134,7 @@ after weighing, or too thin to support a call.
 | **NO-GO** | Skip. Log the reason. A NO-GO is a decision, not a failure to decide. |
 
 **Fund Manager approval.** For paper trading, the "fund manager" is
-Jesse's standing rule: paper only, no live trade without his explicit
+the user's standing rule: paper only, no live trade without the user's explicit
 per-action approval. A GO verdict authorizes a *paper* position only.
 It never authorizes a live order.
 
@@ -317,17 +326,12 @@ add risk. Do not sell this as "passive funding income".
 ## 7. Scored backtest — the honest result
 
 `--min-score` on `scripts/backtest_funding.py` gates long entries on
-the point-in-time 0-10 score. At each entry decision the score is
-computed from data up to that hour ONLY (current APR, last 24h of
-funding, last 25 hourly closes + highs/lows) — no lookahead. Only
-the 4 dimensions computable from Hyperliquid history are used
-(extremity, persistence, trend, volatility); liquidity and
-cross-venue need data that does not exist historically, so they are
-dropped and the remaining weights renormalize (see `scripts/score.py`).
-The score gate applies to long entries only.
-
-Same window as the v0.2 validation (208 days, 2026-04-22 ->
-2026-11-16, BTC/ETH/HYPE, $100 1x):
+the point-in-time 0-10 score, computed from data up to that hour only
+— no lookahead. Only the 4 dimensions computable from Hyperliquid
+history are used (extremity, persistence, trend, volatility);
+liquidity and cross-venue are dropped and the weights renormalize.
+Same window as §6 (208 days, 2026-04-22 -> 2026-11-16, BTC/ETH/HYPE,
+$100 1x):
 
 | Variant | Trades | PnL | Win | Signals seen | Filtered |
 |---|---|---|---|---|---|
@@ -338,32 +342,16 @@ Same window as the v0.2 validation (208 days, 2026-04-22 ->
 
 **The scorer does NOT improve total PnL.** Min-score 2 is +$0.94
 above baseline — noise, and the threshold was picked after looking
-at the results (in-sample). Min-score 3 is worse (+$20.20).
-Min-score 6 barely trades at all (2 trades: BTC 0, ETH 0, HYPE 2).
+at the results. Min-score 3 is worse; min-score 6 barely trades
+(2 trades: BTC 0, ETH 0, HYPE 2). Why: entries fire on the first
+hour below -10%, so the mean entry score across the 166 baseline
+trades is only **3.03** — a threshold of 6 was miscalibrated.
 
-**Why threshold 6 fails — a structural reason, not a bug.** Entries
-fire on the *first* hour funding crosses below -10%. At that hour,
-persistence is mechanically low (only ~1 of the last 24 hours is
-below -10%) and extremity is usually just past the threshold. Across
-the 166 baseline trades the mean entry score is **3.03** (median
-2.93, 90th percentile 4.33). A threshold of 6 was miscalibrated — it
-asks for a score the entry rule almost never produces.
-
-**What the score DOES predict.** Per-trade quality rises with score:
-win rate 56% overall -> 72% for scores >= 4, and average PnL/trade
--$0.04 (score < 2) -> +$0.23 (2–3) -> +$0.29 (3–4) -> +$0.48 (4–5).
-But not enough to beat the baseline on total return, because higher
-thresholds remove too many profitable trades along with the bad ones.
-
-**Conclusion: the unscored v0.2 setup stays the validated default.**
-The scorer's value is as a **ranking/evaluation tool** for the live
-scan — where all 6 dimensions exist and the liquidity gate filters
-traps — not as a validated entry filter. Do not use `--min-score` as
-a live filter without a fresh out-of-sample validation on a new
-window first. The diagnostic file with every baseline trade's entry
-score attached is
-`results/backtest-2026-11-16-208d-scored0.json` (min-score 0: all
-signals pass, scores recorded).
+**Conclusion: the unscored setup stays the validated default.** The
+scorer is a **ranking/evaluation tool** for the live scan, not a
+validated entry filter. Do not use `--min-score` as a live filter
+without a fresh out-of-sample validation first. The diagnostic file
+with every baseline trade's entry score is `results/backtest-2026-11-16-208d-scored0.json`.
 
 ---
 
@@ -573,15 +561,15 @@ below authorizes real money.
 4. Never present a backtest as a promise. Always report: window, trades,
    win rate, return, max DD, and the buy-and-hold comparison.
 5. A PASS score or a GO verdict authorizes a *paper* position only.
-   Live deployment needs Jesse's explicit per-action approval, a funded
-   API wallet (he has none), and a dry-run/paper phase first.
+   Live deployment needs the user's explicit per-action approval, a funded
+   API wallet (they have none), and a dry-run/paper phase first.
 6. A spread flagged by the cross-venue matcher is a detection, not a
    trade. It still has to pass the liquidity gate and the full
    pipeline before any position.
 7. Strategy E in this skill is paper/backtest/scan only. A PASS from
    the multi-venue scanner authorizes a *paper* cycle only. Live
    execution needs accounts with balance on >= 2 venues + API access
-   (Jesse has none set up) + his explicit per-action approval
+   (the user has none set up) + the user's explicit per-action approval
    for that exact plan (§14). Never present live execution as
    available now.
 8. Do not lower Strategy E's 70% MIN_NET_APR to manufacture trades
@@ -630,13 +618,16 @@ Adapted to what public data can check
 2. Asset not on cooldown (2 losses within 48h).
 3. Asset not already open in another arb (one arb per asset).
 4. 70% ≤ net APR ≤ min(120%, 200%).
-5. `apr_24h ≥ 0` AND `apr_7d ≥ 0` (trailing means of the net APR —
-   no headline-only spikes).
+5. `apr_24h ≥ 0` AND `apr_7d ≥ 0` (trailing means of the SIGNED spread
+   for the candidate direction — no headline-only spikes; these are
+   real filters now, not trivially true).
 6. `apr_1h / apr_24h ≤ 5` and `apr_24h / apr_7d ≤ 3`.
 7. Both legs' vol24h ≥ $100k, per-leg ≥ $250k — **only where the
    venue exposes volume** (Hyperliquid `dayNtlVlm` does;
    Lighter/Aster/OKX funding endpoints do not). Not applied where
-   uncomputable; the row is flagged `volume_unknown`.
+   uncomputable; the row is flagged `volume_unknown` — and the verdict
+   is capped at WATCH. A row with unknown volume on any leg can never
+   PASS.
 8. Both legs in the target exchanges (Hyperliquid, Lighter; Aster
    included in the scanner as a third venue).
 
@@ -673,7 +664,7 @@ metrics → decide closes → decide opens → bracket SL/TP → plan →
 wait for "yes" → execute closes first, then opens → persist state.
 In this skill the cycle is a **paper procedure** run by the agent;
 the execution step (§14) is replaced by "record the paper plan and
-wait for Jesse".
+wait for the user".
 
 1. **Load state** — `results/strategy-e-positions.json` and
    `results/strategy-e-cooldown.json` (fields: `arb_id`, `asset`,
@@ -691,9 +682,11 @@ wait for Jesse".
    live), so this step is a consistency check: every open paper arb
    still has a live spread reading; a coin whose spread data went
    missing is flagged, not silently kept.
-4. **Update per-arb metrics** — append the current net APR to
-   `apr_history` (last 24); accrue funding from the two venues'
-   hourly rates; update `peak_funding_cum` and the breakeven flag;
+4. **Update per-arb metrics** — append the current SIGNED spread for
+   that pair's direction to `apr_history` (last 24) — it can go
+   negative when the spread reverses; accrue funding from the two
+   venues' hourly rates on the position's fixed legs; update
+   `peak_funding_cum` and the breakeven flag;
    recompute uPnL from the two venues' marks and `net_usd`.
 5. **Decide closes** — the priority order above.
 6. **Decide opens** — the filters above, from the scanner's ranked
@@ -709,8 +702,8 @@ wait for Jesse".
    reason + expected realized, proposed opens with legs, net APR,
    collat/notional, basis, per-leg slippage (if known), capital after
    the plan.
-9. **Wait for Jesse** — a paper plan is executed (recorded) only on
-   his explicit "yes" for that exact plan. "yes close only" / "yes
+9. **Wait for the user** — a paper plan is executed (recorded) only on
+   their explicit "yes" for that exact plan. "yes close only" / "yes
    open only" for partial; anything else = monitor and exit.
 10. **Execute (paper)** — closes first: remove from positions,
     determine win/loss (realized = uPnL + funding − fees), update
@@ -735,24 +728,34 @@ wait for Jesse".
 
 `scripts/backtest_strategy_e.py`, results in
 `results/backtest-strategy-e-2026-11-16-208d.json`. Same window as
-the v0.2 validation. Full data existed for all three coins
+the §6 validation. Full data existed for all three coins
 (HL funding 4,992h, Lighter fundings 4,985h of 4,992, both candle
 series 4,991–4,993h). One fix found while running it: Lighter's
 `/markPriceCandles` caps at 500 rows/call, so the script chunks
 20d (480h), not 30d — a 30d chunk silently returns only the last
 500h.
 
+**Corrected in v0.5.3 — read this before the numbers.** The original
+run reported 5 trades and +$0.19. It had two bugs: funding accrued
+from the best direction each hour instead of the position's fixed
+legs (so it could only grow), and the spread history was absolute
+instead of signed (so the `apr_24h`/`apr_7d >= 0` filters were
+trivially true and `smart_neg_3` could never fire). The numbers
+below are the corrected re-run on the same window — 1 trade,
++$0.02. The old numbers are kept here once, for transparency.
+
 | Coin | Trades | Win | PnL | Funding | Price (basis) | Fees |
 |---|---|---|---|---|---|---|
 | BTC | 0 | — | $0 | $0 | $0 | $0 |
 | ETH | 0 | — | $0 | $0 | $0 | $0 |
-| HYPE | 5 | 80% | +$0.19 | +$0.14 | +$0.23 | −$0.18 |
-| **Combined** | **5** | **80%** | **+$0.19** | **+$0.14** | **+$0.23** | **−$0.18** |
+| HYPE | 1 | 100% | +$0.02 | +$0.03 | +$0.03 | −$0.04 |
+| **Combined** | **1** | **100%** | **+$0.02** | **+$0.03** | **+$0.03** | **−$0.04** |
 
-Exits: 4× `low_apr_6`, 1× `smart_decl_6`; no stop-losses, no
-max-holds. Holds 13–45h (all above the 12h min hold). Open APRs
-74–114% (inside the band). Signals seen: BTC 4,818 / ETH 4,818 /
-HYPE 4,700 — nearly all filtered.
+Exit: 1× `smart_decl_6`; no stop-losses, no max-holds. The one
+trade held 19h (above the 12h min hold), opened at 74.61% APR
+(inside the band), long Lighter / short Hyperliquid. Funding
++$0.027, price +$0.027, fees −$0.035. Signals seen: BTC 4,814 /
+ETH 4,814 / HYPE 4,797 — nearly all filtered.
 
 **The honest result: on the three majors, the 70% threshold almost
 never triggers.** Diagnostic on the full spread series (4,985h per
@@ -760,29 +763,34 @@ coin): mean net APR is only ~5% (BTC 4.64%, ETH 4.51%, HYPE 6.50%);
 p99 is 21.5% / 23.5% / 54.3%. BTC's max spread in 208 days was
 111.7% — one hour, which failed the trailing-mean/ratio filters
 (a 1-hour spike). ETH never reached 70% at all (max 67.2%). HYPE
-had 20 hours ≥ 70%, 16 in band, 4 passing all filters (the 5th
-trade came from the early window once the candle fix landed).
+had 20 hours ≥ 70% and 16 in band — and with the signed filters
+only 1 of them passed everything.
 
 **Conclusion: Strategy E on BTC/ETH/HYPE is a "wait for a rare
-event" strategy — +$0.19 in 208 days, 5 trades, is not a return
+event" strategy — +$0.02 in 208 days, 1 trade, is not a return
 stream, it is a proof that the machinery works.** The strategy's
 real opportunity set is the full 200+ coin universe: the live
 scanner (§13, below) found 9 in-band candidates on 2026-11-16
 across all coins, vs 0 on the three majors. Do NOT lower the 70%
 threshold to manufacture trades on majors — the threshold exists
 because friction dominates below it. The
-next validation step, if Jesse wants it, is a backtest over the
+next validation step, if the user wants it, is a backtest over the
 full coin universe (the data exists per coin; the run is just
 longer), not a threshold cut.
 
 **Backtest limits (stated, not hidden):** volume gates NOT applied
 (no historical per-venue volume in public endpoints); slippage NOT
 modeled; hard stop evaluated at hour closes only (hourly cycle
-cadence), not intra-hour; Lighter funding history missing ~7 of
-4,992 hours (those hours accrue no funding and skip soft exits);
-capital base differs from Strategy A ($20 margin per arb for $50
-notional per leg vs $100 notional 1x) — compare PnL in USD and
-return-on-margin, not raw return_pct, across strategies.
+cadence), not intra-hour; per-leg liquidation is NOT modeled — a
+leg liquidating intra-hour (or a venue outage mid-hour) is not in
+the model, and a real two-leg position can lose one leg while the
+other stays open (that did not happen in this window; it is a
+stated limit, not a claim it cannot happen); Lighter funding
+history missing ~7 of 4,992 hours (those hours accrue no funding
+and skip soft exits); capital base differs from Strategy A ($20
+margin per arb for $50 notional per leg vs $100 notional 1x) —
+compare PnL in USD and return-on-margin, not raw return_pct,
+across strategies.
 
 ### Live multi-venue scan — first run (2026-11-16 ~10:00 UTC)
 
@@ -825,10 +833,10 @@ here, **not wired in**, and not available now.
 1. **Accounts with balance on at least two venues** (Hyperliquid +
    Lighter; Aster as a third venue where supported).
 2. **API access to that unified API** (credentials for the account).
-   Jesse has none set up; never ask him to paste a credential in
+   The user has none set up; never ask them to paste a credential in
    chat. Reads need the credentials too — there is no public/keyless
    mode for execution.
-3. Jesse's **explicit per-action approval** for each exact plan. His
+3. The user's **explicit per-action approval** for each exact plan. Their
    standing rule governs every real order.
 
 **Capabilities a unified API must expose for the cycle (§13):**

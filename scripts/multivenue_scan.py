@@ -32,18 +32,22 @@ Open filters applied where computable from public data:
   - Asset blacklist (incl. XMR, CC, PYTH, CRV, WLFI, EIGEN)
   - Volume gates where the venue exposes volume: HL dayNtlVlm >= $100k
     (MIN) and >= $250k (per-leg). Lighter/Aster/OKX funding endpoints
-    expose no volume — the gate is NOT applied there and the row is
-    flagged volume_unknown instead of silently passed.
+    expose no volume — the gate is NOT applied there, the row is
+    flagged volume_unknown, and the verdict is capped at WATCH (never
+    PASS): an unchecked leg cannot pass.
   - Spike filters (apr_24h >= 0, apr_7d >= 0, 1h/24h <= 5, 24h/7d <= 3)
     need spread history: computed only for candidates whose pair is
     HL<->Lighter (both have public hourly funding history). Other pairs
     are flagged history_unavailable — the filter is not faked.
 
-Verdicts: PASS = all computable filters pass; WATCH = in the APR band
-but a filter fails or is uncomputable; SKIP = outside the band.
+Verdicts: PASS = all computable filters pass AND volume is known on
+both legs; WATCH = in the APR band but a filter fails, is
+uncomputable, or volume is unknown on a leg (unknown volume caps the
+verdict at WATCH — a row can never PASS on an unchecked leg); SKIP =
+outside the band.
 PASS here means "worth the full Strategy E evaluation" (SKILL.md §13),
 not "open now" — live execution needs accounts + API access on >= 2
-venues + Jesse's explicit approval, none of which exists in this skill.
+venues + the user's explicit approval, none of which exists in this skill.
 
 Outputs:
   results/multivenue-scan-YYYY-MM-DD-HHMM.json (rows + venue status)
@@ -365,7 +369,11 @@ def main():
                 reasons.append(f"HL vol24h ${vol:,.0f} < per-leg ${PER_LEG_VOLUME_MIN_USD:,}")
         other = [v for v in (long_venue, short_venue) if v != "hyperliquid"]
         if other:
+            # Unknown volume caps the verdict at WATCH (never PASS):
+            # an unchecked leg cannot pass. Recorded in reasons so it
+            # is visible in the output, not just in volume_unknown.
             volume_unknown.append(f"volume unknown on {','.join(other)}")
+            reasons.append(f"volume unknown on {','.join(other)} — capped at WATCH")
         # 4. Spike filters — only for HL<->Lighter pairs (history exists)
         hist = None
         hist_note = None

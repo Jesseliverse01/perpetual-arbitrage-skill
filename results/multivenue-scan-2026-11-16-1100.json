@@ -1,0 +1,776 @@
+{
+  "generated_utc": "2026-11-16-1100",
+  "min_net_apr": 0.7,
+  "max_net_apr": 1.2,
+  "venue_status": {
+    "hyperliquid": {
+      "ok": true,
+      "coins": 235
+    },
+    "lighter": {
+      "ok": true,
+      "coins": 231,
+      "venues_included": [
+        "binance",
+        "bybit",
+        "hyperliquid",
+        "lighter"
+      ],
+      "error": null
+    },
+    "aster": {
+      "ok": true,
+      "coins": 750,
+      "error": null
+    },
+    "okx": {
+      "ok": true,
+      "coins": 20,
+      "note": "per-coin fetch, candidates only"
+    }
+  },
+  "coins_with_2plus_venues": 285,
+  "candidates": 28,
+  "passes": 0,
+  "rows": [
+    {
+      "coin": "SKR",
+      "long_venue": "binance",
+      "short_venue": "aster",
+      "long_apr_pct": -3015.5,
+      "short_apr_pct": -1482.23,
+      "net_apr_pct": 1533.27,
+      "venues": {
+        "hyperliquid": -2682.44,
+        "binance": -3015.5,
+        "bybit": -2910.77,
+        "lighter": -2423.89,
+        "aster": -1482.23
+      },
+      "hl_volume_usd": 7475871.44,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on binance,aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 1533.3% > MAX 120%",
+        "net_apr 1533.3% > hard cap 200%",
+        "volume unknown on binance,aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "BOT",
+      "long_venue": "bybit",
+      "short_venue": "lighter",
+      "long_apr_pct": -783.97,
+      "short_apr_pct": -55.19,
+      "net_apr_pct": 728.78,
+      "venues": {
+        "binance": -644.96,
+        "bybit": -783.97,
+        "lighter": -55.19,
+        "okx": -569.61
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit,lighter"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 728.8% > MAX 120%",
+        "net_apr 728.8% > hard cap 200%",
+        "volume unknown on bybit,lighter \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "BIRB",
+      "long_venue": "bybit",
+      "short_venue": "aster",
+      "long_apr_pct": -1183.25,
+      "short_apr_pct": -565.21,
+      "net_apr_pct": 618.04,
+      "venues": {
+        "binance": -1122.44,
+        "bybit": -1183.25,
+        "aster": -565.21
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit,aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 618.0% > MAX 120%",
+        "net_apr 618.0% > hard cap 200%",
+        "volume unknown on bybit,aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "SAGA",
+      "long_venue": "aster",
+      "short_venue": "hyperliquid",
+      "long_apr_pct": 5.48,
+      "short_apr_pct": 370.18,
+      "net_apr_pct": 364.71,
+      "venues": {
+        "hyperliquid": 370.18,
+        "aster": 5.48
+      },
+      "hl_volume_usd": 26117.57,
+      "volume_ok": false,
+      "volume_unknown": [
+        "volume unknown on aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 364.7% > MAX 120%",
+        "net_apr 364.7% > hard cap 200%",
+        "HL vol24h $26,118 < $100,000",
+        "volume unknown on aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "WEN",
+      "long_venue": "lighter",
+      "short_venue": "binance",
+      "long_apr_pct": -317.99,
+      "short_apr_pct": 0.0,
+      "net_apr_pct": 317.99,
+      "venues": {
+        "binance": 0.0,
+        "lighter": -317.99,
+        "okx": -16.96
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,binance"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 318.0% > MAX 120%",
+        "net_apr 318.0% > hard cap 200%",
+        "volume unknown on lighter,binance \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "MELANIA",
+      "long_venue": "hyperliquid",
+      "short_venue": "aster",
+      "long_apr_pct": -272.59,
+      "short_apr_pct": 5.48,
+      "net_apr_pct": 278.06,
+      "venues": {
+        "hyperliquid": -272.59,
+        "aster": 5.48
+      },
+      "hl_volume_usd": 159987.9,
+      "volume_ok": false,
+      "volume_unknown": [
+        "volume unknown on aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 278.1% > MAX 120%",
+        "net_apr 278.1% > hard cap 200%",
+        "HL vol24h $159,988 < per-leg $250,000",
+        "volume unknown on aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "CASHCAT",
+      "long_venue": "bybit",
+      "short_venue": "aster",
+      "long_apr_pct": -238.32,
+      "short_apr_pct": 1.37,
+      "net_apr_pct": 239.69,
+      "venues": {
+        "hyperliquid": -110.11,
+        "bybit": -238.32,
+        "lighter": -63.07,
+        "aster": 1.37,
+        "okx": -34.45
+      },
+      "hl_volume_usd": 4871478.62,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit,aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 239.7% > MAX 120%",
+        "net_apr 239.7% > hard cap 200%",
+        "volume unknown on bybit,aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "DRV",
+      "long_venue": "bybit",
+      "short_venue": "lighter",
+      "long_apr_pct": -224.96,
+      "short_apr_pct": 10.51,
+      "net_apr_pct": 235.47,
+      "venues": {
+        "bybit": -224.96,
+        "lighter": 10.51,
+        "aster": 1.37
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit,lighter"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 235.5% > MAX 120%",
+        "net_apr 235.5% > hard cap 200%",
+        "volume unknown on bybit,lighter \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "SOPH",
+      "long_venue": "hyperliquid",
+      "short_venue": "aster",
+      "long_apr_pct": -281.57,
+      "short_apr_pct": -51.52,
+      "net_apr_pct": 230.04,
+      "venues": {
+        "hyperliquid": -281.57,
+        "aster": -51.52,
+        "okx": -95.5
+      },
+      "hl_volume_usd": 2708297.63,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 230.0% > MAX 120%",
+        "net_apr 230.0% > hard cap 200%",
+        "volume unknown on aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "BB",
+      "long_venue": "okx",
+      "short_venue": "lighter",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 166.44,
+      "net_apr_pct": 166.44,
+      "venues": {
+        "binance": 10.95,
+        "bybit": 10.95,
+        "lighter": 166.44,
+        "aster": 2.23,
+        "okx": 0.0
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on okx,lighter"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "net_apr 166.4% > MAX 120%",
+        "volume unknown on okx,lighter \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "MINIMAX",
+      "long_venue": "aster",
+      "short_venue": "lighter",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 151.55,
+      "net_apr_pct": 151.55,
+      "venues": {
+        "binance": 30.99,
+        "bybit": 99.19,
+        "lighter": 151.55,
+        "aster": 0.0,
+        "okx": 33.63
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster,lighter"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "net_apr 151.5% > MAX 120%",
+        "volume unknown on aster,lighter \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "PRL",
+      "long_venue": "lighter",
+      "short_venue": "aster",
+      "long_apr_pct": -87.6,
+      "short_apr_pct": 46.09,
+      "net_apr_pct": 133.69,
+      "venues": {
+        "binance": 39.76,
+        "bybit": 10.95,
+        "lighter": -87.6,
+        "aster": 46.09
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "net_apr 133.7% > MAX 120%",
+        "volume unknown on lighter,aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "INIT",
+      "long_venue": "aster",
+      "short_venue": "hyperliquid",
+      "long_apr_pct": -251.32,
+      "short_apr_pct": -125.77,
+      "net_apr_pct": 125.55,
+      "venues": {
+        "hyperliquid": -125.77,
+        "aster": -251.32,
+        "okx": -187.17
+      },
+      "hl_volume_usd": 3746172.75,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "net_apr 125.5% > MAX 120%",
+        "volume unknown on aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "CC",
+      "long_venue": "hyperliquid",
+      "short_venue": "bybit",
+      "long_apr_pct": -92.03,
+      "short_apr_pct": 10.95,
+      "net_apr_pct": 102.98,
+      "venues": {
+        "hyperliquid": -92.03,
+        "binance": -30.38,
+        "bybit": 10.95,
+        "lighter": 10.51,
+        "aster": -32.21,
+        "okx": -30.48
+      },
+      "hl_volume_usd": 1614372.43,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "blacklisted:CC",
+        "volume unknown on bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "WLFI",
+      "long_venue": "lighter",
+      "short_venue": "binance",
+      "long_apr_pct": -85.85,
+      "short_apr_pct": 10.95,
+      "net_apr_pct": 96.8,
+      "venues": {
+        "hyperliquid": -9.3,
+        "binance": 10.95,
+        "bybit": -64.43,
+        "lighter": -85.85,
+        "aster": -0.72,
+        "okx": -5.99
+      },
+      "hl_volume_usd": 1122170.26,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,binance"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "blacklisted:WLFI",
+        "volume unknown on lighter,binance \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "SAMSUNG",
+      "long_venue": "binance",
+      "short_venue": "okx",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 94.73,
+      "net_apr_pct": 94.73,
+      "venues": {
+        "binance": 0.0,
+        "bybit": 80.24,
+        "aster": 0.0,
+        "okx": 94.73
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on binance,okx"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "volume unknown on binance,okx \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "BYD",
+      "long_venue": "binance",
+      "short_venue": "bybit",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 80.81,
+      "net_apr_pct": 80.81,
+      "venues": {
+        "binance": 0.0,
+        "bybit": 80.81
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on binance,bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "volume unknown on binance,bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "HYUNDAI",
+      "long_venue": "binance",
+      "short_venue": "okx",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 79.25,
+      "net_apr_pct": 79.25,
+      "venues": {
+        "binance": 0.0,
+        "bybit": 78.07,
+        "aster": 0.0,
+        "okx": 79.25
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on binance,okx"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "volume unknown on binance,okx \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "W",
+      "long_venue": "hyperliquid",
+      "short_venue": "okx",
+      "long_apr_pct": -83.65,
+      "short_apr_pct": -6.96,
+      "net_apr_pct": 76.68,
+      "venues": {
+        "hyperliquid": -83.65,
+        "aster": -23.05,
+        "okx": -6.96
+      },
+      "hl_volume_usd": 376640.77,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on okx"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "volume unknown on okx \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "XPT",
+      "long_venue": "lighter",
+      "short_venue": "okx",
+      "long_apr_pct": 3.5,
+      "short_apr_pct": 79.5,
+      "net_apr_pct": 76.0,
+      "venues": {
+        "binance": 78.97,
+        "lighter": 3.5,
+        "aster": 35.86,
+        "okx": 79.5
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,okx"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "WATCH",
+      "reject_reasons": [
+        "volume unknown on lighter,okx \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "0G",
+      "long_venue": "lighter",
+      "short_venue": "bybit",
+      "long_apr_pct": -58.69,
+      "short_apr_pct": 10.95,
+      "net_apr_pct": 69.64,
+      "venues": {
+        "hyperliquid": 2.95,
+        "binance": -5.43,
+        "bybit": 10.95,
+        "lighter": -58.69,
+        "aster": 0.2,
+        "okx": 5.48
+      },
+      "hl_volume_usd": 268763.75,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 69.6% < MIN 70%",
+        "volume unknown on lighter,bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "KAITO",
+      "long_venue": "hyperliquid",
+      "short_venue": "binance",
+      "long_apr_pct": -52.72,
+      "short_apr_pct": 10.95,
+      "net_apr_pct": 63.67,
+      "venues": {
+        "hyperliquid": -52.72,
+        "binance": 10.95,
+        "bybit": 10.95,
+        "lighter": -7.01,
+        "aster": -4.36,
+        "okx": -1.2
+      },
+      "hl_volume_usd": 282475.37,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on binance"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 63.7% < MIN 70%",
+        "volume unknown on binance \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "GRAM",
+      "long_venue": "lighter",
+      "short_venue": "bybit",
+      "long_apr_pct": -57.82,
+      "short_apr_pct": 5.69,
+      "net_apr_pct": 63.5,
+      "venues": {
+        "hyperliquid": -13.01,
+        "binance": -40.15,
+        "bybit": 5.69,
+        "lighter": -57.82,
+        "aster": -23.69,
+        "okx": -13.21
+      },
+      "hl_volume_usd": 2376649.07,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 63.5% < MIN 70%",
+        "volume unknown on lighter,bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "NVDA",
+      "long_venue": "aster",
+      "short_venue": "bybit",
+      "long_apr_pct": 0.0,
+      "short_apr_pct": 63.21,
+      "net_apr_pct": 63.21,
+      "venues": {
+        "binance": 38.53,
+        "bybit": 63.21,
+        "lighter": 34.16,
+        "aster": 0.0,
+        "okx": 45.71
+      },
+      "hl_volume_usd": null,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster,bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 63.2% < MIN 70%",
+        "volume unknown on aster,bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "MNT",
+      "long_venue": "hyperliquid",
+      "short_venue": "bybit",
+      "long_apr_pct": -52.12,
+      "short_apr_pct": 9.33,
+      "net_apr_pct": 61.45,
+      "venues": {
+        "hyperliquid": -52.12,
+        "bybit": 9.33,
+        "lighter": 0.0
+      },
+      "hl_volume_usd": 575730.39,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 61.5% < MIN 70%",
+        "volume unknown on bybit \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "RESOLV",
+      "long_venue": "aster",
+      "short_venue": "hyperliquid",
+      "long_apr_pct": 5.48,
+      "short_apr_pct": 66.48,
+      "net_apr_pct": 61.01,
+      "venues": {
+        "hyperliquid": 66.48,
+        "aster": 5.48,
+        "okx": 5.48
+      },
+      "hl_volume_usd": 620365.85,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 61.0% < MIN 70%",
+        "volume unknown on aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "ASTER",
+      "long_venue": "lighter",
+      "short_venue": "aster",
+      "long_apr_pct": -15.77,
+      "short_apr_pct": 40.23,
+      "net_apr_pct": 56.0,
+      "venues": {
+        "hyperliquid": 1.59,
+        "binance": 10.95,
+        "bybit": 3.29,
+        "lighter": -15.77,
+        "aster": 40.23,
+        "okx": 1.49
+      },
+      "hl_volume_usd": 59192651.37,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on lighter,aster"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 56.0% < MIN 70%",
+        "volume unknown on lighter,aster \u2014 capped at WATCH"
+      ]
+    },
+    {
+      "coin": "ICP",
+      "long_venue": "aster",
+      "short_venue": "bybit",
+      "long_apr_pct": -43.83,
+      "short_apr_pct": 10.95,
+      "net_apr_pct": 54.78,
+      "venues": {
+        "hyperliquid": -22.78,
+        "binance": 1.65,
+        "bybit": 10.95,
+        "lighter": 10.51,
+        "aster": -43.83,
+        "okx": -12.69
+      },
+      "hl_volume_usd": 831621.68,
+      "volume_ok": true,
+      "volume_unknown": [
+        "volume unknown on aster,bybit"
+      ],
+      "spread_history": null,
+      "history_note": "spread history only computable for HL<->Lighter pairs",
+      "verdict": "SKIP",
+      "reject_reasons": [
+        "net_apr 54.8% < MIN 70%",
+        "volume unknown on aster,bybit \u2014 capped at WATCH"
+      ]
+    }
+  ]
+}

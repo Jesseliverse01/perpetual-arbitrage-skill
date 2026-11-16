@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.2, 2026-11-16. Paper/backtest only.
+Version 0.5.3, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -32,7 +32,7 @@ It covers five ideas, all on public data, all paper/backtest only.
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits |
 | C. Cross-exchange funding spread | ✅ Detection implemented (`scripts/cross_venue.py`), execution not backtested |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs accounts + API access on ≥2 venues (Jesse has none set up) |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs accounts + API access on ≥2 venues (not set up yet) |
 
 **Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -71,24 +71,34 @@ Data: Hyperliquid fundingHistory + candles, Lighter fundings history
 + markPriceCandles (all public, no keys, no lookahead). Full data
 existed for all three coins (4,985–4,993h of 4,992).
 
+**Corrected in v0.5.3.** The original run reported 5 trades and
++$0.19, but it had two bugs: funding accrued from the best direction
+each hour instead of the position's fixed legs, and the spread
+history was absolute instead of signed. The numbers below are the
+corrected re-run on the same window — 1 trade, +$0.02. The old
+numbers are kept here once, for transparency.
+
 | Coin | Trades | Win | PnL | Funding | Price (basis) |
 |---|---|---|---|---|---|
 | BTC | 0 | — | $0 | $0 | $0 |
 | ETH | 0 | — | $0 | $0 | $0 |
-| HYPE | 5 | 80% | +$0.19 | +$0.14 | +$0.23 |
-| **Combined** | **5** | **80%** | **+$0.19** | **+$0.14** | **+$0.23** |
+| HYPE | 1 | 100% | +$0.02 | +$0.03 | +$0.03 |
+| **Combined** | **1** | **100%** | **+$0.02** | **+$0.03** | **+$0.03** |
 
-Exits: 4× low_apr_6, 1× smart_decl_6; no stop-losses, no max-holds.
-Holds 13–45h. **On the three majors the 70% threshold almost never
-triggers** — mean net APR is only ~5% (p99 22–54%); BTC's max spread
-in 208 days was 111.7% for a single hour, ETH never reached 70% (max
-67.2%). **+$0.19 in 208 days is not a return stream, it is proof the
+Exit: 1× smart_decl_6; no stop-losses, no max-holds. The one trade
+held 19h, opened at 74.61% APR, long Lighter / short Hyperliquid.
+**On the three majors the 70% threshold almost never triggers** —
+mean net APR is only ~5% (p99 22–54%); BTC's max spread in 208 days
+was 111.7% for a single hour, ETH never reached 70% (max 67.2%).
+**+$0.02 in 208 days is not a return stream, it is proof the
 machinery works.** The strategy's real opportunity set is the full
 200+ coin universe (the live scan below found 9 in-band candidates
 across all coins, vs 0 on the three majors). Do NOT lower the 70%
 threshold to manufacture trades on majors — friction dominates below
 it. Backtest limits: volume gates not applied (no historical volume),
 slippage not modeled, hard stop evaluated at hour closes only,
+per-leg liquidation not modeled (a leg can liquidate intra-hour
+while the other stays open — that did not happen in this window),
 Lighter funding missing ~7 of 4,992 hours. Capital base differs from
 Strategy A ($20 margin per arb) — compare PnL in USD, not raw
 return_pct.
@@ -214,7 +224,10 @@ Copy this folder into your agent's skills directory (e.g. Muse
 `~/workspace/custom-skills/` or `~/.agents/skills/`), or read `SKILL.md`
 directly — it contains the full workflow, the multi-agent pipeline, the
 scoring rubric, the cross-venue rules, the report format, data sources,
-and rules.
+and rules. One honest limit: the pipeline is a procedure run by one
+model in one context — the analysts, Bull/Bear, and Risk Manager are
+roles the same model plays, not independent agents, so treat its
+verdict as a single-model judgment, not a consensus.
 
 ## Run the scripts
 

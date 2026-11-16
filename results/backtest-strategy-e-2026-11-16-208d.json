@@ -21,7 +21,8 @@
     "warmup_h": 168
   },
   "notes": [
-    "Volume gates NOT applied (no historical per-venue volume in public endpoints). Slippage NOT modeled (no historical book data). Hard stop evaluated at hour closes only (hourly cycle cadence), not intra-hour.",
+    "v0.5.3 (corrected re-run): funding accrues from the position's fixed legs and spread history is signed per direction \u2014 the v0.4 run accrued funding from the best direction each hour and used the absolute spread, which made smart_neg_3 unreachable. See SKILL.md \u00a713.",
+    "Volume gates NOT applied (no historical per-venue volume in public endpoints). Slippage NOT modeled (no historical book data). Hard stop evaluated at hour closes only (hourly cycle cadence), not intra-hour. Per-leg liquidation is NOT modeled (a leg liquidating intra-hour is not in the model).",
     "Lighter fundings `rate` is a PERCENT string, signed by `direction` (calibrated live 2026-11-16)."
   ],
   "pairs": {
@@ -44,9 +45,9 @@
         "smart_decl_6": 0,
         "low_apr_6": 0
       },
-      "signals_seen": 4818,
-      "signals_filtered": 4818,
-      "hours_with_data": 4985,
+      "signals_seen": 4814,
+      "signals_filtered": 4814,
+      "hours_with_data": 4981,
       "trade_list": []
     },
     "ETH": {
@@ -68,94 +69,34 @@
         "smart_decl_6": 0,
         "low_apr_6": 0
       },
-      "signals_seen": 4818,
-      "signals_filtered": 4818,
-      "hours_with_data": 4985,
+      "signals_seen": 4814,
+      "signals_filtered": 4814,
+      "hours_with_data": 4981,
       "trade_list": []
     },
     "HYPE": {
       "coin": "HYPE",
-      "trades": 5,
-      "win_rate": 0.8,
-      "total_pnl_usd": 0.19,
-      "return_on_margin_pct": 0.96,
-      "profit_factor": 16.73,
-      "sharpe_per_trade": 2.15,
-      "avg_hours": 23.2,
-      "funding_pnl_usd": 0.14,
-      "price_pnl_usd": 0.23,
-      "fees_usd": 0.18,
+      "trades": 1,
+      "win_rate": 1.0,
+      "total_pnl_usd": 0.02,
+      "return_on_margin_pct": 0.1,
+      "profit_factor": null,
+      "sharpe_per_trade": null,
+      "avg_hours": 19.0,
+      "funding_pnl_usd": 0.03,
+      "price_pnl_usd": 0.03,
+      "fees_usd": 0.04,
       "exit_reasons": {
         "hard_stop_loss": 0,
         "max_hold": 0,
         "smart_neg_3": 0,
         "smart_decl_6": 1,
-        "low_apr_6": 4
+        "low_apr_6": 0
       },
-      "signals_seen": 4700,
-      "signals_filtered": 4695,
+      "signals_seen": 4797,
+      "signals_filtered": 4796,
       "hours_with_data": 4983,
       "trade_list": [
-        {
-          "coin": "HYPE",
-          "long_venue": "lighter",
-          "short_venue": "hyperliquid",
-          "entry_time": 1780333200000,
-          "exit_time": 1780380000000,
-          "open_net_apr_pct": 78.03,
-          "hours": 13,
-          "reason": "low_apr_6",
-          "funding_pnl": 0.0068,
-          "price_pnl": 0.016,
-          "fees": 0.035,
-          "pnl": -0.0122,
-          "funding_breakeven_achieved": false
-        },
-        {
-          "coin": "HYPE",
-          "long_venue": "hyperliquid",
-          "short_venue": "lighter",
-          "entry_time": 1780606800000,
-          "exit_time": 1780671600000,
-          "open_net_apr_pct": 102.5,
-          "hours": 18,
-          "reason": "low_apr_6",
-          "funding_pnl": 0.0152,
-          "price_pnl": 0.0889,
-          "fees": 0.035,
-          "pnl": 0.0692,
-          "funding_breakeven_achieved": false
-        },
-        {
-          "coin": "HYPE",
-          "long_venue": "hyperliquid",
-          "short_venue": "lighter",
-          "entry_time": 1787353200000,
-          "exit_time": 1787515200000,
-          "open_net_apr_pct": 79.31,
-          "hours": 45,
-          "reason": "low_apr_6",
-          "funding_pnl": 0.0518,
-          "price_pnl": 0.0706,
-          "fees": 0.035,
-          "pnl": 0.0874,
-          "funding_breakeven_achieved": false
-        },
-        {
-          "coin": "HYPE",
-          "long_venue": "lighter",
-          "short_venue": "hyperliquid",
-          "entry_time": 1793322000000,
-          "exit_time": 1793397600000,
-          "open_net_apr_pct": 113.77,
-          "hours": 21,
-          "reason": "low_apr_6",
-          "funding_pnl": 0.04,
-          "price_pnl": 0.0234,
-          "fees": 0.035,
-          "pnl": 0.0285,
-          "funding_breakeven_achieved": false
-        },
         {
           "coin": "HYPE",
           "long_venue": "lighter",
