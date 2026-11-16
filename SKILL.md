@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.4, 2026-11-16. Paper/backtest only.
+Version 0.5.5, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 

@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.4, 2026-11-16. Paper/backtest only.
+Version 0.5.5, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -30,9 +30,9 @@ It covers five ideas, all on public data, all paper/backtest only.
 |---|---|
 | **A. Funding harvest (long-only)** | ✅ Validated — the default |
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits |
-| C. Cross-exchange funding spread | ✅ Detection implemented (`scripts/cross_venue.py`), execution not backtested |
+| C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), execution not backtested |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs accounts + API access on ≥2 venues (not set up yet) |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py)) — paper only; live execution needs accounts + API access on ≥2 venues (not set up yet) |
 
 **Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -51,18 +51,18 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 
 | File | What it is |
 |---|---|
-| `SKILL.md` | The full skill: workflow, pipeline, scoring rubric, all five strategies, data sources, run commands, rules. Start here. |
-| `README.md` | This file — the short version. |
-| `LICENSE` | MIT. |
-| `scripts/score.py` | Score one signal 0–10 (six weighted dimensions + liquidity gate). |
-| `scripts/scan.py` | Live scan of all Hyperliquid perps, ranked table + JSON/markdown report. |
-| `scripts/cross_venue.py` | Cross-venue funding-spread matcher (HL vs OKX, Binance/Bybit best-effort). Detection only. |
-| `scripts/backtest_funding.py` | Strategy A backtest + `--min-score` scored variant. |
-| `scripts/sweep.py` | 48-combo parameter sweep + out-of-sample validation. |
-| `scripts/multivenue_scan.py` | Strategy E live scanner (HL + Lighter + Aster + OKX). |
-| `scripts/backtest_strategy_e.py` | Strategy E backtest (HL vs Lighter). |
-| `scripts/ccxt_funding.py` | Current funding APR via CCXT — Hyperliquid only on this VM; needs `pip install ccxt`. Optional; the core scripts stay stdlib-only. |
-| `results/` | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
+| [`SKILL.md`](SKILL.md) | The full skill: workflow, pipeline, scoring rubric, all five strategies, data sources, run commands, rules. Start here. |
+| [`README.md`](README.md) | This file — the short version. |
+| [`LICENSE`](LICENSE) | MIT. |
+| [`scripts/score.py`](scripts/score.py) | Score one signal 0–10 (six weighted dimensions + liquidity gate). |
+| [`scripts/scan.py`](scripts/scan.py) | Live scan of all Hyperliquid perps, ranked table + JSON/markdown report. |
+| [`scripts/cross_venue.py`](scripts/cross_venue.py) | Cross-venue funding-spread matcher (HL vs OKX, Binance/Bybit best-effort). Detection only. |
+| [`scripts/backtest_funding.py`](scripts/backtest_funding.py) | Strategy A backtest + `--min-score` scored variant. |
+| [`scripts/sweep.py`](scripts/sweep.py) | 48-combo parameter sweep + out-of-sample validation. |
+| [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py) | Strategy E live scanner (HL + Lighter + Aster + OKX). |
+| [`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py) | Strategy E backtest (HL vs Lighter). |
+| [`scripts/ccxt_funding.py`](scripts/ccxt_funding.py) | Current funding APR via CCXT — Hyperliquid only on this VM; needs `pip install ccxt`. Optional; the core scripts stay stdlib-only. |
+| [`results/`](results/) | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
 
 ## Strategy E backtest — honest result
 
