@@ -2,7 +2,7 @@
 
 A trading skill for **perpetual futures arbitrage on Hyperliquid** — with a
 runnable backtest, a parameter sweep, a 0-10 signal scorer, a live scanner,
-a cross-venue funding-spread matcher, and a Vooi-grade delta-neutral
+a cross-venue funding-spread matcher, and a delta-neutral multi-venue
 strategy (Strategy E) with its own multi-venue scanner and backtest.
 Paper/backtest only. **Not financial advice.**
 
@@ -14,7 +14,7 @@ Paper/backtest only. **Not financial advice.**
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits |
 | C. Cross-exchange funding spread | ✅ Detection implemented (`scripts/cross_venue.py`), execution not backtested |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest (Vooi-grade)** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs a VOOI account + token (Jesse has none) |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs accounts + API access on ≥2 venues (Jesse has none set up) |
 
 **Strategy A — the validated setup:** long a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -29,30 +29,31 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | Fees | 0.035% taker per side |
 | Coins | BTC, ETH, HYPE |
 
-## v0.4 — what's new ("Vooi-grade, open source")
+## v0.4.1 — cleanup (2026-11-16): all third-party product names removed from the repo; methods, parameters, scripts, and results unchanged.
 
-Strategy E, adapted from the `vooi-app` org (`vooi-funding-bot-example`
-STRATEGY.md + `vooi-funding-arb-cycle` skill + `vooi-mcp`):
+## v0.4 — what's new
+
+Strategy E — delta-neutral cross-venue funding harvest:
 
 1. **Strategy E — delta-neutral cross-venue funding harvest** — long
    the venue paying funding, short the venue charging it, same asset,
    same size ($50 notional per leg, $10 collat × 5x effective
-   leverage). Full Vooi decision cycle as a procedure (reconcile →
+   leverage). Full decision cycle as a procedure (reconcile →
    closes in priority order → opens with filters → bracket → plan →
    approval → closes first, then opens → persist state), with the
-   Vooi defaults stated explicitly. **Paper/backtest/scan only in
-   this skill** — live execution goes through the VOOI Perps API/MCP
-   and needs a VOOI account + bearer token + Jesse's per-action
-   approval (none of which exists now).
+   Strategy E defaults stated explicitly. **Paper/backtest/scan only in
+   this skill** — live execution goes through a unified multi-venue
+   execution API and needs accounts on ≥2 venues + API access +
+   Jesse's per-action approval (none of which exists now).
 2. **Live multi-venue scanner** (`scripts/multivenue_scan.py`) —
    Hyperliquid + Lighter (whose `/funding-rates` endpoint reports
    funding for HL, Lighter, Binance AND Bybit in one call — this is
    how Binance/Bybit rates become readable from this VM despite
    their direct APIs being geo-blocked) + Aster (works) + OKX
-   (candidates only). Best pair per coin, Vooi open filters where
+   (candidates only). Best pair per coin, open filters where
    computable from public data.
 3. **Strategy E backtest** (`scripts/backtest_strategy_e.py`) — real
-   HL-vs-Lighter backtest, same 208-day window, Vooi close rules
+   HL-vs-Lighter backtest, same 208-day window, close rules
    (hard stop −$1.00 → max hold 96h → smart_neg → smart_decl →
    low_apr), real basis-drift price PnL. Honest result below.
 
@@ -104,9 +105,7 @@ pair there.
 ## v0.3 — what's new
 
 v0.2 was a validated entry rule plus a backtest. v0.3 adds the evaluation
-discipline around the rule, borrowed from three reference repos
-(TauricResearch's TradingAgents — prioritized — plus the Event-Driven
-Arbitrage Scanner and CloddsBot; see `SKILL.md` Sources):
+discipline around the rule:
 
 1. **Staged workflow** — Scan → Verify → Score → Debate → Decide →
    Report, with one JSON + one short markdown summary per scan in
@@ -120,8 +119,8 @@ Arbitrage Scanner and CloddsBot; see `SKILL.md` Sources):
    on untradeable books at 4.0.
 4. **Live scanner** (`scripts/scan.py`) — scores every Hyperliquid perp
    below -10% APR, ranked table, JSON + markdown report.
-5. **Cross-venue matcher** (`scripts/cross_venue.py`) — CloddsBot-style
-   normalized-symbol matching across Hyperliquid vs OKX (Binance/Bybit
+5. **Cross-venue matcher** (`scripts/cross_venue.py`) — normalized-
+   symbol matching across Hyperliquid vs OKX (Binance/Bybit
    best-effort; both geo-blocked from this VM), spread in pp, > 10pp
    flagged. Detection only.
 6. **Scored backtest** (`--min-score` on `scripts/backtest_funding.py`)

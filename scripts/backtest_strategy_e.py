@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Backtest Strategy E — delta-neutral cross-venue funding harvest
-(Hyperliquid vs Lighter), Vooi-grade rules — for the perpetual-arbitrage
+(Hyperliquid vs Lighter) — for the perpetual-arbitrage
 skill. Paper/backtest only. No keys, no trading.
 
 The trade: long the venue paying funding, short the venue charging it,
 same asset, same size ($50 notional per leg). Legs cancel price
 exposure; what remains is the funding-rate spread, collected hourly
 while the spread holds. Close rules, sizing, cooldown and filters are
-the Vooi defaults (vooi-funding-bot STRATEGY.md / vooi-funding-arb-cycle
-SKILL.md), adapted to public data:
+the Strategy E defaults, adapted to public data:
 
   leg collat $10, effective leverage 5 (target 10, cap 5) -> leg
   notional $50; max hold 96h; min hold 12h (soft exits blocked before);
@@ -34,16 +33,15 @@ with P_L / P_S the mark closes of the long / short venue. net_usd =
 uPnL + funding_cum. Fees modeled: HL taker 0.035% per side on the HL
 leg only; Lighter taker fee is 0 on these markets (orderBooks
 taker_fee 0.0000). Slippage is NOT modeled (no historical book data)
-— the Vooi friction estimate (15bps x notional x 2 legs x 2 = $0.30
-per arb) is used ONLY for the funding-breakeven flag, exactly as the
-cycle skill does.
+— the friction estimate (15bps x notional x 2 legs x 2 = $0.30
+per arb) is used ONLY for the funding-breakeven flag.
 
 Honest limits (read before quoting any number):
   - Volume gates are NOT applied: historical per-venue volume does not
     exist in these public endpoints (same dropped-dimension situation
     as the v0.3 scorer's liquidity dimension).
   - No slippage model; entries/exits fill at hour-close marks.
-  - The hard stop is evaluated at hour closes (the Vooi cycle cadence),
+  - The hard stop is evaluated at hour closes (hourly cycle cadence),
     not intra-hour — a fast basis move inside one hour is missed.
   - Lighter funding history is missing ~7 of 4992 hours in the window;
     missing hours accrue no funding and skip soft-exit evaluation.
@@ -74,7 +72,7 @@ from multivenue_scan import lighter_fundings_history  # noqa: E402
 HOUR = 3600_000
 LIGHTER_API = "https://mainnet.zklighter.elliot.ai/api/v1"
 
-# --- Vooi defaults (adapted) ---
+# --- Strategy E defaults ---
 LEG_COLLAT_USD = 10.0
 EFFECTIVE_LEV = 5
 LEG_NOTIONAL_USD = LEG_COLLAT_USD * EFFECTIVE_LEV  # $50 per leg
@@ -397,8 +395,8 @@ def main():
         "notes": [
             "Volume gates NOT applied (no historical per-venue volume in "
             "public endpoints). Slippage NOT modeled (no historical book "
-            "data). Hard stop evaluated at hour closes only (Vooi cycle "
-            "cadence), not intra-hour.",
+            "data). Hard stop evaluated at hour closes only (hourly "
+            "cycle cadence), not intra-hour.",
             "Lighter fundings `rate` is a PERCENT string, signed by "
             "`direction` (calibrated live 2026-11-16).",
         ],

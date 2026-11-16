@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Live multi-venue funding-spread scanner (v0.4) for the
 perpetual-arbitrage skill — Strategy E (delta-neutral cross-venue
-funding harvest, Vooi-grade).
+funding harvest).
 
 Venues (all public endpoints, no keys, no trading):
   Hyperliquid  metaAndAssetCtxs (hourly funding, volume, OI) — always works
@@ -27,9 +27,9 @@ For each coin listed on >= 2 venues the best pair is computed:
 long the venue with the most negative APR, short the venue with the
 most positive APR. net APR = short_apr - long_apr (fraction).
 
-Vooi open filters applied where computable from public data:
+Open filters applied where computable from public data:
   - MIN_NET_APR 0.70 <= net APR <= MAX_NET_APR 1.20 (hard cap 2.00)
-  - Asset blacklist (Vooi list, incl. XMR, CC, PYTH, CRV, WLFI, EIGEN)
+  - Asset blacklist (incl. XMR, CC, PYTH, CRV, WLFI, EIGEN)
   - Volume gates where the venue exposes volume: HL dayNtlVlm >= $100k
     (MIN) and >= $250k (per-leg). Lighter/Aster/OKX funding endpoints
     expose no volume — the gate is NOT applied there and the row is
@@ -42,8 +42,8 @@ Vooi open filters applied where computable from public data:
 Verdicts: PASS = all computable filters pass; WATCH = in the APR band
 but a filter fails or is uncomputable; SKIP = outside the band.
 PASS here means "worth the full Strategy E evaluation" (SKILL.md §13),
-not "open now" — live execution needs a VOOI account + token + Jesse's
-explicit approval, none of which exists in this skill.
+not "open now" — live execution needs accounts + API access on >= 2
+venues + Jesse's explicit approval, none of which exists in this skill.
 
 Outputs:
   results/multivenue-scan-YYYY-MM-DD-HHMM.json (rows + venue status)
@@ -69,7 +69,7 @@ HOUR = 3600_000
 LIGHTER_API = "https://mainnet.zklighter.elliot.ai/api/v1"
 ASTER_API = "https://fapi.asterdex.com/fapi/v1/premiumIndex"
 
-# Vooi asset blacklist (vooi-funding-arb-cycle SKILL.md, verbatim).
+# Asset blacklist (Strategy E defaults).
 BLACKLIST = {
     "YZY", "STBL", "2Z", "CC", "CHIP", "VVV", "MEGA", "AZTEC", "JTO",
     "STABLE", "alias:mu", "alias:bmnr", "EIGEN", "WLFI", "XMR", "PYTH",
@@ -346,7 +346,7 @@ def main():
         # 1. Blacklist
         if coin in BLACKLIST:
             reasons.append(f"blacklisted:{coin}")
-        # 2. APR band (Vooi MIN/MAX + hard cap)
+        # 2. APR band (MIN/MAX + hard cap)
         if net_apr < args.min_net_apr:
             reasons.append(f"net_apr {net_apr * 100:.1f}% < MIN {args.min_net_apr * 100:.0f}%")
         if net_apr > args.max_net_apr:

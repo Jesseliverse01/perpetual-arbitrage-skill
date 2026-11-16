@@ -2,13 +2,10 @@
 """Cross-exchange funding-spread matcher (v0.3) for the perpetual-arbitrage
 skill. Detection only — no orders, no wallet, no trading.
 
-Idea borrowed from CloddsBot's arbitrage matcher (src/arbitrage/index.ts):
-match the SAME asset across venues, compare the numbers, and flag the
-spread. CloddsBot matches prediction markets by question similarity
-(Jaccard >= 0.8) and computes spread / spreadPct / profitPer100 with a
-2% minimum spread and a 60s opportunity TTL. Here the "question" is a
-coin symbol, so matching is exact after normalization, and the number
-compared is the funding APR instead of a market price:
+Match the SAME asset across venues, compare the numbers, and flag the
+spread. Matching is exact after symbol normalization (the matched key
+is a coin symbol), and the number compared is the funding APR instead
+of a market price:
 
   match:   HL coin "BTC"  ==  OKX "BTC-USDT-SWAP"  ==  Binance "BTCUSDT"
            (normalize by stripping "-USDT-SWAP" / "USDT" suffixes)

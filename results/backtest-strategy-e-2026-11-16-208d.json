@@ -21,7 +21,7 @@
     "warmup_h": 168
   },
   "notes": [
-    "Volume gates NOT applied (no historical per-venue volume in public endpoints). Slippage NOT modeled (no historical book data). Hard stop evaluated at hour closes only (Vooi cycle cadence), not intra-hour.",
+    "Volume gates NOT applied (no historical per-venue volume in public endpoints). Slippage NOT modeled (no historical book data). Hard stop evaluated at hour closes only (hourly cycle cadence), not intra-hour.",
     "Lighter fundings `rate` is a PERCENT string, signed by `direction` (calibrated live 2026-11-16)."
   ],
   "pairs": {
