@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.1, 2026-11-16. Paper/backtest only.
+Version 0.5.2, 2026-11-16. Paper/backtest only.
 
 ## What this is
 

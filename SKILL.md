@@ -1,11 +1,11 @@
 ---
 name: perpetual-arbitrage
-description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
+description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
 ---
 
 # Perpetual Arbitrage
 
-Version 0.5.1, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+Version 0.5.2, 2026-11-16. Created at Jesse's request. Paper/backtest only.
 
 ## Please read this first
 
