@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5, 2026-11-16. Paper/backtest only.
+Version 0.5.1, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -63,51 +63,7 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | `scripts/backtest_strategy_e.py` | Strategy E backtest (HL vs Lighter). |
 | `results/` | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
 
-## v0.5 — what's new
-
-A cleanup and a rewrite, not a new strategy:
-
-- **Humanized.** Both docs rewritten in plain language — short
-  sentences, no jargon without an explanation. Every number and every
-  rule is exactly the same as v0.4.1.
-- **A disclaimer** at the top of this file and of `SKILL.md`.
-- **A new section: which coins actually signal** (in `SKILL.md` §9).
-  Thirty days of funding data, ranked by how often each coin goes
-  below -10% APR — with a warning that often does not mean profitable.
-- **Tidied up.** This file index, so you can see what lives where.
-
-No backtests were run for v0.5. The full-universe Strategy E backtest
-is still a documented next step, not run yet.
-
-## v0.4.1 — cleanup (2026-11-16): all third-party product names removed from the repo; methods, parameters, scripts, and results unchanged.
-
-## v0.4 — what's new
-
-Strategy E — delta-neutral cross-venue funding harvest:
-
-1. **Strategy E — delta-neutral cross-venue funding harvest** — long
-   the venue paying funding, short the venue charging it, same asset,
-   same size ($50 notional per leg, $10 collat × 5x effective
-   leverage). Full decision cycle as a procedure (reconcile →
-   closes in priority order → opens with filters → bracket → plan →
-   approval → closes first, then opens → persist state), with the
-   Strategy E defaults stated explicitly. **Paper/backtest/scan only in
-   this skill** — live execution goes through a unified multi-venue
-   execution API and needs accounts on ≥2 venues + API access +
-   Jesse's per-action approval (none of which exists now).
-2. **Live multi-venue scanner** (`scripts/multivenue_scan.py`) —
-   Hyperliquid + Lighter (whose `/funding-rates` endpoint reports
-   funding for HL, Lighter, Binance AND Bybit in one call — this is
-   how Binance/Bybit rates become readable from this VM despite
-   their direct APIs being geo-blocked) + Aster (works) + OKX
-   (candidates only). Best pair per coin, open filters where
-   computable from public data.
-3. **Strategy E backtest** (`scripts/backtest_strategy_e.py`) — real
-   HL-vs-Lighter backtest, same 208-day window, close rules
-   (hard stop −$1.00 → max hold 96h → smart_neg → smart_decl →
-   low_apr), real basis-drift price PnL. Honest result below.
-
-## Strategy E backtest — honest result (v0.4)
+## Strategy E backtest — honest result
 
 `results/backtest-strategy-e-2026-11-16-208d.json`, run with
 `python3 scripts/backtest_strategy_e.py --days 208 --coins BTC ETH HYPE`.
@@ -152,31 +108,6 @@ None is PASS — the spike filters need spread history, only
 computable for HL↔Lighter pairs, and none of these nine has its best
 pair there.
 
-## v0.3 — what's new
-
-v0.2 was a validated entry rule plus a backtest. v0.3 adds the evaluation
-discipline around the rule:
-
-1. **Staged workflow** — Scan → Verify → Score → Debate → Decide →
-   Report, with one JSON + one short markdown summary per scan in
-   `results/`.
-2. **Multi-agent evaluation pipeline** (procedure, not code) — Funding,
-   Market and Liquidity Analysts in parallel → Bull/Bear debate →
-   Risk Manager verdict (**GO / NO-GO / REDUCE**) → decision log.
-3. **0-10 signal scorer** (`scripts/score.py`) — funding extremity
-   30%, persistence 20%, trend 15%, liquidity 15%, volatility 10%,
-   cross-venue spread 10%. No lookahead. A liquidity gate caps signals
-   on untradeable books at 4.0.
-4. **Live scanner** (`scripts/scan.py`) — scores every Hyperliquid perp
-   below -10% APR, ranked table, JSON + markdown report.
-5. **Cross-venue matcher** (`scripts/cross_venue.py`) — normalized-
-   symbol matching across Hyperliquid vs OKX (Binance/Bybit
-   best-effort; both geo-blocked from this VM), spread in pp, > 10pp
-   flagged. Detection only.
-6. **Scored backtest** (`--min-score` on `scripts/backtest_funding.py`)
-   — honest result below: the score gate does **not** improve total PnL.
-   The unscored v0.2 setup stays the validated default.
-
 ## Backtest results — 208 days (2026-04-22 → 2026-11-16)
 
 `results/backtest-2026-11-16-208d.json`, run with
@@ -207,7 +138,7 @@ validated the top 3 on window B (88d, out-of-sample):
   long-only twin. Long-only is the default.
 - **-30% entry and late exits (-5%) are worse.** Worst combo: -$7.95.
 
-### Scored backtest — honest result (v0.3)
+### Scored backtest — honest result
 
 `--min-score` gates long entries on the point-in-time 0-10 score
 (4 dimensions available historically: extremity, persistence, trend,

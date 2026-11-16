@@ -1,11 +1,11 @@
 ---
 name: perpetual-arbitrage
-description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). v0.5 is a humanized rewrite with a disclaimer and a new section on which coins actually signal; the numbers and rules are unchanged from v0.4.1. Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
+description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
 ---
 
 # Perpetual Arbitrage
 
-Version 0.5, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+Version 0.5.1, 2026-11-16. Created at Jesse's request. Paper/backtest only.
 
 ## Please read this first
 
@@ -55,105 +55,6 @@ workflow (§1), a debate-style evaluation pipeline (§2), a 0–10 signal
 scorer (§3), a live scanner (§9), a cross-venue matcher (§4), and a
 multi-venue scanner for Strategy E (§13). Everything runs on public
 APIs. Nothing needs a key.
-
-## What changed in v0.5
-
-This version is a cleanup and a rewrite, not a new strategy:
-
-- **Humanized.** The whole doc is rewritten in plain language — short
-  sentences, no jargon without an explanation. Every number and every
-  rule is exactly the same as v0.4.1.
-- **A disclaimer** at the top of this file and of the README. Read it
-  before you run anything.
-- **A new section: which coins actually signal** (§9). Thirty days of
-  funding data, ranked by how often each coin goes below -10% APR —
-  with a warning that often does not mean profitable.
-- **Tidied up.** The README now has a file index so you can see what
-  lives where.
-
-No backtests were run for v0.5. The full-universe Strategy E backtest
-is still a documented next step, not run yet.
-
-## What changed in v0.4.1
-
-Cleanup only: every third-party product name was removed from the
-repo — the skill stands on its own now. The methods, parameters,
-scripts, and results are unchanged.
-
-## What changed in v0.4
-
-v0.3 added evaluation discipline around the single-venue rule. v0.4
-adds the **second, delta-neutral strategy**:
-
-1. **Strategy E — delta-neutral cross-venue funding harvest** (§13):
-   long the venue paying funding, short the venue charging it, same
-   asset, same size. The full decision cycle as a procedure
-   (load state -> fetch live data -> reconcile drift/orphans ->
-   update per-arb metrics -> decide closes in priority order ->
-   decide opens with filters -> bracket SL/TP -> plan -> wait for
-   "yes" -> execute closes first, then opens -> persist state), with
-   the Strategy E defaults stated explicitly (MIN_NET_APR 70%, leg collat
-   $10, max notional $100, max hold 96h, stop 5%, cooldown 2
-   losses / 48h). **In this skill Strategy E is paper/backtest/scan
-   only.** Live execution goes through a unified multi-venue execution
-   API, which needs accounts with balance on >= 2 venues + API access
-   (Jesse has none set up) + his explicit per-action approval (§14).
-2. **Live multi-venue scanner** (`scripts/multivenue_scan.py`, §13):
-   Hyperliquid + Lighter (whose `/funding-rates` endpoint reports
-   funding for HL, Lighter, Binance AND Bybit in one call — this is
-   how Binance/Bybit rates become readable from this VM despite
-   their direct APIs being geo-blocked) + Aster (works) + OKX
-   (candidates only). Best pair per coin, open filters where
-   computable from public data, ranked table + JSON in `results/`.
-3. **Strategy E backtest** (`scripts/backtest_strategy_e.py`, §13):
-   real HL-vs-Lighter backtest over the same 208-day window, with
-   the close rules and real basis-drift price PnL (not assumed
-   zero). The honest result: on BTC/ETH/HYPE the 70% threshold
-   almost never triggers — 5 trades in 208 days, +$0.19. The
-   strategy's opportunity set is the full 200+ coin universe, not
-   the three majors.
-4. **Unified execution as an option** (§14): what live execution
-   would need, the venue quirks, and the approval gate. Documented,
-   not wired in.
-
-**What did NOT change:** the v0.2 validated defaults for Strategy A
-(entry APR < -10%, exit APR >= 0, stop -5%, 24h timeout, $100
-notional 1x, long-only, BTC/ETH/HYPE) and the v0.3 scorer, scanner,
-matcher, workflow, and pipeline. Do not change them without a fresh
-sweep + out-of-sample check.
-
-## What changed in v0.3
-
-v0.2 was a validated entry rule plus a backtest. v0.3 adds the
-**evaluation discipline around the rule**:
-
-1. **Staged workflow**:
-   Scan -> Verify -> Score -> Debate -> Decide -> Report, with a
-   structured report (one JSON + one short markdown summary per scan)
-   saved in `results/`.
-2. **Multi-agent evaluation pipeline**: parallel specialist analysts -> Bull/Bear debate
-   -> Risk Manager verdict (GO / NO-GO / REDUCE) -> decision log.
-   This is a *procedure the agent follows*, not code.
-3. **0-10 signal scorer** (`scripts/score.py`): six weighted
-   dimensions, no lookahead, with a liquidity gate that caps
-   illiquid-trap signals at 4.0.
-4. **Live scanner** (`scripts/scan.py`): scores every Hyperliquid
-   perp below the -10% entry threshold each run, ranked table, JSON +
-   markdown report in `results/`.
-5. **Cross-venue matcher** (`scripts/cross_venue.py`): normalized-
-   symbol matching across Hyperliquid vs OKX (Binance/Bybit
-   best-effort), funding spread in percentage points, > 10pp flagged.
-   Detection only.
-6. **Scored backtest** (`--min-score` on `scripts/backtest_funding.py`):
-   the honest result is that the score gate does **not** improve total
-   PnL — see §7. The unscored v0.2 setup stays the validated default.
-   The scorer's value is as a ranking/evaluation tool, not as a
-   validated entry filter.
-
-**What did NOT change:** the v0.2 validated defaults (entry APR <
--10%, exit APR >= 0, stop -5%, 24h timeout, $100 notional 1x,
-long-only, BTC/ETH/HYPE). Do not change them without a fresh sweep +
-out-of-sample check.
 
 ---
 
@@ -413,7 +314,7 @@ add risk. Do not sell this as "passive funding income".
 
 ---
 
-## 7. Scored backtest — the honest result (v0.3)
+## 7. Scored backtest — the honest result
 
 `--min-score` on `scripts/backtest_funding.py` gates long entries on
 the point-in-time 0-10 score. At each entry decision the score is
@@ -639,7 +540,7 @@ python3 scripts/backtest_funding.py --days 208 --end 2026-11-16 \
     --coins BTC ETH HYPE                    # unscored v0.2 baseline
 python3 scripts/backtest_funding.py --days 208 --end 2026-11-16 \
     --coins BTC ETH HYPE --min-score 6 --out results/scored.json
-                                            # scored variant (v0.3, see §7)
+                                            # scored variant (see §7)
 python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
                                             # 48-combo grid + out-of-sample validation
 
