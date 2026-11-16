@@ -1,0 +1,204 @@
+{
+  "window_days": 30,
+  "start": "2026-10-17",
+  "end": "2026-11-16",
+  "coins": {
+    "BTC": {
+      "hours": 720,
+      "pct_below_-10": 0.3,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 9.5,
+      "min_apr": -15.7,
+      "max_apr": 11.0
+    },
+    "ETH": {
+      "hours": 720,
+      "pct_below_-10": 5.3,
+      "pct_below_-30": 1.2,
+      "pct_below_-100": 0.0,
+      "mean_apr": 6.2,
+      "min_apr": -67.2,
+      "max_apr": 11.0
+    },
+    "HYPE": {
+      "hours": 720,
+      "pct_below_-10": 3.3,
+      "pct_below_-30": 0.3,
+      "pct_below_-100": 0.0,
+      "mean_apr": 11.7,
+      "min_apr": -40.6,
+      "max_apr": 190.5
+    },
+    "SOL": {
+      "hours": 720,
+      "pct_below_-10": 5.1,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 5.4,
+      "min_apr": -26.5,
+      "max_apr": 11.0
+    },
+    "SKR": {
+      "hours": 720,
+      "pct_below_-10": 1.1,
+      "pct_below_-30": 1.1,
+      "pct_below_-100": 1.1,
+      "mean_apr": -21.0,
+      "min_apr": -3515.8,
+      "max_apr": 22.4
+    },
+    "XMR": {
+      "hours": 720,
+      "pct_below_-10": 7.8,
+      "pct_below_-30": 5.7,
+      "pct_below_-100": 1.1,
+      "mean_apr": 53.9,
+      "min_apr": -309.0,
+      "max_apr": 1553.2
+    },
+    "RUNE": {
+      "hours": 720,
+      "pct_below_-10": 18.1,
+      "pct_below_-30": 15.6,
+      "pct_below_-100": 7.9,
+      "mean_apr": -12.9,
+      "min_apr": -422.3,
+      "max_apr": 11.0
+    },
+    "MELANIA": {
+      "hours": 720,
+      "pct_below_-10": 30.3,
+      "pct_below_-30": 22.4,
+      "pct_below_-100": 7.6,
+      "mean_apr": -15.5,
+      "min_apr": -287.3,
+      "max_apr": 11.0
+    },
+    "CC": {
+      "hours": 720,
+      "pct_below_-10": 15.8,
+      "pct_below_-30": 9.3,
+      "pct_below_-100": 1.9,
+      "mean_apr": 0.2,
+      "min_apr": -168.1,
+      "max_apr": 11.0
+    },
+    "IMX": {
+      "hours": 720,
+      "pct_below_-10": 7.4,
+      "pct_below_-30": 6.8,
+      "pct_below_-100": 1.4,
+      "mean_apr": 4.6,
+      "min_apr": -189.1,
+      "max_apr": 11.0
+    },
+    "BIGTIME": {
+      "hours": 720,
+      "pct_below_-10": 11.4,
+      "pct_below_-30": 6.7,
+      "pct_below_-100": 1.1,
+      "mean_apr": 3.3,
+      "min_apr": -338.8,
+      "max_apr": 11.0
+    },
+    "NIL": {
+      "hours": 720,
+      "pct_below_-10": 38.2,
+      "pct_below_-30": 26.9,
+      "pct_below_-100": 9.6,
+      "mean_apr": -27.9,
+      "min_apr": -2198.8,
+      "max_apr": 97.4
+    },
+    "INIT": {
+      "hours": 720,
+      "pct_below_-10": 33.3,
+      "pct_below_-30": 29.6,
+      "pct_below_-100": 21.0,
+      "mean_apr": -306.7,
+      "min_apr": -4380.0,
+      "max_apr": 575.4
+    },
+    "SOPH": {
+      "hours": 720,
+      "pct_below_-10": 40.8,
+      "pct_below_-30": 36.1,
+      "pct_below_-100": 28.6,
+      "mean_apr": -150.6,
+      "min_apr": -4380.0,
+      "max_apr": 21.1
+    },
+    "SAGA": {
+      "hours": 720,
+      "pct_below_-10": 0.0,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 21.3,
+      "min_apr": 11.0,
+      "max_apr": 483.0
+    },
+    "RESOLV": {
+      "hours": 720,
+      "pct_below_-10": 0.0,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 12.5,
+      "min_apr": 11.0,
+      "max_apr": 139.8
+    },
+    "PONS": {
+      "hours": 720,
+      "pct_below_-10": 0.0,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 13.6,
+      "min_apr": 11.0,
+      "max_apr": 114.8
+    },
+    "USELESS": {
+      "hours": 720,
+      "pct_below_-10": 0.1,
+      "pct_below_-30": 0.0,
+      "pct_below_-100": 0.0,
+      "mean_apr": 17.6,
+      "min_apr": -16.8,
+      "max_apr": 283.0
+    },
+    "XTEN": {
+      "hours": 482,
+      "pct_below_-10": 3.3,
+      "pct_below_-30": 1.7,
+      "pct_below_-100": 0.0,
+      "mean_apr": 9.4,
+      "min_apr": -89.4,
+      "max_apr": 75.1
+    },
+    "DOGE": {
+      "hours": 720,
+      "pct_below_-10": 11.4,
+      "pct_below_-30": 0.3,
+      "pct_below_-100": 0.0,
+      "mean_apr": 3.6,
+      "min_apr": -34.5,
+      "max_apr": 11.0
+    }
+  },
+  "cross_exchange_snapshot_2026-11-16_16:35_WIB": {
+    "note": "Binance fapi (451) and Bybit v5 (403) are geo-blocked from this VM; OKX public API works. Binance/Bybit funding could not be read from here.",
+    "okx_funding_apr_8h": {
+      "BTC": -0.6,
+      "ETH": -5.9,
+      "SOL": 2.8,
+      "DOGE": 1.0
+    },
+    "hyperliquid_live_apr_1h_same_time": {
+      "BTC": -8.0,
+      "ETH": -18.3,
+      "SOL": 11.0,
+      "HYPE": -4.8
+    },
+    "read": "Hyperliquid funding is more negative than OKX on BTC/ETH right now (a cross-exchange spread exists, but small in absolute terms)."
+  },
+  "warning": "Frequency of extreme funding is NOT profit. SOPH/NIL/INIT/MELANIA are small illiquid coins: thin books, wide spreads, violent price moves. They were never backtested (only BTC/ETH/HYPE were validated). Persistently negative funding often means a structural downtrend, i.e. the shorts are right."
+}

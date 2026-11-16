@@ -1,0 +1,600 @@
+{
+  "summary": {
+    "generated_utc": "2026-11-16-1000",
+    "perps_scanned": 235,
+    "below_entry_apr": 26,
+    "candidates_scored": 29,
+    "passes": 2,
+    "min_apr": -0.1,
+    "min_score": 6.0
+  },
+  "rows": [
+    {
+      "coin": "TRUMP",
+      "apr_pct": -76.22,
+      "mark": 0.9338,
+      "volume_usd": 3058499.22,
+      "oi_usd": 6836172.0,
+      "okx_apr_pct": -4.17,
+      "score": 6.33,
+      "dimensions": {
+        "funding_extremity": 9.05,
+        "persistence": 5.83,
+        "trend_alignment": 4.25,
+        "liquidity": 1.46,
+        "volatility": 5.9,
+        "cross_venue_spread": 10.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "PASS"
+    },
+    {
+      "coin": "WLD",
+      "apr_pct": -32.61,
+      "mark": 0.26387,
+      "volume_usd": 8199755.99,
+      "oi_usd": 27075124.09,
+      "okx_apr_pct": -19.69,
+      "score": 6.12,
+      "dimensions": {
+        "funding_extremity": 5.68,
+        "persistence": 10.0,
+        "trend_alignment": 4.71,
+        "liquidity": 2.74,
+        "volatility": 6.43,
+        "cross_venue_spread": 6.58
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "PASS"
+    },
+    {
+      "coin": "XMR",
+      "apr_pct": -178.2,
+      "mark": 490.33,
+      "volume_usd": 25058920.53,
+      "oi_usd": 91085499.33,
+      "okx_apr_pct": null,
+      "score": 5.93,
+      "dimensions": {
+        "funding_extremity": 10.0,
+        "persistence": 2.08,
+        "trend_alignment": 4.36,
+        "liquidity": 4.71,
+        "volatility": 5.57
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "CC",
+      "apr_pct": -38.32,
+      "mark": 0.083089,
+      "volume_usd": 1598103.92,
+      "oi_usd": 4153272.13,
+      "okx_apr_pct": -26.73,
+      "score": 5.86,
+      "dimensions": {
+        "funding_extremity": 6.44,
+        "persistence": 10.0,
+        "trend_alignment": 5.13,
+        "liquidity": 0.61,
+        "volatility": 4.34,
+        "cross_venue_spread": 6.32
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "SKR",
+      "apr_pct": -2775.5,
+      "mark": 0.010423,
+      "volume_usd": 6994567.24,
+      "oi_usd": 1037339.61,
+      "okx_apr_pct": null,
+      "score": 5.84,
+      "dimensions": {
+        "funding_extremity": 10.0,
+        "persistence": 3.75,
+        "trend_alignment": 10.0,
+        "liquidity": 0.05,
+        "volatility": 0.0
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "CASHCAT",
+      "apr_pct": -84.87,
+      "mark": 0.052119,
+      "volume_usd": 3889353.9,
+      "oi_usd": 8664239.73,
+      "okx_apr_pct": 0.01,
+      "score": 5.67,
+      "dimensions": {
+        "funding_extremity": 9.39,
+        "persistence": 0.42,
+        "trend_alignment": 10.0,
+        "liquidity": 1.77,
+        "volatility": 0.0,
+        "cross_venue_spread": 10.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "TRX",
+      "apr_pct": -35.36,
+      "mark": 0.30235,
+      "volume_usd": 1485006.12,
+      "oi_usd": 11497089.14,
+      "okx_apr_pct": -46.83,
+      "score": 5.33,
+      "dimensions": {
+        "funding_extremity": 6.05,
+        "persistence": 8.75,
+        "trend_alignment": 4.56,
+        "liquidity": 0.52,
+        "volatility": 10.0,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "GRAM",
+      "apr_pct": -21.32,
+      "mark": 1.0475,
+      "volume_usd": 2510596.57,
+      "oi_usd": 13177914.53,
+      "okx_apr_pct": -13.35,
+      "score": 4.47,
+      "dimensions": {
+        "funding_extremity": 4.18,
+        "persistence": 5.0,
+        "trend_alignment": 4.58,
+        "liquidity": 1.2,
+        "volatility": 8.74,
+        "cross_venue_spread": 4.78
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "RUNE",
+      "apr_pct": -281.04,
+      "mark": 0.5149,
+      "volume_usd": 193678.21,
+      "oi_usd": 1381871.01,
+      "okx_apr_pct": null,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 10.0,
+        "persistence": 10.0,
+        "trend_alignment": 4.52,
+        "liquidity": 0.0,
+        "volatility": 7.29
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "NIL",
+      "apr_pct": -106.3,
+      "mark": 0.051089,
+      "volume_usd": 164857.45,
+      "oi_usd": 1381225.86,
+      "okx_apr_pct": null,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 10.0,
+        "persistence": 9.17,
+        "trend_alignment": 7.57,
+        "liquidity": 0.0,
+        "volatility": 7.96
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "MELANIA",
+      "apr_pct": -77.04,
+      "mark": 0.04531,
+      "volume_usd": 160198.84,
+      "oi_usd": 814132.85,
+      "okx_apr_pct": null,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 9.08,
+        "persistence": 10.0,
+        "trend_alignment": 3.93,
+        "liquidity": 0.0,
+        "volatility": 7.55
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "W",
+      "apr_pct": -72.68,
+      "mark": 0.00858,
+      "volume_usd": 376873.25,
+      "oi_usd": 1110155.23,
+      "okx_apr_pct": -7.85,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 8.91,
+        "persistence": 10.0,
+        "trend_alignment": 4.74,
+        "liquidity": 0.0,
+        "volatility": 6.87,
+        "cross_venue_spread": 10.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "BERA",
+      "apr_pct": -52.66,
+      "mark": 0.08922,
+      "volume_usd": 695125.3,
+      "oi_usd": 1371216.13,
+      "okx_apr_pct": -37.57,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 8.11,
+        "persistence": 9.58,
+        "trend_alignment": 4.62,
+        "liquidity": 0.0,
+        "volatility": 2.41,
+        "cross_venue_spread": 7.02
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "kBONK",
+      "apr_pct": -50.87,
+      "mark": 0.002316,
+      "volume_usd": 669682.47,
+      "oi_usd": 3517898.28,
+      "okx_apr_pct": null,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 8.03,
+        "persistence": 7.92,
+        "trend_alignment": 3.96,
+        "liquidity": 0.0,
+        "volatility": 6.65
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "ICP",
+      "apr_pct": -43.48,
+      "mark": 2.223,
+      "volume_usd": 825496.9,
+      "oi_usd": 1852432.57,
+      "okx_apr_pct": -21.46,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 7.13,
+        "persistence": 10.0,
+        "trend_alignment": 5.44,
+        "liquidity": 0.0,
+        "volatility": 6.52,
+        "cross_venue_spread": 8.4
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "KAITO",
+      "apr_pct": -40.7,
+      "mark": 0.174751,
+      "volume_usd": 274707.97,
+      "oi_usd": 622587.83,
+      "okx_apr_pct": -0.96,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 6.76,
+        "persistence": 8.75,
+        "trend_alignment": 6.07,
+        "liquidity": 0.0,
+        "volatility": 5.81,
+        "cross_venue_spread": 10.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "IMX",
+      "apr_pct": -26.95,
+      "mark": 0.0964,
+      "volume_usd": 405584.43,
+      "oi_usd": 1247628.6,
+      "okx_apr_pct": -27.83,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 4.93,
+        "persistence": 10.0,
+        "trend_alignment": 3.89,
+        "liquidity": 0.0,
+        "volatility": 7.82,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "AVNT",
+      "apr_pct": -22.62,
+      "mark": 0.070678,
+      "volume_usd": 114422.74,
+      "oi_usd": 686954.82,
+      "okx_apr_pct": 5.48,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 4.35,
+        "persistence": 6.67,
+        "trend_alignment": 5.26,
+        "liquidity": 0.0,
+        "volatility": 8.4,
+        "cross_venue_spread": 9.62
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "BIGTIME",
+      "apr_pct": -19.97,
+      "mark": 0.004307,
+      "volume_usd": 59737.84,
+      "oi_usd": 121894.35,
+      "okx_apr_pct": -9.12,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 3.99,
+        "persistence": 4.58,
+        "trend_alignment": 4.56,
+        "liquidity": 0.0,
+        "volatility": 8.5,
+        "cross_venue_spread": 6.17
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "STX",
+      "apr_pct": -19.84,
+      "mark": 0.26125,
+      "volume_usd": 242002.32,
+      "oi_usd": 1290781.6,
+      "okx_apr_pct": -7.3,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 3.94,
+        "persistence": 10.0,
+        "trend_alignment": 3.8,
+        "liquidity": 0.0,
+        "volatility": 7.54,
+        "cross_venue_spread": 6.51
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "TURBO",
+      "apr_pct": -15.2,
+      "mark": 0.000599,
+      "volume_usd": 69683.44,
+      "oi_usd": 130406.02,
+      "okx_apr_pct": 5.48,
+      "score": 4.0,
+      "dimensions": {
+        "funding_extremity": 2.08,
+        "persistence": 10.0,
+        "trend_alignment": 4.85,
+        "liquidity": 0.0,
+        "volatility": 7.99,
+        "cross_venue_spread": 8.13
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": true,
+      "verdict": "WATCH"
+    },
+    {
+      "coin": "ETH",
+      "apr_pct": -8.31,
+      "mark": 1798.7,
+      "volume_usd": 675473809.99,
+      "oi_usd": 1095572005.44,
+      "okx_apr_pct": -6.2,
+      "score": 3.53,
+      "dimensions": {
+        "funding_extremity": 0.0,
+        "persistence": 1.67,
+        "trend_alignment": 4.31,
+        "liquidity": 9.51,
+        "volatility": 10.0,
+        "cross_venue_spread": 1.27
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "SOPH",
+      "apr_pct": -20.44,
+      "mark": 0.000889,
+      "volume_usd": 3003660.05,
+      "oi_usd": 261016.98,
+      "okx_apr_pct": -39.76,
+      "score": 3.52,
+      "dimensions": {
+        "funding_extremity": 4.06,
+        "persistence": 10.0,
+        "trend_alignment": 2.0,
+        "liquidity": 0.0,
+        "volatility": 0.0,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "MEME",
+      "apr_pct": -26.02,
+      "mark": 0.000318,
+      "volume_usd": 76529.96,
+      "oi_usd": 294122.8,
+      "okx_apr_pct": 5.48,
+      "score": 3.5,
+      "dimensions": {
+        "funding_extremity": 4.8,
+        "persistence": 0.0,
+        "trend_alignment": 3.27,
+        "liquidity": 0.0,
+        "volatility": 5.71,
+        "cross_venue_spread": 10.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "XAI",
+      "apr_pct": -21.66,
+      "mark": 0.00547,
+      "volume_usd": 25300.09,
+      "oi_usd": 153090.94,
+      "okx_apr_pct": null,
+      "score": 3.27,
+      "dimensions": {
+        "funding_extremity": 4.22,
+        "persistence": 0.0,
+        "trend_alignment": 4.62,
+        "liquidity": 0.0,
+        "volatility": 9.86
+      },
+      "missing_dimensions": [
+        "cross_venue_spread"
+      ],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "BTC",
+      "apr_pct": 10.76,
+      "mark": 64339.5,
+      "volume_usd": 2763414797.15,
+      "oi_usd": 2363528337.98,
+      "okx_apr_pct": -0.37,
+      "score": 3.17,
+      "dimensions": {
+        "funding_extremity": 0.0,
+        "persistence": 0.0,
+        "trend_alignment": 4.45,
+        "liquidity": 10.0,
+        "volatility": 10.0,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "SUI",
+      "apr_pct": -10.34,
+      "mark": 0.71861,
+      "volume_usd": 5325684.08,
+      "oi_usd": 15493092.48,
+      "okx_apr_pct": -12.13,
+      "score": 3.09,
+      "dimensions": {
+        "funding_extremity": 0.13,
+        "persistence": 5.83,
+        "trend_alignment": 4.39,
+        "liquidity": 2.18,
+        "volatility": 9.02,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "HYPE",
+      "apr_pct": 10.95,
+      "mark": 66.839,
+      "volume_usd": 430311648.12,
+      "oi_usd": 1285707150.42,
+      "okx_apr_pct": -3.66,
+      "score": 3.09,
+      "dimensions": {
+        "funding_extremity": 0.0,
+        "persistence": 1.25,
+        "trend_alignment": 4.78,
+        "liquidity": 8.95,
+        "volatility": 7.78,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    },
+    {
+      "coin": "JUP",
+      "apr_pct": -10.12,
+      "mark": 0.25233,
+      "volume_usd": 5553130.49,
+      "oi_usd": 6402593.16,
+      "okx_apr_pct": -10.14,
+      "score": 2.49,
+      "dimensions": {
+        "funding_extremity": 0.05,
+        "persistence": 6.25,
+        "trend_alignment": 2.64,
+        "liquidity": 2.23,
+        "volatility": 4.97,
+        "cross_venue_spread": 0.0
+      },
+      "missing_dimensions": [],
+      "liquidity_gate_applied": false,
+      "verdict": "SKIP"
+    }
+  ]
+}

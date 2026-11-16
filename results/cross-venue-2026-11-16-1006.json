@@ -1,0 +1,274 @@
+{
+  "generated_utc": "2026-11-16-1006",
+  "min_spread_pp": 10.0,
+  "venues_available": {
+    "OKX": true,
+    "Binance": false,
+    "Bybit": false
+  },
+  "coins_checked": 34,
+  "matches": 26,
+  "candidates": 18,
+  "rows": [
+    {
+      "coin": "CASHCAT",
+      "venue": "OKX",
+      "hl_apr_pct": -149.49,
+      "venue_apr_pct": -2.94,
+      "spread_pp": 146.55,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "RESOLV",
+      "venue": "OKX",
+      "hl_apr_pct": 97.25,
+      "venue_apr_pct": 5.48,
+      "spread_pp": -91.77,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "TRUMP",
+      "venue": "OKX",
+      "hl_apr_pct": -80.25,
+      "venue_apr_pct": -5.07,
+      "spread_pp": 75.19,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "W",
+      "venue": "OKX",
+      "hl_apr_pct": -79.1,
+      "venue_apr_pct": -8.13,
+      "spread_pp": 70.96,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "TURBO",
+      "venue": "OKX",
+      "hl_apr_pct": -51.69,
+      "venue_apr_pct": 5.48,
+      "spread_pp": 57.16,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "BIGTIME",
+      "venue": "OKX",
+      "hl_apr_pct": -54.56,
+      "venue_apr_pct": -8.17,
+      "spread_pp": 46.39,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "KAITO",
+      "venue": "OKX",
+      "hl_apr_pct": -46.43,
+      "venue_apr_pct": -1.99,
+      "spread_pp": 44.44,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "IMX",
+      "venue": "OKX",
+      "hl_apr_pct": -69.28,
+      "venue_apr_pct": -28.53,
+      "spread_pp": 40.74,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "ICP",
+      "venue": "OKX",
+      "hl_apr_pct": -54.19,
+      "venue_apr_pct": -22.51,
+      "spread_pp": 31.68,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "AVNT",
+      "venue": "OKX",
+      "hl_apr_pct": -24.49,
+      "venue_apr_pct": 5.48,
+      "spread_pp": 29.96,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "STX",
+      "venue": "OKX",
+      "hl_apr_pct": -32.64,
+      "venue_apr_pct": -7.36,
+      "spread_pp": 25.28,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "CC",
+      "venue": "OKX",
+      "hl_apr_pct": -50.3,
+      "venue_apr_pct": -27.07,
+      "spread_pp": 23.23,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "PENGU",
+      "venue": "OKX",
+      "hl_apr_pct": -13.26,
+      "venue_apr_pct": 5.48,
+      "spread_pp": 18.74,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "WLD",
+      "venue": "OKX",
+      "hl_apr_pct": -37.36,
+      "venue_apr_pct": -19.89,
+      "spread_pp": 17.46,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "SOPH",
+      "venue": "OKX",
+      "hl_apr_pct": -22.54,
+      "venue_apr_pct": -39.52,
+      "spread_pp": -16.99,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "WIF",
+      "venue": "OKX",
+      "hl_apr_pct": -10.92,
+      "venue_apr_pct": 5.48,
+      "spread_pp": 16.39,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "BERA",
+      "venue": "OKX",
+      "hl_apr_pct": -52.47,
+      "venue_apr_pct": -36.66,
+      "spread_pp": 15.81,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "HYPE",
+      "venue": "OKX",
+      "hl_apr_pct": 10.95,
+      "venue_apr_pct": -3.63,
+      "spread_pp": -14.58,
+      "match_confidence": 1.0,
+      "candidate": true,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "BTC",
+      "venue": "OKX",
+      "hl_apr_pct": 8.32,
+      "venue_apr_pct": -0.3,
+      "spread_pp": -8.62,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "APT",
+      "venue": "OKX",
+      "hl_apr_pct": -18.61,
+      "venue_apr_pct": -10.74,
+      "spread_pp": 7.87,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "SOL",
+      "venue": "OKX",
+      "hl_apr_pct": 10.6,
+      "venue_apr_pct": 3.09,
+      "spread_pp": -7.51,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "TRX",
+      "venue": "OKX",
+      "hl_apr_pct": -40.28,
+      "venue_apr_pct": -46.8,
+      "spread_pp": -6.51,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "OKX"
+    },
+    {
+      "coin": "SUI",
+      "venue": "OKX",
+      "hl_apr_pct": -16.24,
+      "venue_apr_pct": -11.99,
+      "spread_pp": 4.25,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "ETH",
+      "venue": "OKX",
+      "hl_apr_pct": -10.11,
+      "venue_apr_pct": -6.25,
+      "spread_pp": 3.85,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "GRAM",
+      "venue": "OKX",
+      "hl_apr_pct": -17.22,
+      "venue_apr_pct": -14.45,
+      "spread_pp": 2.77,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "Hyperliquid"
+    },
+    {
+      "coin": "JUP",
+      "venue": "OKX",
+      "hl_apr_pct": -11.1,
+      "venue_apr_pct": -10.73,
+      "spread_pp": 0.37,
+      "match_confidence": 1.0,
+      "candidate": false,
+      "long_venue": "Hyperliquid"
+    }
+  ]
+}

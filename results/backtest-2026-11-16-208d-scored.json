@@ -1,0 +1,135 @@
+{
+  "window_days": 208,
+  "start": "2026-04-22",
+  "end": "2026-11-16",
+  "notional_usd": 100.0,
+  "leverage": "1x",
+  "taker_fee_per_side": 0.00035,
+  "params": {
+    "entry_apr": -0.1,
+    "exit_apr": 0.0,
+    "stop_pct": 0.05,
+    "timeout_h": 24,
+    "side": "long",
+    "min_score": 6.0
+  },
+  "pairs": {
+    "BTC": {
+      "coin": "BTC",
+      "trades": 0,
+      "win_rate": null,
+      "total_pnl_usd": 0,
+      "return_pct": 0.0,
+      "profit_factor": null,
+      "sharpe_per_trade": null,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": null,
+      "funding_pnl_usd": 0,
+      "price_pnl_usd": 0,
+      "exit_reasons": {
+        "funding_flip": 0,
+        "stoploss": 0,
+        "timeout": 0
+      },
+      "signals_seen": 93,
+      "signals_taken": 0,
+      "signals_filtered": 93,
+      "avg_entry_score": null,
+      "trade_list": [],
+      "buy_and_hold_pct": -14.94
+    },
+    "ETH": {
+      "coin": "ETH",
+      "trades": 0,
+      "win_rate": null,
+      "total_pnl_usd": 0,
+      "return_pct": 0.0,
+      "profit_factor": null,
+      "sharpe_per_trade": null,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": null,
+      "funding_pnl_usd": 0,
+      "price_pnl_usd": 0,
+      "exit_reasons": {
+        "funding_flip": 0,
+        "stoploss": 0,
+        "timeout": 0
+      },
+      "signals_seen": 135,
+      "signals_taken": 0,
+      "signals_filtered": 135,
+      "avg_entry_score": null,
+      "trade_list": [],
+      "buy_and_hold_pct": -22.05
+    },
+    "HYPE": {
+      "coin": "HYPE",
+      "trades": 2,
+      "win_rate": 1.0,
+      "total_pnl_usd": 8.0,
+      "return_pct": 8.0,
+      "profit_factor": null,
+      "sharpe_per_trade": 3.24,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": 3.0,
+      "funding_pnl_usd": 0.02,
+      "price_pnl_usd": 8.13,
+      "exit_reasons": {
+        "funding_flip": 2,
+        "stoploss": 0,
+        "timeout": 0
+      },
+      "signals_seen": 157,
+      "signals_taken": 2,
+      "signals_filtered": 155,
+      "avg_entry_score": 6.5,
+      "trade_list": [
+        {
+          "coin": "HYPE",
+          "side": "long",
+          "entry_time": 1779282000000,
+          "exit_time": 1779289200000,
+          "entry_price": 49.907,
+          "exit_price": 51.323,
+          "entry_score": 6.47,
+          "hours": 2,
+          "reason": "funding_flip",
+          "price_pnl": 2.8373,
+          "funding_pnl": -0.001,
+          "fees": 0.07,
+          "pnl": 2.7663
+        },
+        {
+          "coin": "HYPE",
+          "side": "long",
+          "entry_time": 1779303600000,
+          "exit_time": 1779318000000,
+          "entry_price": 51.471,
+          "exit_price": 54.193,
+          "entry_score": 6.53,
+          "hours": 4,
+          "reason": "funding_flip",
+          "price_pnl": 5.2884,
+          "funding_pnl": 0.0165,
+          "fees": 0.07,
+          "pnl": 5.2349
+        }
+      ],
+      "buy_and_hold_pct": 68.14
+    }
+  },
+  "scoring": {
+    "min_score": 6.0,
+    "dimensions_used": [
+      "funding_extremity",
+      "persistence",
+      "trend_alignment",
+      "volatility"
+    ],
+    "dimensions_dropped": [
+      "liquidity",
+      "cross_venue_spread"
+    ],
+    "note": "Score computed point-in-time at each entry decision from data up to that hour only (no lookahead). Liquidity and cross-venue need data that does not exist historically, so they are dropped and the remaining weights renormalize (see scripts/score.py)."
+  }
+}
