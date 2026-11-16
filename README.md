@@ -1,10 +1,28 @@
 # Perpetual Arbitrage Skill
 
-A trading skill for **perpetual futures arbitrage on Hyperliquid** — with a
-runnable backtest, a parameter sweep, a 0-10 signal scorer, a live scanner,
-a cross-venue funding-spread matcher, and a delta-neutral multi-venue
-strategy (Strategy E) with its own multi-venue scanner and backtest.
-Paper/backtest only. **Not financial advice.**
+> **Disclaimer — please read this first.** This is not financial advice.
+> It is a research tool for studying how funding rates behave
+> and testing ideas on old data. Nothing here trades live — no orders,
+> no wallet, no keys. A backtest is not a promise: past results do not
+> predict what happens next. Funding rates can flip every hour, and a
+> -4,000% APR is one hour annualized, not a year's return. You can lose
+> money fast — liquidation, a venue going down, one leg of a two-leg
+> trade filling while the other does not, slippage, and fees eating the
+> whole edge are all real risks, on top of venue and smart-contract
+> risk. No returns are guaranteed. Do your own research, paper-trade
+> first, and never trade money you cannot afford to lose.
+
+Version 0.5, 2026-11-16. Paper/backtest only.
+
+## What this is
+
+Perpetual futures ("perps") have a trick built in: every hour, one side
+pays the other. That payment is the **funding rate**. When too many
+people are short, shorts pay longs — and the rate goes deeply negative.
+This skill watches those payments and asks one question: is there a
+trade here?
+
+It covers five ideas, all on public data, all paper/backtest only.
 
 ## What it covers
 
@@ -16,7 +34,7 @@ Paper/backtest only. **Not financial advice.**
 | D. Funding squeeze | Experimental (backtest was negative) |
 | **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner (`scripts/backtest_strategy_e.py`, `scripts/multivenue_scan.py`) — paper only; live execution needs accounts + API access on ≥2 venues (Jesse has none set up) |
 
-**Strategy A — the validated setup:** long a perp when funding APR is
+**Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 
 | Rule | Value |
@@ -28,6 +46,38 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | Size | $100 notional, 1x per coin |
 | Fees | 0.035% taker per side |
 | Coins | BTC, ETH, HYPE |
+
+## What's in this repo
+
+| File | What it is |
+|---|---|
+| `SKILL.md` | The full skill: workflow, pipeline, scoring rubric, all five strategies, data sources, run commands, rules. Start here. |
+| `README.md` | This file — the short version. |
+| `LICENSE` | MIT. |
+| `scripts/score.py` | Score one signal 0–10 (six weighted dimensions + liquidity gate). |
+| `scripts/scan.py` | Live scan of all Hyperliquid perps, ranked table + JSON/markdown report. |
+| `scripts/cross_venue.py` | Cross-venue funding-spread matcher (HL vs OKX, Binance/Bybit best-effort). Detection only. |
+| `scripts/backtest_funding.py` | Strategy A backtest + `--min-score` scored variant. |
+| `scripts/sweep.py` | 48-combo parameter sweep + out-of-sample validation. |
+| `scripts/multivenue_scan.py` | Strategy E live scanner (HL + Lighter + Aster + OKX). |
+| `scripts/backtest_strategy_e.py` | Strategy E backtest (HL vs Lighter). |
+| `results/` | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
+
+## v0.5 — what's new
+
+A cleanup and a rewrite, not a new strategy:
+
+- **Humanized.** Both docs rewritten in plain language — short
+  sentences, no jargon without an explanation. Every number and every
+  rule is exactly the same as v0.4.1.
+- **A disclaimer** at the top of this file and of `SKILL.md`.
+- **A new section: which coins actually signal** (in `SKILL.md` §9).
+  Thirty days of funding data, ranked by how often each coin goes
+  below -10% APR — with a warning that often does not mean profitable.
+- **Tidied up.** This file index, so you can see what lives where.
+
+No backtests were run for v0.5. The full-universe Strategy E backtest
+is still a documented next step, not run yet.
 
 ## v0.4.1 — cleanup (2026-11-16): all third-party product names removed from the repo; methods, parameters, scripts, and results unchanged.
 
@@ -66,7 +116,7 @@ Data: Hyperliquid fundingHistory + candles, Lighter fundings history
 existed for all three coins (4,985–4,993h of 4,992).
 
 | Coin | Trades | Win | PnL | Funding | Price (basis) |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|
 | BTC | 0 | — | $0 | $0 | $0 |
 | ETH | 0 | — | $0 | $0 | $0 |
 | HYPE | 5 | 80% | +$0.19 | +$0.14 | +$0.23 |
@@ -152,7 +202,7 @@ validated the top 3 on window B (88d, out-of-sample):
 
 - **Stricter entry (-20%) is overfitting.** Better on A (+$8.81 vs +$8.29)
   but worse out-of-sample (B: +$24.61 vs +$35.23) and combined
-  ($33.42 vs $43.52). The -10% default is the robust choice.
+  ($33.42 vs $43.52). The -10% default is the safer choice.
 - **The short side hurts.** Every "both" combo underperformed its
   long-only twin. Long-only is the default.
 - **-30% entry and late exits (-5%) are worse.** Worst combo: -$7.95.
@@ -190,6 +240,26 @@ The PnL came from price moves. Extreme funding is a 1-hour spike that
 normalizes right after entry — at 1x this is a **positioning /
 mean-reversion signal**, not a carry harvest. Real funding harvest needs
 leverage or longer holds, both of which add risk.
+
+## Which coins actually signal
+
+Thirty days of hourly funding (2026-10-17 → 2026-11-16, 720 hours per
+coin), from `results/funding-frequency-2026-11-16.json` — % of hours
+below -10% APR:
+
+SOPH 40.8%, NIL 38.2%, INIT 33.3%, MELANIA 30.3%, RUNE 18.1%,
+CC 15.8%, BIGTIME 11.4%, DOGE 11.4%, XMR 7.8%, IMX 7.4%, ETH 5.3%,
+SOL 5.1%, HYPE 3.3%, BTC 0.3%. SAGA, RESOLV, PONS: 0%. SKR: only
+1.1% despite huge spikes (lowest hour -3,515.8%).
+
+**Often does not mean profitable.** SOPH, NIL, INIT, MELANIA are
+small, illiquid coins — thin books, wide spreads, violent price moves.
+They were never backtested; only BTC/ETH/HYPE were validated. A coin
+below -10% forty percent of the time is often a coin in a structural
+downtrend — the shorts are right. The usable middle is RUNE, DOGE,
+ETH, SOL, HYPE: liquid enough to actually trade, and they signal
+often enough to matter. See `SKILL.md` §9 for the full table and the
+warning.
 
 ## Live scan — first run (2026-11-16 ~10:00 UTC)
 
@@ -233,13 +303,6 @@ python3 scripts/backtest_strategy_e.py --days 208 --coins BTC ETH HYPE --out res
 ```
 
 Stdlib only (Python 3). No keys, no trading, no installs.
-
-## Disclaimer
-
-Educational material only — not financial advice, not a promise of returns.
-Past backtest performance does not predict future results. Do not trade
-real money with this without your own validation, risk management, and a
-paper-trading phase first.
 
 ## License
 

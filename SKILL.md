@@ -1,11 +1,78 @@
 ---
 name: perpetual-arbitrage
-description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). v0.3 adds a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), and a cross-venue funding-spread matcher (scripts/cross_venue.py). v0.4 adds Strategy E (delta-neutral HL vs Lighter funding harvest with a full decision cycle), a live multi-venue scanner (scripts/multivenue_scan.py), and a Strategy E backtest (scripts/backtest_strategy_e.py). Includes runnable backtests (scripts/backtest_funding.py, scripts/sweep.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
+description: Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). v0.5 is a humanized rewrite with a disclaimer and a new section on which coins actually signal; the numbers and rules are unchanged from v0.4.1. Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when Jesse asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run.
 ---
 
 # Perpetual Arbitrage
 
-Version 0.4.1, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+Version 0.5, 2026-11-16. Created at Jesse's request. Paper/backtest only.
+
+## Please read this first
+
+This is **not financial advice**. It is a research tool — a way to study
+how funding rates behave and to test ideas on old data before you risk
+anything real.
+
+- **Nothing here trades live.** Every script reads public data and
+  writes a report. No orders, no wallet, no keys.
+- **A backtest is not a promise.** Past results do not predict what
+  happens next. A strategy that made money on old data can lose money
+  tomorrow.
+- **Funding rates are wild.** They can flip every hour. A -4,000% APR
+  does not mean you earn that for a year — it is one hour, annualized.
+  Most of the time it is gone by the next hour.
+- **You can lose money fast.** The risks include liquidation, a venue
+  going down, one leg of a two-leg trade filling while the other does
+  not, slippage, and fees eating the whole edge. There is also venue
+  and smart-contract risk you cannot fully control.
+- **No returns are guaranteed.** None. If anyone tells you this is
+  passive income, they are selling you something.
+- **Do your own research.** Check the numbers yourself, paper-trade
+  first, and never trade money you cannot afford to lose.
+
+If you skip everything else, do not skip that.
+
+## What this is
+
+Perpetual futures ("perps") have a trick built in: every hour, one side
+pays the other. That payment is the **funding rate**. When too many
+people are short, shorts pay longs — and the rate goes deeply negative.
+This skill watches those payments and asks one question: is there a
+trade here?
+
+It covers five ideas, all on public data:
+
+| Strategy | What it does | Where to read |
+|---|---|---|
+| **A. Funding harvest (long-only)** | Buy a perp when funding is deeply negative, exit when it flips back to zero. | §6 — the validated default |
+| B. Basis / cash-and-carry | Buy the cheap leg, sell the expensive leg, earn the gap as they converge. | §8 |
+| C. Cross-exchange funding spread | Same coin, different funding on two venues. | §8 (§4 detects it) |
+| D. Funding squeeze | Buy when funding is deeply negative *and* price is already rising. | §8 |
+| **E. Delta-neutral cross-venue harvest** | Long the venue that pays funding, short the venue that charges it — same coin, same size, so price moves cancel out. | §13 |
+
+Around those strategies sit the tools that keep you honest: a staged
+workflow (§1), a debate-style evaluation pipeline (§2), a 0–10 signal
+scorer (§3), a live scanner (§9), a cross-venue matcher (§4), and a
+multi-venue scanner for Strategy E (§13). Everything runs on public
+APIs. Nothing needs a key.
+
+## What changed in v0.5
+
+This version is a cleanup and a rewrite, not a new strategy:
+
+- **Humanized.** The whole doc is rewritten in plain language — short
+  sentences, no jargon without an explanation. Every number and every
+  rule is exactly the same as v0.4.1.
+- **A disclaimer** at the top of this file and of the README. Read it
+  before you run anything.
+- **A new section: which coins actually signal** (§9). Thirty days of
+  funding data, ranked by how often each coin goes below -10% APR —
+  with a warning that often does not mean profitable.
+- **Tidied up.** The README now has a file index so you can see what
+  lives where.
+
+No backtests were run for v0.5. The full-universe Strategy E backtest
+is still a documented next step, not run yet.
 
 ## What changed in v0.4.1
 
@@ -92,33 +159,35 @@ out-of-sample check.
 
 ## 1. The staged workflow
 
-Every signal evaluation follows these six stages, in order. Skip a
-stage only if it is marked optional.
+Every signal goes through six stages, in order. Skip a stage only if
+it is marked optional.
 
 | Stage | What happens | Output |
 |---|---|---|
 | **1. Scan** | `scripts/scan.py` fetches all 235 Hyperliquid perps, scores every coin below -10% APR, prints a ranked table, saves JSON + markdown in `results/`. | Ranked candidate list with scores |
-| **2. Verify** | For each PASS candidate, verify the raw numbers independently: re-read the current funding rate and mark price from `metaAndAssetCtxs`; check the coin actually trades (volume/OI from the same response); check the funding history for the last 24h (is this a 1-hour spike or a sustained print?). A candidate whose numbers do not reproduce is dropped here. | Verified facts per candidate |
+| **2. Verify** | For each PASS candidate, check the numbers yourself: re-read the current funding rate and mark price from `metaAndAssetCtxs`; check the coin actually trades (volume/OI from the same response); check the funding history for the last 24h (is this a 1-hour spike or a sustained print?). A candidate whose numbers do not reproduce is dropped here. | Verified facts per candidate |
 | **3. Score** | `scripts/score.py` 0-10 score (see §3). A signal below 6 is WATCH/SKIP and does not go to debate. | Score + dimension breakdown |
 | **4. Debate** | The multi-agent pipeline (§2): three analysts in parallel, then Bull vs Bear, then the Risk Manager verdict. | GO / NO-GO / REDUCE + reasons |
 | **5. Decide** | The decision is the Risk Manager's verdict, sized by the score and the debate: GO = take the paper position at the validated size; REDUCE = take it at half size (or watch one more hour); NO-GO = skip and log why. No decision without a logged verdict. | Position (or explicit skip) |
 | **6. Report** | Append the decision to the scan's markdown summary and to the decision log (§2). One JSON + one short markdown summary per scan, in `results/`. | `results/scan-YYYY-MM-DD-HHMM.{json,md}` + decision log |
 
-Analytical mode: when evaluating, numbers first — data and valuation tools,
-with narrative/context second. A debate argument without a number
-attached to it is a weak argument.
+Analytical mode: when you evaluate, numbers first — data and valuation
+tools, with narrative/context second. A debate argument without a
+number attached to it is a weak argument.
 
 ---
 
 ## 2. The multi-agent evaluation pipeline (procedure, not code)
 
-The pipeline has five seats — Analyst Team (parallel specialists)
--> Bull/Bear debate -> Trader decision -> Risk Management team ->
-Fund Manager approval — with a decision log and point-in-time
-integrity (every number must be computable from data available at
-that moment). This is a
-procedure the agent follows by role-playing each seat in turn. It is
-not a program and it does not execute trades.
+Think of it as a small team arguing about one trade. Five seats, each
+with its own job. The agent plays every seat in turn — this is a
+procedure to follow, not a program, and it never places a trade.
+
+The seats, in order: Analyst Team (parallel specialists) -> Bull/Bear
+debate -> Trader decision -> Risk Management team -> Fund Manager
+approval. Every evaluation keeps a decision log, and every number must
+be computable from data available at that moment (no peeking at the
+future).
 
 ### The seats
 
@@ -175,13 +244,12 @@ happen.
 
 ### Point-in-time integrity
 
-Like a point-in-time backtest (its grid stops at the present because a
-future date has no outcome to settle against), every number used in
-an evaluation must be computable from data available at that moment.
-No future data, no lookahead, no "this would have scored well
-yesterday". The backtest enforces this by construction (§7); live
-evaluations enforce it by only reading live/history endpoints, never
-by peeking at a later print.
+A backtest's grid stops at the present, because a future date has no
+outcome to settle against. Same rule here: every number you use must
+be computable from data available at that moment. No future data, no
+lookahead, no "this would have scored well yesterday". The backtest
+enforces this by construction (§7); live evaluations enforce it by
+only reading live/history endpoints, never by peeking at a later print.
 
 ---
 
@@ -283,8 +351,10 @@ spread, candidate flag, long_venue) with the table printed to stdout.
 
 ## 6. The validated setup (Strategy A — funding harvest, long-only)
 
-Long a perp when funding is deeply negative (shorts pay longs). Funding on
-Hyperliquid is paid **hourly**; APR = hourly rate x 24 x 365.
+The idea is simple. When funding is deeply negative, shorts are
+paying longs to hold their position. You buy the perp, collect the
+payments, and leave when funding flips back to zero or above.
+Funding on Hyperliquid is paid **hourly**; APR = hourly rate x 24 x 365.
 
 | Rule | Value |
 |---|---|
@@ -309,9 +379,10 @@ Hyperliquid is paid **hourly**; APR = hourly rate x 24 x 365.
 | HYPE | 99 | 57.6% | +$28.86 | +28.86% | 4.19% | +63.6% |
 | **Combined** | **166** | — | **+$43.52** | **+14.51% on $300** | — | — |
 
-The strategy beat buy-and-hold on BTC and ETH (positive while buy-and-hold
-lost 18–25%) but **lagged HYPE's +63.6% rally** — it is out of the market
-most of the time, so it wins in chop/downtrends and lags strong uptrends.
+It beat buy-and-hold on BTC and ETH (positive while buy-and-hold
+lost 18–25%). But it **lagged HYPE's +63.6% rally** — it is out of the
+market most of the time, so it wins in chop and downtrends and lags
+strong uptrends.
 
 ### What the sweep proved (and what NOT to do)
 
@@ -322,7 +393,7 @@ most of the time, so it wins in chop/downtrends and lags strong uptrends.
 - **Stricter entry (-20%) looks better on A (+$8.81 vs +$8.29) but loses
   out-of-sample (B: +$24.61 vs +$35.23) and combined ($33.42 vs $43.52).**
   It is overfitting to window A — do not use it. The -10% default is the
-  robust choice.
+  safer choice.
 - **The short side hurts.** Every "both" combo underperformed its
   long-only twin (e.g. -10% both +$5.91 vs long +$8.29 on A). Shorting
   into +30% funding gets squeezed. Long-only is the default.
@@ -333,12 +404,12 @@ most of the time, so it wins in chop/downtrends and lags strong uptrends.
 ### Honest finding — the money is NOT from funding
 
 Across all 166 trades, funding income was only **$0.10–$0.25 per coin**.
-The PnL came from price moves. Extreme funding is a 1-hour spike that
-normalizes right after entry, so at 1x the strategy is really a
-**positioning / mean-reversion signal** (buy the dip when shorts are
-paying hard, exit when funding normalizes), not a carry harvest. Real
-funding harvest needs leverage or longer holds — both add risk. Do not
-sell this as "passive funding income".
+The PnL came from price moves. Here is why: extreme funding is a
+1-hour spike that normalizes right after entry. So at 1x, this is
+really a **positioning / mean-reversion signal** — buy the dip when
+shorts are paying hard, exit when funding normalizes — not a carry
+harvest. Real funding harvest needs leverage or longer holds, and both
+add risk. Do not sell this as "passive funding income".
 
 ---
 
@@ -459,6 +530,54 @@ means "worth the full evaluation", not "buy now" — both have thin
 liquidity dimensions (1.46 and 2.74) and would face a hard liquidity
 question in debate.
 
+### Which coins actually signal
+
+How often does each coin even go below -10% APR? Thirty days of
+hourly Hyperliquid funding (2026-10-17 -> 2026-11-16, 720 hours per
+coin), from `results/funding-frequency-2026-11-16.json`:
+
+| Coin | % of hours below -10% APR | Mean APR | Lowest APR |
+|---|---:|---:|---:|
+| SOPH | 40.8% | -150.6% | -4,380.0% |
+| NIL | 38.2% | -27.9% | -2,198.8% |
+| INIT | 33.3% | -306.7% | -4,380.0% |
+| MELANIA | 30.3% | -15.5% | -287.3% |
+| RUNE | 18.1% | -12.9% | -422.3% |
+| CC | 15.8% | 0.2% | -168.1% |
+| BIGTIME | 11.4% | 3.3% | -338.8% |
+| DOGE | 11.4% | 3.6% | -34.5% |
+| XMR | 7.8% | 53.9% | -309.0% |
+| IMX | 7.4% | 4.6% | -189.1% |
+| ETH | 5.3% | 6.2% | -67.2% |
+| SOL | 5.1% | 5.4% | -26.5% |
+| HYPE | 3.3% | 11.7% | -40.6% |
+| BTC | 0.3% | 9.5% | -15.7% |
+| SAGA / RESOLV / PONS | 0% | — | — |
+| SKR | 1.1% | -21.0% | -3,515.8% |
+
+Read this carefully, because it is easy to read it wrong.
+
+**Often does not mean profitable.** The top four — SOPH, NIL, INIT,
+MELANIA — are small, illiquid coins. Thin books, wide spreads,
+violent price moves. They were never backtested; only BTC/ETH/HYPE
+were validated. A coin that is below -10% forty percent of the time
+is often a coin in a structural downtrend. The shorts are right, and
+buying the dip into that just loses money more often.
+
+**SKR is the other trap.** Its spikes are enormous (-3,515.8% at the
+worst hour) but it is below -10% only 1.1% of the time. One violent
+hour, then nothing. A scanner that chases the biggest number will
+find SKR first and lose on it.
+
+**The usable middle:** RUNE, DOGE, ETH, SOL, HYPE. Liquid enough to
+actually trade, and they signal often enough to matter. RUNE is the
+most frequent of the liquid set (18.1% of hours). BTC almost never
+signals (0.3%) — and SAGA, RESOLV, and PONS never do at all, because
+their funding sits at the +11% floor.
+
+This section is a map, not a recommendation. Frequency tells you
+where to look. It does not tell you a trade will work.
+
 ---
 
 ## 10. Data sources (public, no key)
@@ -540,6 +659,10 @@ python3 scripts/backtest_strategy_e.py --days 208 --end 2026-11-16 \
 
 ## 12. Rules before any live talk
 
+One reminder before the rules: the disclaimer at the top of this file
+applies to everything below. Nothing here is a promise, and no rule
+below authorizes real money.
+
 1. Backtest first, on a fresh window, before quoting any return.
 2. An hourly funding APR is an annualisation of a 1-hour spike — a
    -4,000% APR does NOT mean that return for a year. Extreme funding
@@ -567,12 +690,14 @@ python3 scripts/backtest_strategy_e.py --days 208 --end 2026-11-16 \
 
 ## 13. Strategy E — delta-neutral cross-venue funding harvest
 
-The pattern: **long the venue paying funding, short the venue
-charging it — same asset, same size, opposite sides.** The legs cancel
-price exposure; what remains is the funding-rate spread, collected
-hourly while the spread holds. Everything else is risk management
-around that trade. The algorithm and defaults below are this skill's
-Strategy E parameters; the implementation here is public-data only
+The idea: **long the venue paying funding, short the venue charging
+it — same asset, same size, opposite sides.** The legs cancel price
+exposure. What is left is the funding-rate spread, collected hourly
+while the spread holds. "Delta-neutral" just means the two legs move
+against each other when the price moves, so a price swing alone does
+not hurt you. Everything else is risk management around that trade.
+The algorithm and defaults below are this skill's Strategy E
+parameters; the implementation here is public-data only
 (paper/backtest/scan).
 
 ### The trade, in one table
