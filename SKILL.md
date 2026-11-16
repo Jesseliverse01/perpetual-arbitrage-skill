@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.6, 2026-11-16. Paper/backtest only.
+Version 0.5.7, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -45,9 +45,9 @@ It covers five ideas, all on public data:
 | Strategy | What it does | Where to read |
 |---|---|---|
 | **A. Funding harvest (long-only)** | Buy a perp when funding is deeply negative, exit when it flips back to zero. | §6 — the validated default |
-| B. Basis / cash-and-carry | Buy the cheap leg, sell the expensive leg, earn the gap as they converge. | §8 |
-| C. Cross-exchange funding spread | Same coin, different funding on two venues. | §8 (§4 detects it) |
-| D. Funding squeeze | Buy when funding is deeply negative *and* price is already rising. | §8 |
+| B. Basis / cash-and-carry | Buy the cheap leg, sell the expensive leg, earn the gap as they converge. | §8 B |
+| C. Cross-exchange funding spread | Same coin, different funding on two venues. | §8 C — detected by §4 |
+| D. Funding squeeze | Buy when funding is deeply negative *and* price is already rising. | §8 D |
 | **E. Delta-neutral cross-venue harvest** | Long the venue that pays funding, short the venue that charges it — same coin, same size, so price moves cancel out. | §13 |
 
 Around those strategies sit the tools that keep you honest: a staged
