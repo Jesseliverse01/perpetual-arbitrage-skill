@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.8, 2026-11-16. Paper/backtest only.
+Version 0.5.9, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -811,10 +811,59 @@ real opportunity set is the full 200+ coin universe: the live
 scanner (§13, below) found 9 in-band candidates on 2026-11-16
 across all coins, vs 0 on the three majors. Do NOT lower the 70%
 threshold to manufacture trades on majors — the threshold exists
-because friction dominates below it. The
-next validation step, if the user wants it, is a backtest over the
-full coin universe (the data exists per coin; the run is just
-longer), not a threshold cut.
+because friction dominates below it. That backtest is now done — see the full-universe run below. It did
+not change the threshold: 70% stays.
+
+### Full-universe backtest — 81 coins, same 208 days
+
+`results/backtest-strategy-e-2026-11-16-full-universe.json`. Same
+window (2026-04-22 → 2026-11-16), same parameters, same corrected
+script logic — only the universe is wider. Every coin listed as a
+perp on BOTH Hyperliquid and Lighter, exact symbol match: 97 in the
+intersection, 16 blacklisted and not run, 81 run. 62 coins traded;
+19 saw no signal pass the filters. Signals seen across all coins:
+305,734. Data coverage averages 4,146h of 4,992 per coin (some coins
+listed mid-window).
+
+| | |
+|---|---|
+| Trades | 437 |
+| Win rate | 78.5% (343 of 437) |
+| PnL | +$30.62 |
+| Funding | +$31.03 |
+| Price (basis) | +$14.91 |
+| Fees | −$15.48 |
+
+(Components sum to $30.46; the $0.16 gap is rounding in the stored
+per-trade values.)
+
+Exits: 338× `low_apr_6`, 50× `smart_neg_3`, 33× `max_hold`, 16×
+`smart_decl_6`, 0 hard stops. Most positions end the same way the
+majors-only run did: the spread decays before anything else happens.
+
+Top coins: APEX 19 trades +$2.79, S 24 trades +$2.02, 0G 21 trades
++$1.50, ZORA 21 trades +$1.45, BERA 10 trades +$1.31. Worst: BIO 6
+trades −$0.14, SEI −$0.05, PENDLE −$0.02, ARB −$0.02. No coin lost
+more than 14 cents.
+
+**The honest result: the universe matters more than the threshold.**
+On the three majors the strategy barely trades; across 81 coins it
+trades 437 times and the funding leg — not price — carries the PnL
+(+$31.03 funding vs +$14.91 price). That is the carry working as
+designed. It is still small money: +$30.62 in 208 days, about 7
+cents a trade, on $20 margin per arb. A working machine, not a
+return stream. Nothing in this run says lowering the 70% threshold
+would help — the trades that exist already come from in-band
+spreads, and the exits show decay, not missed entries.
+
+Same limits as the majors run: volume gates not applied, slippage
+not modeled, hard stop at hour closes only, per-leg liquidation not
+modeled. One gap in the universe itself: scale variants were not
+matched (Lighter lists 1000BONK/1000FLOKI/1000NOT/1000PEPE/
+1000SHIB/1000TOSHI while Hyperliquid lists kBONK/kFLOKI/kNOT/
+kPEPE/kSHIB/kTOSHI — same underlying at 1000x scale). A follow-up
+could add them with an explicit scale map; silently equating them
+would hide the mapping.
 
 **Backtest limits (stated, not hidden):** volume gates NOT applied
 (no historical per-venue volume in public endpoints); slippage NOT

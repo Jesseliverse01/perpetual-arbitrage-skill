@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.8, 2026-11-16. Paper/backtest only.
+Version 0.5.9, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -115,6 +115,27 @@ while the other stays open — that did not happen in this window),
 Lighter funding missing ~7 of 4,992 hours. Capital base differs from
 Strategy A ($20 margin per arb) — compare PnL in USD, not raw
 return_pct.
+
+### Full-universe backtest — 81 coins, same 208 days
+
+`results/backtest-strategy-e-2026-11-16-full-universe.json`. Same
+window, same parameters, wider universe: every coin listed as a perp
+on both Hyperliquid and Lighter (exact symbol match) — 97 in the
+intersection, 16 blacklisted and not run, 81 run. 305,734 signals
+seen; 62 coins traded.
+
+**437 trades, 78.5% win rate, +$30.62.** Funding +$31.03, price
++$14.91, fees −$15.48. Exits: 338× low_apr_6, 50× smart_neg_3,
+33× max_hold, 16× smart_decl_6, 0 hard stops. Top: APEX +$2.79,
+S +$2.02, 0G +$1.50. Worst coin lost 14 cents.
+
+The universe matters more than the threshold: on the majors the
+strategy barely trades; across 81 coins it trades 437 times and the
+funding leg carries the PnL — the carry working as designed. Still
+small money (~7 cents a trade on $20 margin per arb): a working
+machine, not a return stream. Threshold stays 70%. Same limits as
+above (no volume gates, no slippage, hour-close stops, no per-leg
+liquidation model). Scale variants (kBONK vs 1000BONK) not matched.
 
 ### Live multi-venue scan — first run (2026-11-16 ~10:00 UTC)
 
