@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.3, 2026-11-16. Paper/backtest only.
+Version 0.5.4, 2026-11-16. Paper/backtest only.
 
 ## What this is
 
@@ -61,6 +61,7 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | `scripts/sweep.py` | 48-combo parameter sweep + out-of-sample validation. |
 | `scripts/multivenue_scan.py` | Strategy E live scanner (HL + Lighter + Aster + OKX). |
 | `scripts/backtest_strategy_e.py` | Strategy E backtest (HL vs Lighter). |
+| `scripts/ccxt_funding.py` | Current funding APR via CCXT — Hyperliquid only on this VM; needs `pip install ccxt`. Optional; the core scripts stay stdlib-only. |
 | `results/` | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
 
 ## Strategy E backtest — honest result
@@ -218,6 +219,29 @@ Top: CASHCAT +146.6pp, RESOLV -91.8pp, TRUMP +75.2pp, W +71.0pp.
 Binance (451) and Bybit (403) geo-blocked from this VM — skipped
 gracefully, no fake rows.
 
+## CCXT — optional unified venue access
+
+CCXT is one library for 100+ exchanges (104 in v4.5.92, MIT): the same
+method names and return shapes on every venue — `fetchTicker`,
+`fetchFundingRate`, `fetchFundingRateHistory`, `fetchMarkets`,
+`fetchOHLCV`. It is an optional way to read the same public data this
+skill reads per venue. Install with `pip install ccxt`. Full detail in
+`SKILL.md` §15; the example script is `scripts/ccxt_funding.py`.
+
+One quirk, verified live 2026-11-16: CCXT ignores the `HTTPS_PROXY`
+environment variable, so the proxy has to be passed explicitly in the
+constructor (read from the environment at runtime, never hard-coded).
+
+| Venue | Through CCXT on this VM |
+|---|---|
+| Hyperliquid | **Works** — 871 markets, ticker + funding rate fetched live |
+| Lighter | **Fails** at `load_markets()` (`CERTIFICATE_VERIFY_FAILED`) |
+| OKX | **Fails** at `load_markets()` (`CERTIFICATE_VERIFY_FAILED`) |
+
+Keep the raw-HTTP calls for Lighter and OKX; use CCXT where it works.
+Do not turn verification off to "fix" it. The core scripts stay
+stdlib-only — CCXT is optional, never required.
+
 ## Use as an agent skill
 
 Copy this folder into your agent's skills directory (e.g. Muse
@@ -244,9 +268,12 @@ python3 scripts/sweep.py --out results/sweep-YYYY-MM-DD.json
 
 python3 scripts/multivenue_scan.py              # Strategy E live scanner -> results/multivenue-scan-YYYY-MM-DD-HHMM.json
 python3 scripts/backtest_strategy_e.py --days 208 --coins BTC ETH HYPE --out results/backtest-strategy-e-YYYY-MM-DD.json
+
+python3 scripts/ccxt_funding.py                 # current funding APR via CCXT (Hyperliquid only; needs `pip install ccxt`)
 ```
 
-Stdlib only (Python 3). No keys, no trading, no installs.
+Stdlib only (Python 3). No keys, no trading, no installs — except
+`scripts/ccxt_funding.py`, the one optional script that needs CCXT.
 
 ## License
 

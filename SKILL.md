@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.5.3, 2026-11-16. Paper/backtest only.
+Version 0.5.4, 2026-11-16. Paper/backtest only.
 
 ## Please read this first
 
@@ -54,7 +54,9 @@ Around those strategies sit the tools that keep you honest: a staged
 workflow (§1), a debate-style evaluation pipeline (§2), a 0–10 signal
 scorer (§3), a live scanner (§9), a cross-venue matcher (§4), and a
 multi-venue scanner for Strategy E (§13). Everything runs on public
-APIs. Nothing needs a key.
+APIs. Nothing needs a key. CCXT (§15) is an optional extra — the same
+venue data through one library, for readers who prefer it. The core
+scripts do not need it.
 
 ---
 
@@ -73,8 +75,8 @@ it is marked optional.
 | **6. Report** | Append the decision to the scan's markdown summary and to the decision log (§2). One JSON + one short markdown summary per scan, in `results/`. | `results/scan-YYYY-MM-DD-HHMM.{json,md}` + decision log |
 
 Analytical mode: when you evaluate, numbers first — data and valuation
-tools, with narrative/context second. A debate argument without a
-number attached to it is a weak argument.
+tools, with narrative/context second. An argument without a number
+does not count.
 
 ---
 
@@ -511,6 +513,10 @@ Rate limit (Hyperliquid): 1,200 weight/minute per IP. Funding row
 `time` is the payment time at the END of its hour; a row with time in
 (candle_open, candle_close] is the payment for holding that hour.
 
+CCXT (§15) reads the same data through one library instead of one
+client per venue — optional, and on this VM it only works for
+Hyperliquid.
+
 ## 11. How to run
 
 ```bash
@@ -537,9 +543,14 @@ python3 scripts/multivenue_scan.py           # Strategy E live scanner
 python3 scripts/backtest_strategy_e.py --days 208 --end 2026-11-16 \
     --coins BTC ETH HYPE --out results/backtest-strategy-e-YYYY-MM-DD.json
                                             # Strategy E backtest (HL vs Lighter, close rules)
+
+python3 scripts/ccxt_funding.py              # current funding APR via CCXT (Hyperliquid only)
+                                            # -> prints a table; needs `pip install ccxt` (§15)
 ```
 
-- Stdlib only, no keys, no trading. Entry/exit evaluated at hourly closes
+- Stdlib only, no keys, no trading. (`scripts/ccxt_funding.py` is the
+  one exception — it needs `pip install ccxt`, and it only covers
+  Hyperliquid on this VM.) Entry/exit evaluated at hourly closes
   (no lookahead: the decision uses the funding rate of the hour just
   closed, fill at that close).
 - `backtest_funding.py` accepts `--entry-apr`, `--exit-apr`, `--stop`,
@@ -768,7 +779,7 @@ only 1 of them passed everything.
 
 **Conclusion: Strategy E on BTC/ETH/HYPE is a "wait for a rare
 event" strategy — +$0.02 in 208 days, 1 trade, is not a return
-stream, it is a proof that the machinery works.** The strategy's
+stream, it proves the machinery works.** The strategy's
 real opportunity set is the full 200+ coin universe: the live
 scanner (§13, below) found 9 in-band candidates on 2026-11-16
 across all coins, vs 0 on the three majors. Do NOT lower the 70%
@@ -876,6 +887,78 @@ operations, surfaced separately.
   fails, roll back immediately (reduce-only market close on the
   filled leg); if rollback fails, surface an emergency-unwind notice
   and STOP the cycle.
+
+## 15. CCXT — optional unified venue access
+
+CCXT is one library for 100+ exchanges (104 in v4.5.92, MIT): the same
+method names and return shapes on every venue. It is an optional way
+to read the same public data this skill reads per venue. The core
+scripts stay stdlib-only — nothing in this skill needs CCXT, and
+adding it changes no rule, threshold, or result.
+
+Install:
+
+```bash
+pip install ccxt
+```
+
+The methods that matter here:
+
+| Method | What it returns, for this skill |
+|---|---|
+| `fetchTicker(symbol)` | Last price, bid/ask — the mark for a signal check |
+| `fetchFundingRate(symbol)` | Current funding rate (hourly on Hyperliquid) — APR = rate × 24 × 365 |
+| `fetchFundingRateHistory(symbol, since, limit)` | Funding history — persistence and trailing means |
+| `fetchMarkets()` | All pairs on the venue — which coins exist, with limits and precision |
+| `fetchOHLCV(symbol, timeframe)` | Candles — the trend and volatility inputs |
+
+Symbols are `BASE/QUOTE`, and perps add the settle currency:
+`BTC/USDT:USDT` on USDT-margined venues, `HYPE/USDC:USDC` on
+Hyperliquid — Hyperliquid is USDC-margined, so `HYPE/USDT:USDT`
+does not exist there and raises `BadSymbol`.
+
+### The proxy quirk on this VM (verified live 2026-11-16)
+
+CCXT ignores the `HTTPS_PROXY` environment variable — it sets
+`trust_env = False` on its session. Without an explicit proxy, its
+requests go direct and fail. Pass the proxy in the constructor,
+read from the environment at runtime, never hard-coded:
+
+```python
+import os, ccxt
+ex = ccxt.hyperliquid({
+    'enableRateLimit': True,
+    'https_proxy': os.environ['HTTPS_PROXY'],
+})
+```
+
+### Which venues work through CCXT on this VM (verified live 2026-11-16)
+
+| Venue | Through CCXT on this VM |
+|---|---|
+| Hyperliquid | **Works end to end.** `load_markets()` → 871 markets; ticker and funding rate fetched live. |
+| Lighter | **Fails** at `load_markets()` — `CERTIFICATE_VERIFY_FAILED`, sync and async. |
+| OKX | **Fails** at `load_markets()` — `CERTIFICATE_VERIFY_FAILED`, sync and async. |
+
+The failures are the egress proxy's TLS interception: its CA is not
+in the `certifi` bundle CCXT forces per request, and CCXT collapses
+any custom `verify` value to a boolean, so pointing it at a CA bundle
+does not work. Raw `urllib` / `requests` / `curl` reach both venues
+fine — they use the system CA store. **Do not "fix" this by turning
+verification off** (`validateServerSsl = False`) — that disables TLS
+checks on a trading library.
+
+The rule, then: keep the existing raw-HTTP calls for Lighter and
+OKX; use CCXT where it works. `scripts/ccxt_funding.py` is the
+example — it reads current funding APR on Hyperliquid only, and
+says so in its output. Binance and Bybit are geo-blocked from this
+VM either way (451/403) — CCXT does not bypass that. On a normal
+network CCXT works for all three venues; this split is specific to
+this VM's proxy, not a CCXT bug.
+
+Live execution still needs §14's three requirements (funded accounts
+on ≥ 2 venues, API access, the user's explicit per-action approval).
+CCXT changes how data is read, not what is authorized.
 
 ## Sources
 
