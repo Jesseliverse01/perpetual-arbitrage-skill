@@ -71,7 +71,18 @@ Honest limits (read before quoting any number):
   - Capital base differs from Strategy A ($100 notional 1x per coin):
     Strategy E deploys $20 margin per arb ($10 x 2 legs) for $50
     notional per leg. Compare PnL in USD and return-on-margin, not
-    raw return_pct, across strategies.
+    raw return_pct, across strategies. The portfolio block in the
+    results reports average and peak deployed margin across coins, so
+    an aggregate total is never read as a return on a single $20.
+
+  2026-11-17 audit fixes: the §13 portfolio caps (max 12 open arbs, max
+  3 new opens per hour) are now enforced by a greedy chronological
+  filter (apply_portfolio_caps) — earlier runs assumed unlimited
+  concurrency. Max drawdown (realized, trade-close equity) is now
+  reported per coin and combined. Coins with zero hours of data are
+  listed separately (zero_data_coins) instead of counting as "no
+  signal". Sharpe is the plain per-trade mean/std; t_stat carries the
+  old sqrt(N)-scaled value.
 
 Usage:
   python3 backtest_strategy_e.py [--days 208] [--end 2026-11-16]
@@ -118,12 +129,20 @@ COOLDOWN_AFTER_LOSSES = 2
 COOLDOWN_HOURS = 48
 HL_TAKER_FEE = 0.00035  # per side, HL leg only; Lighter taker = 0
 WARMUP_HOURS = 168  # need a full 7d of spread history before entries
+MAX_OPEN_ARBS = 12  # SKILL.md §13 portfolio cap (also enforces the $120/venue margin cap: 12 x $10/leg)
+MAX_NEW_OPENS_PER_HOUR = 3  # SKILL.md §13: max 3 new opens per cycle (hour)
 
 BLACKLIST = {
     "YZY", "STBL", "2Z", "CC", "CHIP", "VVV", "MEGA", "AZTEC", "JTO",
-    "STABLE", "alias:mu", "alias:bmnr", "EIGEN", "WLFI", "XMR", "PYTH",
+    "STABLE", "MUU", "BMNR", "EIGEN", "WLFI", "XMR", "PYTH",
     "ZRO", "CRV",
 }
+# Note: "MUU" and "BMNR" are the post-alias symbols (aliases mu->MUU,
+# bmnr->BMNR are resolved before this check, so the blacklist must use
+# the resolved names — the old entries "alias:mu"/"alias:bmnr" could
+# never match anything. 2026-11-17 audit fix.) Neither coin is in the
+# 2026-11-16 Hyperliquid/Lighter intersection, so this change does not
+# alter the 81-coin universe.
 
 
 def fetch_hl_funding(coin, start_ms, end_ms):
@@ -195,6 +214,130 @@ def upnl_now(pos, p_hl, p_li, N):
                 - N * (p_hl / pos["p_hl0"] - 1))
     return (N * (p_hl / pos["p_hl0"] - 1)
             - N * (p_li / pos["p_li0"] - 1))
+
+
+def _trade_stats(trades, margin_usd):
+    """Aggregate stats over a trade list. Sharpe is the plain per-trade
+    mean/std of trade returns (no sqrt(N) scaling); t_stat is the same
+    ratio scaled by sqrt(N). Max drawdown is realized only: equity moves
+    at trade closes, so intra-trade drawdown is not in this number."""
+    wins = [t for t in trades if t["pnl"] > 0]
+    losses = [t for t in trades if t["pnl"] <= 0]
+    total = sum(t["pnl"] for t in trades)
+    gross_win = sum(t["pnl"] for t in wins)
+    gross_loss = -sum(t["pnl"] for t in losses)
+    rets = [t["pnl"] / margin_usd for t in trades]
+    sharpe = None
+    t_stat = None
+    if len(rets) > 1:
+        mean = sum(rets) / len(rets)
+        var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
+        if var > 0:
+            sharpe = mean / math.sqrt(var)
+            t_stat = sharpe * math.sqrt(len(rets))
+    eq = 0.0
+    peak = 0.0
+    max_dd = 0.0
+    for t in sorted(trades, key=lambda x: x["exit_time"]):
+        eq += t["pnl"]
+        peak = max(peak, eq)
+        max_dd = max(max_dd, peak - eq)
+    return {
+        "trades": len(trades),
+        "win_rate": round(len(wins) / len(trades), 4) if trades else None,
+        "total_pnl_usd": round(total, 2),
+        "return_on_margin_pct": round(total / margin_usd * 100, 2),
+        "profit_factor": round(gross_win / gross_loss, 2) if gross_loss else None,
+        "sharpe_per_trade": round(sharpe, 2) if sharpe is not None else None,
+        "t_stat": round(t_stat, 2) if t_stat is not None else None,
+        "avg_hours": round(sum(t["hours"] for t in trades) / len(trades), 1) if trades else None,
+        "funding_pnl_usd": round(sum(t["funding_pnl"] for t in trades), 2),
+        "price_pnl_usd": round(sum(t["price_pnl"] for t in trades), 2),
+        "fees_usd": round(sum(t["fees"] for t in trades), 2),
+        "exit_reasons": {r: sum(1 for t in trades if t["reason"] == r)
+                         for r in ("hard_stop_loss", "max_hold", "smart_neg_3",
+                                   "smart_decl_6", "low_apr_6")},
+        "max_drawdown_usd": round(max_dd, 2),
+    }
+
+
+def apply_portfolio_caps(pairs, margin_per_arb=LEG_COLLAT_USD * 2,
+                         max_open=MAX_OPEN_ARBS,
+                         max_new_per_hour=MAX_NEW_OPENS_PER_HOUR):
+    """Enforce the SKILL.md §13 portfolio limits on per-coin backtest
+    trades: at most max_open arbs open at once, at most max_new_per_hour
+    new opens per hour. 12 open arbs x $10/leg also enforces the $120
+    per-exchange margin cap (one $10 leg per venue per arb).
+
+    Greedy chronological filter: trades are considered in entry-time
+    order and accepted while a slot is free. This is a filter on the
+    per-coin simulations, not a re-simulation: a rejected trade does not
+    change its coin's later signals or cooldown state, so the capped
+    total is an approximation of a joint simulation, stated as such.
+    Returns (filtered_pairs, portfolio_summary)."""
+    all_trades = []
+    for coin, res in pairs.items():
+        for t in res["trade_list"]:
+            all_trades.append((t["entry_time"], coin, t))
+    all_trades.sort(key=lambda x: (x[0], x[1]))
+    accepted = {coin: [] for coin in pairs}
+    open_until = []  # exit times of accepted trades still open
+    opens_this_hour = {}
+    rejected = 0
+    peak_open = 0
+    for entry, coin, t in all_trades:
+        open_until = [x for x in open_until if x > entry]
+        hour = entry // HOUR
+        if (len(open_until) >= max_open
+                or opens_this_hour.get(hour, 0) >= max_new_per_hour):
+            rejected += 1
+            continue
+        accepted[coin].append(t)
+        open_until.append(t["exit_time"])
+        opens_this_hour[hour] = opens_this_hour.get(hour, 0) + 1
+        peak_open = max(peak_open, len(open_until))
+    new_pairs = {}
+    for coin, res in pairs.items():
+        d = dict(res)
+        d.update(_trade_stats(accepted[coin], margin_per_arb))
+        d["trade_list"] = accepted[coin]
+        new_pairs[coin] = d
+    acc_trades = [t for coin in accepted for t in accepted[coin]]
+    total_arb_hours = sum((t["exit_time"] - t["entry_time"]) / HOUR
+                          for t in acc_trades)
+    if acc_trades:
+        span_h = (max(t["exit_time"] for t in acc_trades)
+                  - min(t["entry_time"] for t in acc_trades)) / HOUR
+    else:
+        span_h = 0
+    avg_open = total_arb_hours / span_h if span_h else 0.0
+    uncapped_total = round(sum(t["pnl"] for res in pairs.values()
+                               for t in res["trade_list"]), 2)
+    capped_total = round(sum(t["pnl"] for t in acc_trades), 2)
+    eq = 0.0
+    peak = 0.0
+    max_dd = 0.0
+    for t in sorted(acc_trades, key=lambda x: x["exit_time"]):
+        eq += t["pnl"]
+        peak = max(peak, eq)
+        max_dd = max(max_dd, peak - eq)
+    zero_data = sorted(coin for coin, res in pairs.items()
+                       if res["hours_with_data"] == 0)
+    portfolio = {
+        "trades_accepted": len(acc_trades),
+        "trades_rejected": rejected,
+        "uncapped_total_pnl_usd": uncapped_total,
+        "capped_total_pnl_usd": capped_total,
+        "peak_open_arbs": peak_open,
+        "avg_open_arbs": round(avg_open, 2),
+        "peak_deployed_margin_usd": round(peak_open * margin_per_arb, 2),
+        "avg_deployed_margin_usd": round(avg_open * margin_per_arb, 2),
+        "max_drawdown_usd": round(max_dd, 2),
+        "zero_data_coins": zero_data,
+        "coins_with_data": len(pairs) - len(zero_data),
+        "coins_run": len(pairs),
+    }
+    return new_pairs, portfolio
 
 
 def simulate(coin, hours, hl_rate, li_rate, hl_close, li_close):
@@ -348,37 +491,15 @@ def simulate(coin, hours, hl_rate, li_rate, hl_close, li_close):
             cooldown_last_loss = None
         pos = None
 
-    wins = [t for t in trades if t["pnl"] > 0]
-    losses = [t for t in trades if t["pnl"] <= 0]
-    total = sum(t["pnl"] for t in trades)
-    gross_win = sum(t["pnl"] for t in wins)
-    gross_loss = -sum(t["pnl"] for t in losses)
-    rets = [t["pnl"] / (LEG_COLLAT_USD * 2) for t in trades]
-    sharpe = None
-    if len(rets) > 1:
-        mean = sum(rets) / len(rets)
-        var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
-        if var > 0:
-            sharpe = mean / math.sqrt(var) * math.sqrt(len(rets))
-    return {
-        "coin": coin, "trades": len(trades),
-        "win_rate": round(len(wins) / len(trades), 4) if trades else None,
-        "total_pnl_usd": round(total, 2),
-        "return_on_margin_pct": round(total / (LEG_COLLAT_USD * 2) * 100, 2),
-        "profit_factor": round(gross_win / gross_loss, 2) if gross_loss else None,
-        "sharpe_per_trade": round(sharpe, 2) if sharpe is not None else None,
-        "avg_hours": round(sum(t["hours"] for t in trades) / len(trades), 1) if trades else None,
-        "funding_pnl_usd": round(sum(t["funding_pnl"] for t in trades), 2),
-        "price_pnl_usd": round(sum(t["price_pnl"] for t in trades), 2),
-        "fees_usd": round(sum(t["fees"] for t in trades), 2),
-        "exit_reasons": {r: sum(1 for t in trades if t["reason"] == r)
-                         for r in ("hard_stop_loss", "max_hold", "smart_neg_3",
-                                   "smart_decl_6", "low_apr_6")},
+    stats = _trade_stats(trades, LEG_COLLAT_USD * 2)
+    stats.update({
+        "coin": coin,
         "signals_seen": signals_seen,
         "signals_filtered": signals_filtered,
         "hours_with_data": hours_with_data,
         "trade_list": trades,
-    }
+    })
+    return stats
 
 
 def close_pos(trades, pos, exit_t, p_hl, p_li, reason, N, upnl_override=None):
@@ -438,6 +559,8 @@ def main():
             "funding_breakeven_threshold_usd": FB_THRESHOLD_USD,
             "hl_taker_fee": HL_TAKER_FEE, "lighter_taker_fee": 0.0,
             "warmup_h": WARMUP_HOURS,
+            "max_open_arbs": MAX_OPEN_ARBS,
+            "max_new_opens_per_hour": MAX_NEW_OPENS_PER_HOUR,
         },
         "notes": [
             "v0.5.3 (corrected re-run): funding accrues from the "
@@ -477,6 +600,25 @@ def main():
               f"price=${res['price_pnl_usd']} "
               f"signals={res['signals_seen']}/{res['signals_filtered']} "
               f"filtered", flush=True)
+    filtered_pairs, portfolio = apply_portfolio_caps(results["pairs"])
+    results["pairs"] = filtered_pairs
+    results["portfolio"] = portfolio
+    results["notes"].append(
+        "2026-11-17 audit fix: the SKILL.md §13 portfolio caps (max 12 "
+        "open arbs, max 3 new opens per hour) are enforced by a greedy "
+        "chronological filter on the per-coin simulations (see "
+        "apply_portfolio_caps). The capped total is the headline number; "
+        "the uncapped total is kept in results['portfolio'] for "
+        "comparison. The filter is an approximation, not a joint "
+        "re-simulation: a rejected trade does not change its coin's later "
+        "signals or cooldown state.")
+    print(f"[portfolio] accepted={portfolio['trades_accepted']} "
+          f"rejected={portfolio['trades_rejected']} "
+          f"capped_pnl=${portfolio['capped_total_pnl_usd']} "
+          f"uncapped_pnl=${portfolio['uncapped_total_pnl_usd']} "
+          f"peak_open={portfolio['peak_open_arbs']} "
+          f"avg_open={portfolio['avg_open_arbs']} "
+          f"zero_data={portfolio['zero_data_coins']}", flush=True)
     if args.out:
         with open(args.out, "w") as f:
             json.dump(results, f, indent=2)

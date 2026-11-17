@@ -14,6 +14,11 @@ Ranking: combined PnL across BTC/ETH/HYPE, minimum 15 trades combined.
 Overfitting warning: the top set is the best OF THE GRID on window A —
 always check window B before trusting it.
 
+2026-11-17 audit fix: funding for the exit hour is no longer accrued on
+stop-loss exits (same fix as backtest_funding.py). The stored sweep
+results predate this fix; the affected amounts are cents per stop trade,
+so the ranking conclusion is unchanged.
+
 Usage:
   python3 sweep.py [--out results/sweep-YYYY-MM-DD.json]
 """
@@ -75,19 +80,23 @@ def simulate(candles, funding_by_close, entry_apr, exit_apr, stop_pct,
                        "funding": 0.0, "hours": 0}
             continue
         s = pos["side"]
-        pos["funding"] += -s * rate * NOTIONAL
-        pos["hours"] += 1
         exit_price, reason = None, None
+        # Stop first: it fires intrabar, before the hour-end funding
+        # payment, so a stop exit collects no funding for this hour
+        # (same 2026-11-17 audit fix as backtest_funding.py).
         if s == 1 and cd["l"] <= pos["entry"] * (1 - stop_pct):
             exit_price, reason = pos["entry"] * (1 - stop_pct), "stoploss"
         elif s == -1 and cd["h"] >= pos["entry"] * (1 + stop_pct):
             exit_price, reason = pos["entry"] * (1 + stop_pct), "stoploss"
-        elif s == 1 and apr >= exit_apr:
-            exit_price, reason = close, "funding_flip"
-        elif s == -1 and apr <= -exit_apr:
-            exit_price, reason = close, "funding_flip"
-        elif pos["hours"] >= timeout_h:
-            exit_price, reason = close, "timeout"
+        if exit_price is None:
+            pos["funding"] += -s * rate * NOTIONAL
+            pos["hours"] += 1
+            if s == 1 and apr >= exit_apr:
+                exit_price, reason = close, "funding_flip"
+            elif s == -1 and apr <= -exit_apr:
+                exit_price, reason = close, "funding_flip"
+            elif pos["hours"] >= timeout_h:
+                exit_price, reason = close, "timeout"
         if exit_price is None:
             continue
         price_pnl = s * (exit_price - pos["entry"]) / pos["entry"] * NOTIONAL

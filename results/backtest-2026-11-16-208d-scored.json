@@ -16,27 +16,54 @@
   "pairs": {
     "BTC": {
       "coin": "BTC",
-      "trades": 0,
-      "win_rate": null,
-      "total_pnl_usd": 0,
-      "return_pct": 0.0,
-      "profit_factor": null,
+      "trades": 1,
+      "win_rate": 0.0,
+      "total_pnl_usd": -0.06,
+      "return_pct": -0.06,
+      "profit_factor": 0.0,
       "sharpe_per_trade": null,
-      "max_drawdown_pct": 0.0,
-      "avg_hours": null,
-      "funding_pnl_usd": 0,
-      "price_pnl_usd": 0,
+      "t_stat": null,
+      "max_drawdown_pct": 0.06,
+      "avg_hours": 4.0,
+      "funding_pnl_usd": 0.0,
+      "price_pnl_usd": 0.01,
       "exit_reasons": {
-        "funding_flip": 0,
+        "funding_flip": 1,
         "stoploss": 0,
         "timeout": 0
       },
-      "signals_seen": 93,
-      "signals_taken": 0,
-      "signals_filtered": 93,
-      "avg_entry_score": null,
-      "trade_list": [],
-      "buy_and_hold_pct": -14.94
+      "signals_seen": 91,
+      "signals_taken": 1,
+      "signals_filtered": 90,
+      "avg_entry_score": 6.09,
+      "trade_list": [
+        {
+          "coin": "BTC",
+          "side": "long",
+          "entry_time": 1776891600000,
+          "exit_time": 1776906000000,
+          "entry_price": 78378.0,
+          "exit_price": 78383.0,
+          "entry_score": 6.09,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence"
+          ],
+          "entry_score_missing": [
+            "trend_alignment",
+            "liquidity",
+            "volatility",
+            "cross_venue_spread"
+          ],
+          "hours": 4,
+          "reason": "funding_flip",
+          "price_pnl": 0.0064,
+          "funding_pnl": 0.0019,
+          "fees": 0.07,
+          "pnl": -0.0617
+        }
+      ],
+      "buy_and_hold_pct": -17.84
     },
     "ETH": {
       "coin": "ETH",
@@ -46,6 +73,7 @@
       "return_pct": 0.0,
       "profit_factor": null,
       "sharpe_per_trade": null,
+      "t_stat": null,
       "max_drawdown_pct": 0.0,
       "avg_hours": null,
       "funding_pnl_usd": 0,
@@ -60,7 +88,7 @@
       "signals_filtered": 135,
       "avg_entry_score": null,
       "trade_list": [],
-      "buy_and_hold_pct": -22.05
+      "buy_and_hold_pct": -24.29
     },
     "HYPE": {
       "coin": "HYPE",
@@ -69,7 +97,8 @@
       "total_pnl_usd": 8.0,
       "return_pct": 8.0,
       "profit_factor": null,
-      "sharpe_per_trade": 3.24,
+      "sharpe_per_trade": 2.29,
+      "t_stat": 3.24,
       "max_drawdown_pct": 0.0,
       "avg_hours": 3.0,
       "funding_pnl_usd": 0.02,
@@ -79,9 +108,9 @@
         "stoploss": 0,
         "timeout": 0
       },
-      "signals_seen": 157,
+      "signals_seen": 155,
       "signals_taken": 2,
-      "signals_filtered": 155,
+      "signals_filtered": 153,
       "avg_entry_score": 6.5,
       "trade_list": [
         {
@@ -92,6 +121,16 @@
           "entry_price": 49.907,
           "exit_price": 51.323,
           "entry_score": 6.47,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 2.8373,
@@ -107,6 +146,16 @@
           "entry_price": 51.471,
           "exit_price": 54.193,
           "entry_score": 6.53,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 5.2884,
@@ -115,7 +164,7 @@
           "pnl": 5.2349
         }
       ],
-      "buy_and_hold_pct": 68.14
+      "buy_and_hold_pct": 63.71
     }
   },
   "scoring": {
@@ -130,6 +179,6 @@
       "liquidity",
       "cross_venue_spread"
     ],
-    "note": "Score computed point-in-time at each entry decision from data up to that hour only (no lookahead). Liquidity and cross-venue need data that does not exist historically, so they are dropped and the remaining weights renormalize (see scripts/score.py)."
+    "note": "Score computed point-in-time at each entry decision from data up to that hour only (no lookahead). Liquidity and cross-venue need data that does not exist historically, so they are dropped and the remaining weights renormalize (see scripts/score.py). Because the liquidity dimension is dropped, the liquidity gate (cap at 4.0 for zero-liquidity signals) never applies in backtest mode, and the scored backtest (BTC/ETH/HYPE only) does not validate the trap filter for illiquid coins. Each scored trade records entry_score_dims and entry_score_missing so a score can be traced to the dimensions behind it."
   }
 }

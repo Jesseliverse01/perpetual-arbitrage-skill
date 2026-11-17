@@ -26,6 +26,11 @@ available. The result dict lists which dimensions were used. In particular:
   historically, so they are not used there. The threshold (--min-score 6)
   is applied to the same 0-10 scale in both cases.
 
+Backtest note (2026-11-17 audit): because liquidity is dropped in
+backtest mode, the liquidity gate above never applies there — the scored
+backtest cannot validate the trap filter. Treat the trap filter as
+unvalidated for illiquid coins until a scored run on trap coins exists.
+
 Why these weights (justification):
 - Extremity (30%) is the entry condition itself — without it there is no
   signal at all, so it carries the most weight.

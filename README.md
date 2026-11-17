@@ -124,6 +124,21 @@ on both Hyperliquid and Lighter (exact symbol match) — 97 in the
 intersection, 16 blacklisted and not run, 81 run. 305,734 signals
 seen; 62 coins traded.
 
+Of the 81, 6 had zero hours of data (AI, AI16Z, BNB, CASHCAT,
+LAUNCHCOIN, SOL), so 75 coins actually had data. This run is
+in-sample (same parameters and window as development); there is no
+out-of-sample validation of the Strategy E parameter set yet. The
+§13 portfolio caps (max 12 open arbs, max 3 new opens per hour) are
+enforced by a greedy chronological filter on the per-coin
+simulations; the capped total is the headline number and the uncapped
+total is kept in the results file for comparison. Blacklist: 16 names
+compiled 2026-11-16 with v0.4; no per-name reason was recorded at the
+time, and any future addition needs a one-line reason and a date.
+
+**Note (2026-11-17): these are pre-fix numbers (unlimited
+concurrency, no max drawdown). The capped total is still being
+computed; this paragraph will be replaced when the E re-run lands.**
+
 **437 trades, 78.5% win rate, +$30.62.** Funding +$31.03, price
 +$14.91, fees −$15.48. Exits: 338× low_apr_6, 50× smart_neg_3,
 33× max_hold, 16× smart_decl_6, 0 hard stops. Top: APEX +$2.79,
@@ -161,10 +176,16 @@ no keys, no lookahead.
 
 | Coin | Trades | Win | PnL | Return | Max DD | Buy & hold |
 |---|---|---|---|---|---|---|
-| BTC | 31 | 51.6% | +$2.69 | +2.69% | 2.61% | -17.6% |
-| ETH | 36 | 55.6% | +$11.97 | +11.97% | 7.61% | -24.8% |
-| HYPE | 99 | 57.6% | +$28.86 | +28.86% | 4.19% | +63.6% |
-| **Combined** | **166** | — | **+$43.52** | **+14.51% on $300** | — | — |
+| BTC | 31 | 51.6% | +$2.55 | +2.55% | 2.61% | -17.6% |
+| ETH | 36 | 55.6% | +$11.96 | +11.96% | 7.61% | -24.8% |
+| HYPE | 97 | 57.7% | +$27.98 | +27.98% | 4.22% | +63.6% |
+| **Combined** | **164** | — | **+$42.49** | **+14.16% on $300** | — | — |
+
+Re-fetched 2026-11-17 with the fixed code (was +$43.52 on 166
+trades); the $1.03 move is almost entirely data drift at the window
+edges, not the fix (two HYPE trades at the window start no longer
+fire in the re-fetched data, one BTC entry shifted three hours; the
+stop-loss funding fix itself is about $0.006).
 
 The strategy beat buy-and-hold on BTC and ETH, but lagged HYPE's +63.6%
 rally — it is out of the market most of the time, so it wins in
@@ -175,12 +196,12 @@ chop/downtrends and lags strong uptrends.
 `scripts/sweep.py` tested 48 parameter combos on window A (120d) and
 validated the top 3 on window B (88d, out-of-sample):
 
-- **Stricter entry (-20%) is overfitting.** Better on A (+$8.81 vs +$8.29)
-  but worse out-of-sample (B: +$24.61 vs +$35.23) and combined
-  ($33.42 vs $43.52). The -10% default is the safer choice.
+- **Stricter entry (-20%) is overfitting.** Better on A (+$8.81 vs +$8.28)
+  but worse out-of-sample (B: +$24.61 vs +$35.37) and combined
+  ($33.42 vs $43.65). The -10% default is the safer choice.
 - **The short side hurts.** Every "both" combo underperformed its
   long-only twin. Long-only is the default.
-- **-30% entry and late exits (-5%) are worse.** Worst combo: -$7.95.
+- **-30% entry and late exits (-5%) are worse.** Worst combo: -$7.99.
 
 ### Scored backtest — honest result
 
@@ -191,26 +212,27 @@ Same 208-day window:
 
 | Variant | Trades | PnL | Win | Signals seen | Filtered |
 |---|---|---|---|---|---|
-| **Baseline (unscored, v0.2)** | **166** | **+$43.52** | **56%** | — | — |
-| min-score 2 | 158 | +$44.46 | 57% | 179 | 21 |
-| min-score 3 | 100 | +$20.20 | 55% | 223 | 123 |
-| min-score 6 | 2 | +$8.00 | 100% | 385 | 383 |
+| **Baseline (unscored, v0.2)** | **164** | **+$42.49** | **56%** | — | — |
+| min-score 2 | 155 | +$42.49 | 57% | 177 | 22 |
+| min-score 3 | 98 | +$18.75 | 55% | 218 | 120 |
+| min-score 6 | 3 | +$7.94 | 67% | 381 | 378 |
 
-**The scorer does NOT improve total PnL.** Min-score 2 is +$0.94 above
-baseline — noise, and the threshold was picked after looking at the
-results. Min-score 3 is worse; min-score 6 barely trades at all.
+**The scorer does NOT improve total PnL.** Min-score 2 now ties the
+baseline exactly (+$42.49 vs +$42.49) — no improvement at all, and
+the threshold was picked after looking at the results. Min-score 3
+is worse; min-score 6 barely trades at all.
 Why: entries fire on the *first* hour below -10%, so at entry,
 persistence is mechanically low and extremity is usually just past the
-threshold — the mean entry score across the 166 baseline trades is
-3.03 (median 2.93). A threshold of 6 was miscalibrated. Per-trade
-quality does rise with score (win rate 56% → 72% at score ≥ 4), but
+threshold — the mean entry score across the 164 baseline trades is
+3.04 (median 2.93). A threshold of 6 was miscalibrated. Per-trade
+quality does rise with score (win rate 56% → 69% at score ≥ 4), but
 not enough to beat the baseline on total return. **The unscored v0.2
 setup stays the default.** The scorer is a ranking/evaluation tool for
 the live scan, not a validated entry filter.
 
 ### Honest finding
 
-Across all 166 trades, funding income was only **$0.10–$0.25 per coin**.
+Across all 164 trades, funding income was only **$0.10–$0.25 per coin**.
 The PnL came from price moves. Extreme funding is a 1-hour spike that
 normalizes right after entry — at 1x this is a **positioning /
 mean-reversion signal**, not a carry harvest. Real funding harvest needs

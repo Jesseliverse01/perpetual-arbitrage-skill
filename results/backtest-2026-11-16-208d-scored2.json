@@ -18,14 +18,15 @@
       "coin": "BTC",
       "trades": 30,
       "win_rate": 0.5,
-      "total_pnl_usd": 2.78,
-      "return_pct": 2.78,
-      "profit_factor": 1.29,
-      "sharpe_per_trade": 0.48,
-      "max_drawdown_pct": 2.62,
-      "avg_hours": 7.6,
-      "funding_pnl_usd": 0.17,
-      "price_pnl_usd": 4.71,
+      "total_pnl_usd": 2.64,
+      "return_pct": 2.64,
+      "profit_factor": 1.27,
+      "sharpe_per_trade": 0.08,
+      "t_stat": 0.45,
+      "max_drawdown_pct": 2.63,
+      "avg_hours": 7.5,
+      "funding_pnl_usd": 0.16,
+      "price_pnl_usd": 4.58,
       "exit_reasons": {
         "funding_flip": 29,
         "stoploss": 0,
@@ -34,22 +35,32 @@
       "signals_seen": 33,
       "signals_taken": 30,
       "signals_filtered": 3,
-      "avg_entry_score": 2.94,
+      "avg_entry_score": 2.99,
       "trade_list": [
         {
           "coin": "BTC",
           "side": "long",
-          "entry_time": 1776877200000,
+          "entry_time": 1776888000000,
           "exit_time": 1776906000000,
-          "entry_price": 78688.0,
+          "entry_price": 78798.0,
           "exit_price": 78383.0,
-          "entry_score": 2.91,
-          "hours": 8,
+          "entry_score": 4.64,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence"
+          ],
+          "entry_score_missing": [
+            "trend_alignment",
+            "liquidity",
+            "volatility",
+            "cross_venue_spread"
+          ],
+          "hours": 5,
           "reason": "funding_flip",
-          "price_pnl": -0.3876,
-          "funding_pnl": 0.0073,
+          "price_pnl": -0.5267,
+          "funding_pnl": 0.004,
           "fees": 0.07,
-          "pnl": -0.4503
+          "pnl": -0.5926
         },
         {
           "coin": "BTC",
@@ -59,6 +70,16 @@
           "entry_price": 76834.0,
           "exit_price": 75916.0,
           "entry_score": 2.66,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": -1.1948,
@@ -74,6 +95,16 @@
           "entry_price": 76995.0,
           "exit_price": 76541.0,
           "entry_score": 3.45,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 6,
           "reason": "funding_flip",
           "price_pnl": -0.5896,
@@ -89,6 +120,16 @@
           "entry_price": 76201.0,
           "exit_price": 77095.0,
           "entry_score": 2.58,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 10,
           "reason": "funding_flip",
           "price_pnl": 1.1732,
@@ -104,6 +145,16 @@
           "entry_price": 78170.0,
           "exit_price": 78184.0,
           "entry_score": 3.25,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 15,
           "reason": "funding_flip",
           "price_pnl": 0.0179,
@@ -119,6 +170,16 @@
           "entry_price": 80330.0,
           "exit_price": 80867.0,
           "entry_score": 3.14,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 11,
           "reason": "funding_flip",
           "price_pnl": 0.6685,
@@ -134,6 +195,16 @@
           "entry_price": 81215.0,
           "exit_price": 81465.0,
           "entry_score": 3.01,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": 0.3078,
@@ -149,6 +220,16 @@
           "entry_price": 81811.0,
           "exit_price": 81794.0,
           "entry_score": 3.49,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.0208,
@@ -164,6 +245,16 @@
           "entry_price": 79208.0,
           "exit_price": 79732.0,
           "entry_score": 2.65,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.6615,
@@ -179,6 +270,16 @@
           "entry_price": 81616.0,
           "exit_price": 81088.0,
           "entry_score": 3.26,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 8,
           "reason": "funding_flip",
           "price_pnl": -0.6469,
@@ -194,6 +295,16 @@
           "entry_price": 78921.0,
           "exit_price": 78198.0,
           "entry_score": 2.52,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 18,
           "reason": "funding_flip",
           "price_pnl": -0.9161,
@@ -209,6 +320,16 @@
           "entry_price": 74643.0,
           "exit_price": 77258.0,
           "entry_score": 3.24,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 12,
           "reason": "funding_flip",
           "price_pnl": 3.5033,
@@ -224,6 +345,16 @@
           "entry_price": 77068.0,
           "exit_price": 77311.0,
           "entry_score": 3.47,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 24,
           "reason": "timeout",
           "price_pnl": 0.3153,
@@ -239,6 +370,16 @@
           "entry_price": 77072.0,
           "exit_price": 77144.0,
           "entry_score": 3.11,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 13,
           "reason": "funding_flip",
           "price_pnl": 0.0934,
@@ -254,6 +395,16 @@
           "entry_price": 75707.0,
           "exit_price": 76050.0,
           "entry_score": 3.44,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.4531,
@@ -269,6 +420,16 @@
           "entry_price": 75522.0,
           "exit_price": 75858.0,
           "entry_score": 3.39,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 6,
           "reason": "funding_flip",
           "price_pnl": 0.4449,
@@ -284,6 +445,16 @@
           "entry_price": 64247.0,
           "exit_price": 63961.0,
           "entry_score": 2.46,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.4452,
@@ -299,6 +470,16 @@
           "entry_price": 63777.0,
           "exit_price": 62663.0,
           "entry_score": 2.49,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -1.7467,
@@ -314,6 +495,16 @@
           "entry_price": 64161.0,
           "exit_price": 64576.0,
           "entry_score": 2.73,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 13,
           "reason": "funding_flip",
           "price_pnl": 0.6468,
@@ -329,6 +520,16 @@
           "entry_price": 59438.0,
           "exit_price": 59466.0,
           "entry_score": 2.85,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 0.0471,
@@ -344,6 +545,16 @@
           "entry_price": 58518.0,
           "exit_price": 60025.0,
           "entry_score": 2.36,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 2.5753,
@@ -359,6 +570,16 @@
           "entry_price": 60211.0,
           "exit_price": 59283.0,
           "entry_score": 2.63,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -1.5412,
@@ -374,6 +595,16 @@
           "entry_price": 65100.0,
           "exit_price": 65348.0,
           "entry_score": 3.53,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.381,
@@ -389,6 +620,16 @@
           "entry_price": 66806.0,
           "exit_price": 66189.0,
           "entry_score": 2.93,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.9236,
@@ -404,6 +645,16 @@
           "entry_price": 64275.0,
           "exit_price": 64172.0,
           "entry_score": 3.11,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 15,
           "reason": "funding_flip",
           "price_pnl": -0.1602,
@@ -419,6 +670,16 @@
           "entry_price": 78908.0,
           "exit_price": 78869.0,
           "entry_score": 2.5,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": -0.0494,
@@ -434,6 +695,16 @@
           "entry_price": 77314.0,
           "exit_price": 77299.0,
           "entry_score": 2.28,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.0194,
@@ -449,6 +720,16 @@
           "entry_price": 76767.0,
           "exit_price": 77186.0,
           "entry_score": 2.59,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": 0.5458,
@@ -464,6 +745,16 @@
           "entry_price": 82913.0,
           "exit_price": 83869.0,
           "entry_score": 2.63,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 15,
           "reason": "funding_flip",
           "price_pnl": 1.153,
@@ -479,6 +770,16 @@
           "entry_price": 80382.0,
           "exit_price": 80678.0,
           "entry_score": 3.45,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": 0.3682,
@@ -487,7 +788,7 @@
           "pnl": 0.2989
         }
       ],
-      "buy_and_hold_pct": -14.94
+      "buy_and_hold_pct": -17.84
     },
     "ETH": {
       "coin": "ETH",
@@ -496,8 +797,9 @@
       "total_pnl_usd": 16.22,
       "return_pct": 16.22,
       "profit_factor": 2.38,
-      "sharpe_per_trade": 1.52,
-      "max_drawdown_pct": 6.05,
+      "sharpe_per_trade": 0.27,
+      "t_stat": 1.52,
+      "max_drawdown_pct": 6.06,
       "avg_hours": 6.4,
       "funding_pnl_usd": 0.23,
       "price_pnl_usd": 18.3,
@@ -509,7 +811,7 @@
       "signals_seen": 41,
       "signals_taken": 33,
       "signals_filtered": 8,
-      "avg_entry_score": 2.95,
+      "avg_entry_score": 2.96,
       "trade_list": [
         {
           "coin": "ETH",
@@ -518,7 +820,17 @@
           "exit_time": 1776956400000,
           "entry_price": 2315.4,
           "exit_price": 2333.0,
-          "entry_score": 2.33,
+          "entry_score": 2.6,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": 0.7601,
@@ -534,6 +846,16 @@
           "entry_price": 2307.4,
           "exit_price": 2307.8,
           "entry_score": 2.93,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.0173,
@@ -549,6 +871,16 @@
           "entry_price": 2315.7,
           "exit_price": 2322.7,
           "entry_score": 2.88,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.3023,
@@ -564,6 +896,16 @@
           "entry_price": 2276.3,
           "exit_price": 2275.4,
           "entry_score": 2.77,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": -0.0395,
@@ -579,6 +921,16 @@
           "entry_price": 2359.3,
           "exit_price": 2370.1,
           "entry_score": 2.43,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": 0.4578,
@@ -594,6 +946,16 @@
           "entry_price": 2029.8,
           "exit_price": 2145.4,
           "entry_score": 2.04,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 8,
           "reason": "funding_flip",
           "price_pnl": 5.6951,
@@ -609,6 +971,16 @@
           "entry_price": 2115.7,
           "exit_price": 2116.1,
           "entry_score": 2.66,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.0189,
@@ -624,6 +996,16 @@
           "entry_price": 2096.9,
           "exit_price": 2115.0,
           "entry_score": 2.43,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": 0.8632,
@@ -639,6 +1021,16 @@
           "entry_price": 1582.4,
           "exit_price": 1593.3,
           "entry_score": 2.44,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.6888,
@@ -654,6 +1046,16 @@
           "entry_price": 1521.3,
           "exit_price": 1559.3,
           "entry_score": 2.54,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 2.4979,
@@ -669,6 +1071,16 @@
           "entry_price": 1628.8,
           "exit_price": 1671.8,
           "entry_score": 3.07,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 2.64,
@@ -684,6 +1096,16 @@
           "entry_price": 1685.6,
           "exit_price": 1668.2,
           "entry_score": 3.24,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 8,
           "reason": "funding_flip",
           "price_pnl": -1.0323,
@@ -699,6 +1121,16 @@
           "entry_price": 1638.5,
           "exit_price": 1625.2,
           "entry_score": 2.14,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": -0.8117,
@@ -714,6 +1146,16 @@
           "entry_price": 1641.2,
           "exit_price": 1629.3,
           "entry_score": 3.14,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.7251,
@@ -729,6 +1171,16 @@
           "entry_price": 1661.0,
           "exit_price": 1679.3,
           "entry_score": 2.31,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 1.1017,
@@ -744,6 +1196,16 @@
           "entry_price": 1647.1,
           "exit_price": 1658.6,
           "entry_score": 3.15,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 8,
           "reason": "funding_flip",
           "price_pnl": 0.6982,
@@ -759,6 +1221,16 @@
           "entry_price": 1558.9,
           "exit_price": 1620.2,
           "entry_score": 2.73,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 9,
           "reason": "funding_flip",
           "price_pnl": 3.9323,
@@ -774,6 +1246,16 @@
           "entry_price": 1567.6,
           "exit_price": 1559.0,
           "entry_score": 3.21,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 24,
           "reason": "timeout",
           "price_pnl": -0.5486,
@@ -789,6 +1271,16 @@
           "entry_price": 1569.9,
           "exit_price": 1593.0,
           "entry_score": 3.94,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 22,
           "reason": "funding_flip",
           "price_pnl": 1.4714,
@@ -804,6 +1296,16 @@
           "entry_price": 1573.7,
           "exit_price": 1572.4,
           "entry_score": 3.58,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 24,
           "reason": "timeout",
           "price_pnl": -0.0826,
@@ -819,6 +1321,16 @@
           "entry_price": 1567.7,
           "exit_price": 1572.4,
           "entry_score": 4.85,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": 0.2998,
@@ -834,6 +1346,16 @@
           "entry_price": 1909.4,
           "exit_price": 1915.1,
           "entry_score": 4.12,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.2985,
@@ -849,6 +1371,16 @@
           "entry_price": 1932.1,
           "exit_price": 1970.0,
           "entry_score": 3.27,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.9616,
@@ -864,6 +1396,16 @@
           "entry_price": 2460.2,
           "exit_price": 2467.2,
           "entry_score": 2.46,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.2845,
@@ -879,6 +1421,16 @@
           "entry_price": 2395.9,
           "exit_price": 2404.7,
           "entry_score": 2.19,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.3673,
@@ -894,6 +1446,16 @@
           "entry_price": 2509.0,
           "exit_price": 2499.8,
           "entry_score": 3.97,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 6,
           "reason": "funding_flip",
           "price_pnl": -0.3667,
@@ -909,6 +1471,16 @@
           "entry_price": 2445.6,
           "exit_price": 2463.2,
           "entry_score": 3.34,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.7197,
@@ -924,6 +1496,16 @@
           "entry_price": 2367.0,
           "exit_price": 2369.6,
           "entry_score": 2.53,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.1098,
@@ -939,6 +1521,16 @@
           "entry_price": 2272.2,
           "exit_price": 2228.8,
           "entry_score": 2.17,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 12,
           "reason": "funding_flip",
           "price_pnl": -1.91,
@@ -954,6 +1546,16 @@
           "entry_price": 2126.9,
           "exit_price": 2122.6,
           "entry_score": 3.18,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 10,
           "reason": "funding_flip",
           "price_pnl": -0.2022,
@@ -969,12 +1571,22 @@
           "entry_price": 1852.8,
           "exit_price": 1760.1599999999999,
           "entry_score": 2.23,
-          "hours": 7,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
+          "hours": 6,
           "reason": "stoploss",
           "price_pnl": -5.0,
-          "funding_pnl": 0.0098,
+          "funding_pnl": 0.0066,
           "fees": 0.07,
-          "pnl": -5.0602
+          "pnl": -5.0634
         },
         {
           "coin": "ETH",
@@ -984,6 +1596,16 @@
           "entry_price": 1743.3,
           "exit_price": 1815.0,
           "entry_score": 3.85,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 4.1129,
@@ -999,6 +1621,16 @@
           "entry_price": 1835.0,
           "exit_price": 1829.8,
           "entry_score": 3.28,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.2834,
@@ -1007,75 +1639,31 @@
           "pnl": -0.3541
         }
       ],
-      "buy_and_hold_pct": -22.05
+      "buy_and_hold_pct": -24.29
     },
     "HYPE": {
       "coin": "HYPE",
-      "trades": 95,
-      "win_rate": 0.5789,
-      "total_pnl_usd": 25.46,
-      "return_pct": 25.46,
-      "profit_factor": 1.81,
-      "sharpe_per_trade": 2.17,
-      "max_drawdown_pct": 3.57,
+      "trades": 92,
+      "win_rate": 0.5761,
+      "total_pnl_usd": 23.63,
+      "return_pct": 23.63,
+      "profit_factor": 1.76,
+      "sharpe_per_trade": 0.21,
+      "t_stat": 2.02,
+      "max_drawdown_pct": 3.63,
       "avg_hours": 2.1,
       "funding_pnl_usd": 0.09,
-      "price_pnl_usd": 32.03,
+      "price_pnl_usd": 29.98,
       "exit_reasons": {
-        "funding_flip": 95,
+        "funding_flip": 92,
         "stoploss": 0,
         "timeout": 0
       },
-      "signals_seen": 105,
-      "signals_taken": 95,
-      "signals_filtered": 10,
-      "avg_entry_score": 3.35,
+      "signals_seen": 103,
+      "signals_taken": 92,
+      "signals_filtered": 11,
+      "avg_entry_score": 3.37,
       "trade_list": [
-        {
-          "coin": "HYPE",
-          "side": "long",
-          "entry_time": 1776852000000,
-          "exit_time": 1776855600000,
-          "entry_price": 40.515,
-          "exit_price": 40.998,
-          "entry_score": 3.02,
-          "hours": 1,
-          "reason": "funding_flip",
-          "price_pnl": 1.1922,
-          "funding_pnl": -0.0013,
-          "fees": 0.07,
-          "pnl": 1.1209
-        },
-        {
-          "coin": "HYPE",
-          "side": "long",
-          "entry_time": 1776873600000,
-          "exit_time": 1776877200000,
-          "entry_price": 40.971,
-          "exit_price": 40.9,
-          "entry_score": 3.23,
-          "hours": 1,
-          "reason": "funding_flip",
-          "price_pnl": -0.1733,
-          "funding_pnl": -0.0,
-          "fees": 0.07,
-          "pnl": -0.2433
-        },
-        {
-          "coin": "HYPE",
-          "side": "long",
-          "entry_time": 1776891600000,
-          "exit_time": 1776898800000,
-          "entry_price": 40.906,
-          "exit_price": 41.326,
-          "entry_score": 2.63,
-          "hours": 2,
-          "reason": "funding_flip",
-          "price_pnl": 1.0267,
-          "funding_pnl": -0.001,
-          "fees": 0.07,
-          "pnl": 0.9557
-        },
         {
           "coin": "HYPE",
           "side": "long",
@@ -1083,7 +1671,17 @@
           "exit_time": 1776920400000,
           "entry_price": 41.302,
           "exit_price": 40.994,
-          "entry_score": 2.87,
+          "entry_score": 3.27,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.7457,
@@ -1099,6 +1697,16 @@
           "entry_price": 40.958,
           "exit_price": 41.124,
           "entry_score": 3.02,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.4053,
@@ -1114,6 +1722,16 @@
           "entry_price": 41.644,
           "exit_price": 42.304,
           "entry_score": 4.48,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 1.5849,
@@ -1129,6 +1747,16 @@
           "entry_price": 40.342,
           "exit_price": 39.74,
           "entry_score": 4.05,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": -1.4922,
@@ -1144,6 +1772,16 @@
           "entry_price": 39.489,
           "exit_price": 39.546,
           "entry_score": 2.31,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.1443,
@@ -1159,6 +1797,16 @@
           "entry_price": 43.926,
           "exit_price": 44.296,
           "entry_score": 3.11,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.8423,
@@ -1174,6 +1822,16 @@
           "entry_price": 43.965,
           "exit_price": 44.194,
           "entry_score": 4.93,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 0.5209,
@@ -1189,6 +1847,16 @@
           "entry_price": 44.667,
           "exit_price": 43.862,
           "entry_score": 4.88,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -1.8022,
@@ -1204,6 +1872,16 @@
           "entry_price": 42.32,
           "exit_price": 42.218,
           "entry_score": 3.84,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.241,
@@ -1219,6 +1897,16 @@
           "entry_price": 42.176,
           "exit_price": 41.996,
           "entry_score": 3.75,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.4268,
@@ -1234,6 +1922,16 @@
           "entry_price": 42.589,
           "exit_price": 42.943,
           "entry_score": 4.98,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.8312,
@@ -1249,6 +1947,16 @@
           "entry_price": 42.895,
           "exit_price": 43.423,
           "entry_score": 4.29,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 1.2309,
@@ -1264,6 +1972,16 @@
           "entry_price": 45.685,
           "exit_price": 46.94,
           "entry_score": 3.81,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 2.7471,
@@ -1279,6 +1997,16 @@
           "entry_price": 45.981,
           "exit_price": 45.09,
           "entry_score": 4.4,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -1.9378,
@@ -1294,6 +2022,16 @@
           "entry_price": 47.55,
           "exit_price": 47.599,
           "entry_score": 4.26,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.103,
@@ -1309,6 +2047,16 @@
           "entry_price": 48.036,
           "exit_price": 47.751,
           "entry_score": 3.87,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.5933,
@@ -1324,6 +2072,16 @@
           "entry_price": 48.145,
           "exit_price": 48.008,
           "entry_score": 4.32,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.2846,
@@ -1339,6 +2097,16 @@
           "entry_price": 48.553,
           "exit_price": 48.944,
           "entry_score": 5.21,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.8053,
@@ -1354,6 +2122,16 @@
           "entry_price": 49.907,
           "exit_price": 51.323,
           "entry_score": 6.47,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 2.8373,
@@ -1369,6 +2147,16 @@
           "entry_price": 51.917,
           "exit_price": 54.193,
           "entry_score": 3.25,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": 4.3839,
@@ -1384,6 +2172,16 @@
           "entry_price": 55.592,
           "exit_price": 55.037,
           "entry_score": 2.36,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.9983,
@@ -1399,6 +2197,16 @@
           "entry_price": 60.0,
           "exit_price": 61.285,
           "entry_score": 2.87,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 2.1417,
@@ -1414,6 +2222,16 @@
           "entry_price": 63.706,
           "exit_price": 63.998,
           "entry_score": 4.89,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.4584,
@@ -1429,6 +2247,16 @@
           "entry_price": 63.083,
           "exit_price": 63.946,
           "entry_score": 2.59,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.368,
@@ -1444,6 +2272,16 @@
           "entry_price": 60.853,
           "exit_price": 61.441,
           "entry_score": 2.14,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.9663,
@@ -1459,6 +2297,16 @@
           "entry_price": 62.614,
           "exit_price": 63.313,
           "entry_score": 2.88,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.1164,
@@ -1474,6 +2322,16 @@
           "entry_price": 60.641,
           "exit_price": 60.014,
           "entry_score": 3.44,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -1.034,
@@ -1489,6 +2347,16 @@
           "entry_price": 62.487,
           "exit_price": 61.86,
           "entry_score": 5.11,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -1.0034,
@@ -1504,6 +2372,16 @@
           "entry_price": 59.395,
           "exit_price": 59.379,
           "entry_score": 3.65,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.0269,
@@ -1519,6 +2397,16 @@
           "entry_price": 57.869,
           "exit_price": 57.456,
           "entry_score": 3.22,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.7137,
@@ -1534,6 +2422,16 @@
           "entry_price": 66.784,
           "exit_price": 66.197,
           "entry_score": 3.63,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.879,
@@ -1549,6 +2447,16 @@
           "entry_price": 65.027,
           "exit_price": 65.585,
           "entry_score": 3.3,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.8581,
@@ -1564,6 +2472,16 @@
           "entry_price": 65.092,
           "exit_price": 64.58,
           "entry_score": 4.55,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.7866,
@@ -1579,6 +2497,16 @@
           "entry_price": 65.662,
           "exit_price": 66.029,
           "entry_score": 2.83,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.5589,
@@ -1594,6 +2522,16 @@
           "entry_price": 66.596,
           "exit_price": 67.494,
           "entry_score": 4.2,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.3484,
@@ -1609,6 +2547,16 @@
           "entry_price": 58.815,
           "exit_price": 59.183,
           "entry_score": 2.96,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 0.6257,
@@ -1624,6 +2572,16 @@
           "entry_price": 58.031,
           "exit_price": 58.646,
           "entry_score": 2.61,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.0598,
@@ -1639,6 +2597,16 @@
           "entry_price": 60.102,
           "exit_price": 59.891,
           "entry_score": 4.33,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.3511,
@@ -1654,6 +2622,16 @@
           "entry_price": 63.587,
           "exit_price": 65.329,
           "entry_score": 4.49,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 2.7396,
@@ -1669,6 +2647,16 @@
           "entry_price": 67.734,
           "exit_price": 67.4,
           "entry_score": 2.23,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 10,
           "reason": "funding_flip",
           "price_pnl": -0.4931,
@@ -1684,6 +2672,16 @@
           "entry_price": 67.342,
           "exit_price": 65.955,
           "entry_score": 3.17,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -2.0596,
@@ -1699,6 +2697,16 @@
           "entry_price": 67.497,
           "exit_price": 67.981,
           "entry_score": 3.22,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.7171,
@@ -1714,6 +2722,16 @@
           "entry_price": 66.7,
           "exit_price": 67.305,
           "entry_score": 3.75,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.907,
@@ -1729,6 +2747,16 @@
           "entry_price": 59.533,
           "exit_price": 60.196,
           "entry_score": 2.34,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 1.1137,
@@ -1744,6 +2772,16 @@
           "entry_price": 60.756,
           "exit_price": 60.836,
           "entry_score": 3.3,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.1317,
@@ -1759,6 +2797,16 @@
           "entry_price": 60.097,
           "exit_price": 60.257,
           "entry_score": 2.17,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.2662,
@@ -1774,6 +2822,16 @@
           "entry_price": 57.227,
           "exit_price": 57.346,
           "entry_score": 3.16,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.2079,
@@ -1789,6 +2847,16 @@
           "entry_price": 57.047,
           "exit_price": 57.49,
           "entry_score": 2.92,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.7766,
@@ -1804,6 +2872,16 @@
           "entry_price": 56.7,
           "exit_price": 56.91,
           "entry_score": 2.26,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.3704,
@@ -1819,6 +2897,16 @@
           "entry_price": 54.064,
           "exit_price": 53.962,
           "entry_score": 2.2,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.1887,
@@ -1834,6 +2922,16 @@
           "entry_price": 54.619,
           "exit_price": 54.595,
           "entry_score": 2.58,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.0439,
@@ -1849,6 +2947,16 @@
           "entry_price": 58.502,
           "exit_price": 58.37,
           "entry_score": 3.06,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.2256,
@@ -1864,6 +2972,16 @@
           "entry_price": 81.827,
           "exit_price": 81.881,
           "entry_score": 2.31,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.066,
@@ -1879,6 +2997,16 @@
           "entry_price": 79.808,
           "exit_price": 81.094,
           "entry_score": 2.54,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 1.6114,
@@ -1894,6 +3022,16 @@
           "entry_price": 81.532,
           "exit_price": 81.836,
           "entry_score": 3.1,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.3729,
@@ -1909,6 +3047,16 @@
           "entry_price": 81.376,
           "exit_price": 81.885,
           "entry_score": 2.59,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 6,
           "reason": "funding_flip",
           "price_pnl": 0.6255,
@@ -1924,6 +3072,16 @@
           "entry_price": 81.509,
           "exit_price": 82.11,
           "entry_score": 2.62,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.7373,
@@ -1939,6 +3097,16 @@
           "entry_price": 85.121,
           "exit_price": 85.674,
           "entry_score": 2.61,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.6497,
@@ -1954,6 +3122,16 @@
           "entry_price": 86.552,
           "exit_price": 86.298,
           "entry_score": 2.75,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -0.2935,
@@ -1969,6 +3147,16 @@
           "entry_price": 84.975,
           "exit_price": 85.67,
           "entry_score": 2.51,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.8179,
@@ -1984,6 +3172,16 @@
           "entry_price": 80.864,
           "exit_price": 80.153,
           "entry_score": 3.23,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.8793,
@@ -1999,6 +3197,16 @@
           "entry_price": 78.911,
           "exit_price": 78.72,
           "entry_score": 2.45,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.242,
@@ -2014,6 +3222,16 @@
           "entry_price": 79.017,
           "exit_price": 78.752,
           "entry_score": 3.73,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": -0.3354,
@@ -2029,6 +3247,16 @@
           "entry_price": 79.733,
           "exit_price": 79.612,
           "entry_score": 3.7,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.1518,
@@ -2044,6 +3272,16 @@
           "entry_price": 78.727,
           "exit_price": 77.902,
           "entry_score": 2.45,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": -1.0479,
@@ -2059,6 +3297,16 @@
           "entry_price": 78.05,
           "exit_price": 78.878,
           "entry_score": 3.93,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.0609,
@@ -2074,6 +3322,16 @@
           "entry_price": 80.335,
           "exit_price": 80.199,
           "entry_score": 2.94,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.1693,
@@ -2089,6 +3347,16 @@
           "entry_price": 79.721,
           "exit_price": 79.193,
           "entry_score": 3.09,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.6623,
@@ -2104,6 +3372,16 @@
           "entry_price": 85.348,
           "exit_price": 86.512,
           "entry_score": 4.17,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.3638,
@@ -2119,6 +3397,16 @@
           "entry_price": 87.7,
           "exit_price": 90.252,
           "entry_score": 4.85,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 2.9099,
@@ -2134,6 +3422,16 @@
           "entry_price": 86.402,
           "exit_price": 88.158,
           "entry_score": 2.69,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 3,
           "reason": "funding_flip",
           "price_pnl": 2.0324,
@@ -2149,6 +3447,16 @@
           "entry_price": 89.998,
           "exit_price": 90.085,
           "entry_score": 3.49,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.0967,
@@ -2164,6 +3472,16 @@
           "entry_price": 90.214,
           "exit_price": 90.643,
           "entry_score": 3.71,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.4755,
@@ -2179,6 +3497,16 @@
           "entry_price": 91.677,
           "exit_price": 91.808,
           "entry_score": 2.3,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.1429,
@@ -2194,6 +3522,16 @@
           "entry_price": 91.576,
           "exit_price": 91.925,
           "entry_score": 3.74,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.3811,
@@ -2209,6 +3547,16 @@
           "entry_price": 87.339,
           "exit_price": 88.621,
           "entry_score": 4.35,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 7,
           "reason": "funding_flip",
           "price_pnl": 1.4678,
@@ -2224,6 +3572,16 @@
           "entry_price": 85.562,
           "exit_price": 84.96,
           "entry_score": 3.81,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.7036,
@@ -2239,6 +3597,16 @@
           "entry_price": 85.803,
           "exit_price": 85.577,
           "entry_score": 3.82,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.2634,
@@ -2254,6 +3622,16 @@
           "entry_price": 78.796,
           "exit_price": 79.038,
           "entry_score": 2.45,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.3071,
@@ -2269,6 +3647,16 @@
           "entry_price": 80.577,
           "exit_price": 78.872,
           "entry_score": 2.8,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 5,
           "reason": "funding_flip",
           "price_pnl": -2.116,
@@ -2284,6 +3672,16 @@
           "entry_price": 77.668,
           "exit_price": 78.274,
           "entry_score": 2.48,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.7802,
@@ -2299,6 +3697,16 @@
           "entry_price": 76.447,
           "exit_price": 77.162,
           "entry_score": 4.43,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 4,
           "reason": "funding_flip",
           "price_pnl": 0.9353,
@@ -2314,6 +3722,16 @@
           "entry_price": 75.34,
           "exit_price": 75.208,
           "entry_score": 2.58,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.1752,
@@ -2329,6 +3747,16 @@
           "entry_price": 80.006,
           "exit_price": 78.736,
           "entry_score": 2.46,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -1.5874,
@@ -2344,6 +3772,16 @@
           "entry_price": 74.124,
           "exit_price": 74.443,
           "entry_score": 4.15,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 0.4304,
@@ -2359,6 +3797,16 @@
           "entry_price": 72.548,
           "exit_price": 73.939,
           "entry_score": 2.15,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 1.9174,
@@ -2374,6 +3822,16 @@
           "entry_price": 75.996,
           "exit_price": 75.005,
           "entry_score": 3.61,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 6,
           "reason": "funding_flip",
           "price_pnl": -1.304,
@@ -2389,6 +3847,16 @@
           "entry_price": 63.49,
           "exit_price": 66.059,
           "entry_score": 2.59,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": 4.0463,
@@ -2404,6 +3872,16 @@
           "entry_price": 65.497,
           "exit_price": 64.917,
           "entry_score": 2.97,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.8855,
@@ -2419,6 +3897,16 @@
           "entry_price": 68.317,
           "exit_price": 67.954,
           "entry_score": 2.68,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": -0.5313,
@@ -2434,6 +3922,16 @@
           "entry_price": 67.344,
           "exit_price": 66.857,
           "entry_score": 3.94,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 2,
           "reason": "funding_flip",
           "price_pnl": -0.7232,
@@ -2449,6 +3947,16 @@
           "entry_price": 66.496,
           "exit_price": 67.15,
           "entry_score": 2.28,
+          "entry_score_dims": [
+            "funding_extremity",
+            "persistence",
+            "trend_alignment",
+            "volatility"
+          ],
+          "entry_score_missing": [
+            "liquidity",
+            "cross_venue_spread"
+          ],
           "hours": 1,
           "reason": "funding_flip",
           "price_pnl": 0.9835,
@@ -2457,7 +3965,7 @@
           "pnl": 0.9123
         }
       ],
-      "buy_and_hold_pct": 68.14
+      "buy_and_hold_pct": 63.71
     }
   },
   "scoring": {
@@ -2472,6 +3980,6 @@
       "liquidity",
       "cross_venue_spread"
     ],
-    "note": "Score computed point-in-time at each entry decision from data up to that hour only (no lookahead). Liquidity and cross-venue need data that does not exist historically, so they are dropped and the remaining weights renormalize (see scripts/score.py)."
+    "note": "Score computed point-in-time at each entry decision from data up to that hour only (no lookahead). Liquidity and cross-venue need data that does not exist historically, so they are dropped and the remaining weights renormalize (see scripts/score.py). Because the liquidity dimension is dropped, the liquidity gate (cap at 4.0 for zero-liquidity signals) never applies in backtest mode, and the scored backtest (BTC/ETH/HYPE only) does not validate the trap filter for illiquid coins. Each scored trade records entry_score_dims and entry_score_missing so a score can be traced to the dimensions behind it."
   }
 }

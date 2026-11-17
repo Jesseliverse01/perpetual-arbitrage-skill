@@ -12,7 +12,12 @@ BTC/ETH/HYPE, $100 notional 1x, 166 trades, +$43.52 combined):
     as defaults.
 
 Funding APR = hourly funding rate * 24 * 365. While in a position, each hour
-accrues funding = -funding_rate * notional (long). Fees: 0.035% taker/side.
+accrues funding = -funding_rate * notional (long). A stop-loss exit collects
+no funding for the exit hour (the stop fires intrabar, before the hour-end
+payment); funding-flip and timeout exits collect it (they close at the hour
+end). Fees: 0.035% taker/side. Sharpe is the plain per-trade mean/std;
+t_stat is the sqrt(N)-scaled value. 2026-11-17 audit fixes: funding-accrual
+order on stop exits, Sharpe definition, per-trade score dimensions.
 
 Data: fundingHistory (500 rows/page, paginated) + candleSnapshot 1h
 (max ~5,000 candles, ~208 days). Funding row `time` is the payment time at
@@ -117,6 +122,8 @@ def simulate(coin, candles, funding_by_close, notional=100.0,
         if pos is None:
             if side in ("long", "both") and apr < entry_apr:
                 entry_score = None
+                entry_score_dims = None
+                entry_score_missing = None
                 if min_score is not None:
                     # Score gate (long entries only): 4 dimensions that
                     # Hyperliquid history can supply. Liquidity and
@@ -129,31 +136,43 @@ def simulate(coin, candles, funding_by_close, notional=100.0,
                         "lows": low_hist[-24:],
                     })
                     entry_score = res["score"]
+                    entry_score_dims = sorted(res["dimensions"].keys())
+                    entry_score_missing = res["missing"]
                     signals_seen += 1
                     if entry_score < min_score:
                         signals_filtered += 1
                         continue
                     signals_taken += 1
                 pos = {"side": 1, "entry": close, "t0": t + HOUR,
-                       "funding": 0.0, "hours": 0, "entry_score": entry_score}
+                       "funding": 0.0, "hours": 0, "entry_score": entry_score,
+                       "entry_score_dims": entry_score_dims,
+                       "entry_score_missing": entry_score_missing}
             elif side in ("short", "both") and apr > short_entry_apr:
                 pos = {"side": -1, "entry": close, "t0": t + HOUR,
                        "funding": 0.0, "hours": 0, "entry_score": None}
             continue
         s = pos["side"]
-        pos["funding"] += -s * rate * notional
-        pos["hours"] += 1
         exit_price, reason = None, None
+        # Stop first: it fires intrabar, before the hour-end funding
+        # payment, so a stop exit collects no funding for this hour.
+        # (Before this fix the exit hour's funding was accrued first;
+        # that over-credited the 2 stop exits in the 208d run by
+        # ~$0.014 total.)
         if s == 1 and cd["l"] <= pos["entry"] * (1 - stop_pct):
             exit_price, reason = pos["entry"] * (1 - stop_pct), "stoploss"
         elif s == -1 and cd["h"] >= pos["entry"] * (1 + stop_pct):
             exit_price, reason = pos["entry"] * (1 + stop_pct), "stoploss"
-        elif s == 1 and apr >= exit_apr:
-            exit_price, reason = close, "funding_flip"
-        elif s == -1 and apr <= -exit_apr:
-            exit_price, reason = close, "funding_flip"
-        elif pos["hours"] >= timeout_h:
-            exit_price, reason = close, "timeout"
+        if exit_price is None:
+            # Still holding through the hour end: accrue this hour's
+            # funding, then check the close-based exits.
+            pos["funding"] += -s * rate * notional
+            pos["hours"] += 1
+            if s == 1 and apr >= exit_apr:
+                exit_price, reason = close, "funding_flip"
+            elif s == -1 and apr <= -exit_apr:
+                exit_price, reason = close, "funding_flip"
+            elif pos["hours"] >= timeout_h:
+                exit_price, reason = close, "timeout"
         if exit_price is None:
             continue
         price_pnl = s * (exit_price - pos["entry"]) / pos["entry"] * notional
@@ -167,6 +186,8 @@ def simulate(coin, candles, funding_by_close, notional=100.0,
             "entry_time": pos["t0"], "exit_time": t + HOUR,
             "entry_price": pos["entry"], "exit_price": exit_price,
             "entry_score": pos.get("entry_score"),
+            "entry_score_dims": pos.get("entry_score_dims"),
+            "entry_score_missing": pos.get("entry_score_missing"),
             "hours": pos["hours"], "reason": reason,
             "price_pnl": round(price_pnl, 4), "funding_pnl": round(pos["funding"], 4),
             "fees": round(fees, 4), "pnl": round(pnl, 4),
@@ -179,11 +200,17 @@ def simulate(coin, candles, funding_by_close, notional=100.0,
     gross_loss = -sum(t["pnl"] for t in losses)
     rets = [t["pnl"] / notional for t in trades]
     sharpe = None
+    t_stat = None
     if len(rets) > 1:
         mean = sum(rets) / len(rets)
         var = sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)
         if var > 0:
-            sharpe = mean / math.sqrt(var) * math.sqrt(len(rets))
+            # Plain per-trade Sharpe (mean/std, no scaling). The old
+            # formula multiplied by sqrt(N trades), which is the
+            # t-statistic of the mean, not a Sharpe ratio; it is kept
+            # under its correct name below.
+            sharpe = mean / math.sqrt(var)
+            t_stat = sharpe * math.sqrt(len(rets))
     return {
         "coin": coin, "trades": len(trades),
         "win_rate": round(len(wins) / len(trades), 4) if trades else None,
@@ -191,6 +218,7 @@ def simulate(coin, candles, funding_by_close, notional=100.0,
         "return_pct": round(total / notional * 100, 2),
         "profit_factor": round(gross_win / gross_loss, 2) if gross_loss else None,
         "sharpe_per_trade": round(sharpe, 2) if sharpe is not None else None,
+        "t_stat": round(t_stat, 2) if t_stat is not None else None,
         "max_drawdown_pct": round(max_dd * 100, 2),
         "avg_hours": round(sum(t["hours"] for t in trades) / len(trades), 1) if trades else None,
         "funding_pnl_usd": round(sum(t["funding_pnl"] for t in trades), 2),
@@ -251,7 +279,15 @@ def main():
                     "from data up to that hour only (no lookahead). "
                     "Liquidity and cross-venue need data that does not "
                     "exist historically, so they are dropped and the "
-                    "remaining weights renormalize (see scripts/score.py).",
+                    "remaining weights renormalize (see scripts/score.py). "
+                    "Because the liquidity dimension is dropped, the "
+                    "liquidity gate (cap at 4.0 for zero-liquidity "
+                    "signals) never applies in backtest mode, and the "
+                    "scored backtest (BTC/ETH/HYPE only) does not "
+                    "validate the trap filter for illiquid coins. Each "
+                    "scored trade records entry_score_dims and "
+                    "entry_score_missing so a score can be traced to the "
+                    "dimensions behind it.",
         }
     for coin in args.coins:
         print(f"[{coin}] fetching funding + candles ...", flush=True)

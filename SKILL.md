@@ -287,10 +287,17 @@ Funding on Hyperliquid is paid **hourly**; APR = hourly rate x 24 x 365.
 
 | Coin | Trades | Win | PnL | Return | Max DD | Buy & hold |
 |---|---|---|---|---|---|---|
-| BTC | 31 | 51.6% | +$2.69 | +2.69% | 2.61% | -17.6% |
-| ETH | 36 | 55.6% | +$11.97 | +11.97% | 7.61% | -24.8% |
-| HYPE | 99 | 57.6% | +$28.86 | +28.86% | 4.19% | +63.6% |
-| **Combined** | **166** | — | **+$43.52** | **+14.51% on $300** | — | — |
+| BTC | 31 | 51.6% | +$2.55 | +2.55% | 2.61% | -17.6% |
+| ETH | 36 | 55.6% | +$11.96 | +11.96% | 7.61% | -24.8% |
+| HYPE | 97 | 57.7% | +$27.98 | +27.98% | 4.22% | +63.6% |
+| **Combined** | **164** | — | **+$42.49** | **+14.16% on $300** | — | — |
+
+The baseline was re-fetched 2026-11-17 with the fixed code; the
+previous run was +$43.52 on 166 trades. The $1.03 move is almost
+entirely data drift at the window edges, not the fix: two HYPE trades
+at the window start no longer fire in the re-fetched data (-$0.88),
+one BTC entry shifted three hours (-$0.14), and the stop-loss funding
+fix itself accounts for only about $0.006 (the two ETH stop trades).
 
 It beat buy-and-hold on BTC and ETH (positive while buy-and-hold
 lost 18–25%). But it **lagged HYPE's +63.6% rally** — it is out of the
@@ -303,20 +310,20 @@ strong uptrends.
 2026-07-19 -> 2026-11-16) and validated the top 3 on window B (88d,
 2026-04-22 -> 2026-07-19). Results in `results/sweep-2026-11-16.json`.
 
-- **Stricter entry (-20%) looks better on A (+$8.81 vs +$8.29) but loses
-  out-of-sample (B: +$24.61 vs +$35.23) and combined ($33.42 vs $43.52).**
+- **Stricter entry (-20%) looks better on A (+$8.81 vs +$8.28) but loses
+  out-of-sample (B: +$24.61 vs +$35.37) and combined ($33.42 vs $43.65).**
   It is overfitting to window A — do not use it. The -10% default is the
   safer choice.
 - **The short side hurts.** Every "both" combo underperformed its
-  long-only twin (e.g. -10% both +$5.91 vs long +$8.29 on A). Shorting
+  long-only twin (e.g. -10% both +$5.88 vs long +$8.28 on A). Shorting
   into +30% funding gets squeezed. Long-only is the default.
-- **-30% entry is worse** (best +$4.92 on A) and **late exits (-5%) hurt**
-  (worst combo -$7.95 on A).
+- **-30% entry is worse** (best +$4.85 on A) and **late exits (-5%) hurt**
+  (worst combo -$7.99 on A).
 - **Timeout 24h vs 48h is identical** — exits are always funding flips.
 
 ### Honest finding — the money is NOT from funding
 
-Across all 166 trades, funding income was only **$0.10–$0.25 per coin**.
+Across all 164 trades, funding income was only **$0.10–$0.25 per coin**.
 The PnL came from price moves. Here is why: extreme funding is a
 1-hour spike that normalizes right after entry. So at 1x, this is
 really a **positioning / mean-reversion signal** — buy the dip when
@@ -338,23 +345,32 @@ $100 1x):
 
 | Variant | Trades | PnL | Win | Signals seen | Filtered |
 |---|---|---|---|---|---|
-| **Baseline (unscored, v0.2)** | **166** | **+$43.52** | **56%** | — | — |
-| min-score 2 | 158 | +$44.46 | 57% | 179 | 21 |
-| min-score 3 | 100 | +$20.20 | 55% | 223 | 123 |
-| min-score 6 | 2 | +$8.00 | 100% | 385 | 383 |
+| **Baseline (unscored, v0.2)** | **164** | **+$42.49** | **56%** | — | — |
+| min-score 2 | 155 | +$42.49 | 57% | 177 | 22 |
+| min-score 3 | 98 | +$18.75 | 55% | 218 | 120 |
+| min-score 6 | 3 | +$7.94 | 67% | 381 | 378 |
 
-**The scorer does NOT improve total PnL.** Min-score 2 is +$0.94
-above baseline — noise, and the threshold was picked after looking
-at the results. Min-score 3 is worse; min-score 6 barely trades
-(2 trades: BTC 0, ETH 0, HYPE 2). Why: entries fire on the first
-hour below -10%, so the mean entry score across the 166 baseline
-trades is only **3.03** — a threshold of 6 was miscalibrated.
+**The scorer does NOT improve total PnL.** Min-score 2 now ties the
+baseline exactly (+$42.49 vs +$42.49) — no improvement at all, and
+the threshold was picked after looking at the results. Min-score 3
+is worse; min-score 6 barely trades (3 trades: BTC 1, ETH 0,
+HYPE 2). Why: entries fire on the first hour below -10%, so the mean
+entry score across the 164 baseline trades is only **3.04** — a
+threshold of 6 was miscalibrated.
 
 **Conclusion: the unscored setup stays the validated default.** The
 scorer is a **ranking/evaluation tool** for the live scan, not a
 validated entry filter. Do not use `--min-score` as a live filter
 without a fresh out-of-sample validation first. The diagnostic file
 with every baseline trade's entry score is `results/backtest-2026-11-16-208d-scored0.json`.
+
+Two limits of the scored backtest itself: the liquidity gate (cap at
+4.0 for zero-liquidity signals) never applies in backtest mode,
+because the liquidity dimension is dropped there — so the scored
+backtest cannot validate the trap filter for illiquid coins. Each
+scored trade now records `entry_score_dims` and
+`entry_score_missing`, so a score can be traced to the dimensions
+behind it.
 
 ---
 
@@ -820,10 +836,48 @@ not change the threshold: 70% stays.
 window (2026-04-22 → 2026-11-16), same parameters, same corrected
 script logic — only the universe is wider. Every coin listed as a
 perp on BOTH Hyperliquid and Lighter, exact symbol match: 97 in the
-intersection, 16 blacklisted and not run, 81 run. 62 coins traded;
-19 saw no signal pass the filters. Signals seen across all coins:
+intersection, 16 blacklisted and not run, 81 run. Of those 81, 6 had
+zero hours of data (AI, AI16Z, BNB, CASHCAT, LAUNCHCOIN, SOL), so 75
+coins actually had data; 62 traded, and the remaining 13 with data
+saw no signal pass the filters. Signals seen across all coins:
 305,734. Data coverage averages 4,146h of 4,992 per coin (some coins
 listed mid-window).
+
+This run is in-sample: the parameters and the window are the same
+ones the strategy was developed on, and there is no out-of-sample
+validation of the Strategy E parameter set yet (Strategy A has one,
+§6). Two 104-day half-window runs
+(`results/backtest-strategy-e-2026-08-04-104d.json` and
+`results/backtest-strategy-e-2026-11-16-104d.json`) check whether the
+result is stable across halves — a stability check, not out-of-sample
+validation. Quote the headline total as in-sample until a fresh
+window exists.
+
+The §13 portfolio caps (max 12 open arbs, max 3 new opens per hour)
+are enforced by a greedy chronological filter on the per-coin
+simulations (`apply_portfolio_caps` in
+`scripts/backtest_strategy_e.py`): trades are considered in
+entry-time order and accepted while a slot is free. The capped total
+is the headline number; the uncapped total is kept in the results
+file (`results['portfolio']`) for comparison. The filter is an
+approximation, not a joint re-simulation — a rejected trade does not
+change its coin's later signals or cooldown state. 12 open arbs at
+$10 per leg also enforces the $120-per-exchange margin cap.
+
+Blacklist note (2026-11-17): the 16 names were compiled 2026-11-16
+with v0.4 (commit bec238d) and no per-name reason was recorded at the
+time. The only documented part is the overlap with the illiquid-trap
+list (filter 1, below). Two entries in the code were dead until this
+fix ("alias:mu"/"alias:bmnr" could never match, because aliases are
+resolved before the check); they are now the post-alias symbols MUU
+and BMNR, which are not in the intersection, so the universe is
+unchanged. Going forward, any addition to the blacklist needs a
+one-line reason and a date, or it does not go in.
+
+**Note (2026-11-17): the numbers in this table are from the pre-fix
+run — the backtest assumed unlimited concurrency and reported no max
+drawdown. The capped total from the fixed code is still being
+computed; this table will be replaced when the E re-run lands.**
 
 | | |
 |---|---|

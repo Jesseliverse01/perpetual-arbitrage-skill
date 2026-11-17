@@ -76,7 +76,7 @@
         "timeout_h": 24,
         "side": "long"
       },
-      "combined_pnl": 8.29,
+      "combined_pnl": 8.28,
       "combined_trades": 74,
       "per_coin": {
         "BTC": {
@@ -89,8 +89,8 @@
         "ETH": {
           "trades": 15,
           "win_rate": 0.467,
-          "pnl": -2.58,
-          "max_dd_pct": 8.68,
+          "pnl": -2.59,
+          "max_dd_pct": 8.69,
           "funding_pnl": 0.09
         },
         "HYPE": {
@@ -110,7 +110,7 @@
         "timeout_h": 48,
         "side": "long"
       },
-      "combined_pnl": 8.29,
+      "combined_pnl": 8.28,
       "combined_trades": 74,
       "per_coin": {
         "BTC": {
@@ -123,8 +123,8 @@
         "ETH": {
           "trades": 15,
           "win_rate": 0.467,
-          "pnl": -2.58,
-          "max_dd_pct": 8.68,
+          "pnl": -2.59,
+          "max_dd_pct": 8.69,
           "funding_pnl": 0.09
         },
         "HYPE": {
@@ -280,7 +280,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 6.43,
+      "combined_pnl": 6.4,
       "combined_trades": 42,
       "per_coin": {
         "BTC": {
@@ -300,9 +300,9 @@
         "HYPE": {
           "trades": 32,
           "win_rate": 0.625,
-          "pnl": 2.38,
-          "max_dd_pct": 17.98,
-          "funding_pnl": 0.88
+          "pnl": 2.35,
+          "max_dd_pct": 18.01,
+          "funding_pnl": 0.85
         }
       }
     },
@@ -314,7 +314,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 5.91,
+      "combined_pnl": 5.88,
       "combined_trades": 95,
       "per_coin": {
         "BTC": {
@@ -329,14 +329,14 @@
           "win_rate": 0.529,
           "pnl": 2.15,
           "max_dd_pct": 8.3,
-          "funding_pnl": 0.17
+          "funding_pnl": 0.16
         },
         "HYPE": {
           "trades": 66,
           "win_rate": 0.576,
-          "pnl": 5.32,
-          "max_dd_pct": 18.97,
-          "funding_pnl": 0.89
+          "pnl": 5.29,
+          "max_dd_pct": 19.0,
+          "funding_pnl": 0.86
         }
       }
     },
@@ -348,29 +348,29 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": 4.92,
+      "combined_pnl": 4.85,
       "combined_trades": 27,
       "per_coin": {
         "BTC": {
           "trades": 2,
           "win_rate": 0.0,
-          "pnl": -6.03,
-          "max_dd_pct": 6.03,
-          "funding_pnl": 0.11
+          "pnl": -6.04,
+          "max_dd_pct": 6.04,
+          "funding_pnl": 0.1
         },
         "ETH": {
           "trades": 6,
           "win_rate": 0.667,
-          "pnl": 8.62,
-          "max_dd_pct": 2.87,
-          "funding_pnl": 0.2
+          "pnl": 8.61,
+          "max_dd_pct": 2.88,
+          "funding_pnl": 0.19
         },
         "HYPE": {
           "trades": 19,
           "win_rate": 0.526,
-          "pnl": 2.33,
-          "max_dd_pct": 20.66,
-          "funding_pnl": 0.94
+          "pnl": 2.28,
+          "max_dd_pct": 20.71,
+          "funding_pnl": 0.89
         }
       }
     },
@@ -382,7 +382,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 4.81,
+      "combined_pnl": 4.78,
       "combined_trades": 99,
       "per_coin": {
         "BTC": {
@@ -402,9 +402,9 @@
         "HYPE": {
           "trades": 69,
           "win_rate": 0.58,
-          "pnl": 1.38,
-          "max_dd_pct": 21.0,
-          "funding_pnl": 0.89
+          "pnl": 1.35,
+          "max_dd_pct": 21.03,
+          "funding_pnl": 0.86
         }
       }
     },
@@ -416,7 +416,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 4.47,
+      "combined_pnl": 4.41,
       "combined_trades": 31,
       "per_coin": {
         "BTC": {
@@ -429,16 +429,16 @@
         "ETH": {
           "trades": 6,
           "win_rate": 0.667,
-          "pnl": 7.03,
-          "max_dd_pct": 2.92,
-          "funding_pnl": 0.14
+          "pnl": 7.02,
+          "max_dd_pct": 2.93,
+          "funding_pnl": 0.13
         },
         "HYPE": {
           "trades": 22,
           "win_rate": 0.636,
-          "pnl": 0.28,
-          "max_dd_pct": 18.38,
-          "funding_pnl": 0.83
+          "pnl": 0.23,
+          "max_dd_pct": 18.43,
+          "funding_pnl": 0.78
         }
       }
     },
@@ -450,7 +450,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 4.03,
+      "combined_pnl": 4.0,
       "combined_trades": 42,
       "per_coin": {
         "BTC": {
@@ -470,9 +470,9 @@
         "HYPE": {
           "trades": 32,
           "win_rate": 0.625,
-          "pnl": 0.15,
-          "max_dd_pct": 18.43,
-          "funding_pnl": 0.88
+          "pnl": 0.12,
+          "max_dd_pct": 18.46,
+          "funding_pnl": 0.85
         }
       }
     },
@@ -484,7 +484,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 3.97,
+      "combined_pnl": 3.94,
       "combined_trades": 29,
       "per_coin": {
         "BTC": {
@@ -504,9 +504,9 @@
         "HYPE": {
           "trades": 21,
           "win_rate": 0.714,
-          "pnl": -0.9,
-          "max_dd_pct": 17.56,
-          "funding_pnl": 0.88
+          "pnl": -0.93,
+          "max_dd_pct": 17.59,
+          "funding_pnl": 0.85
         }
       }
     },
@@ -518,7 +518,7 @@
         "timeout_h": 24,
         "side": "long"
       },
-      "combined_pnl": 3.87,
+      "combined_pnl": 3.86,
       "combined_trades": 22,
       "per_coin": {
         "BTC": {
@@ -531,9 +531,9 @@
         "ETH": {
           "trades": 6,
           "win_rate": 0.5,
-          "pnl": -3.93,
-          "max_dd_pct": 4.77,
-          "funding_pnl": 0.07
+          "pnl": -3.94,
+          "max_dd_pct": 4.78,
+          "funding_pnl": 0.06
         },
         "HYPE": {
           "trades": 16,
@@ -552,7 +552,7 @@
         "timeout_h": 48,
         "side": "long"
       },
-      "combined_pnl": 3.87,
+      "combined_pnl": 3.86,
       "combined_trades": 22,
       "per_coin": {
         "BTC": {
@@ -565,9 +565,9 @@
         "ETH": {
           "trades": 6,
           "win_rate": 0.5,
-          "pnl": -3.93,
-          "max_dd_pct": 4.77,
-          "funding_pnl": 0.07
+          "pnl": -3.94,
+          "max_dd_pct": 4.78,
+          "funding_pnl": 0.06
         },
         "HYPE": {
           "trades": 16,
@@ -586,7 +586,7 @@
         "timeout_h": 24,
         "side": "long"
       },
-      "combined_pnl": 2.71,
+      "combined_pnl": 2.7,
       "combined_trades": 75,
       "per_coin": {
         "BTC": {
@@ -599,9 +599,9 @@
         "ETH": {
           "trades": 16,
           "win_rate": 0.438,
-          "pnl": -7.26,
-          "max_dd_pct": 9.64,
-          "funding_pnl": 0.08
+          "pnl": -7.27,
+          "max_dd_pct": 9.65,
+          "funding_pnl": 0.07
         },
         "HYPE": {
           "trades": 50,
@@ -620,7 +620,7 @@
         "timeout_h": 48,
         "side": "long"
       },
-      "combined_pnl": 2.71,
+      "combined_pnl": 2.7,
       "combined_trades": 75,
       "per_coin": {
         "BTC": {
@@ -633,9 +633,9 @@
         "ETH": {
           "trades": 16,
           "win_rate": 0.438,
-          "pnl": -7.26,
-          "max_dd_pct": 9.64,
-          "funding_pnl": 0.08
+          "pnl": -7.27,
+          "max_dd_pct": 9.65,
+          "funding_pnl": 0.07
         },
         "HYPE": {
           "trades": 50,
@@ -643,6 +643,74 @@
           "pnl": 9.84,
           "max_dd_pct": 5.76,
           "funding_pnl": 0.02
+        }
+      }
+    },
+    {
+      "params": {
+        "entry_apr": -0.2,
+        "exit_apr": -0.05,
+        "stop_pct": 0.03,
+        "timeout_h": 24,
+        "side": "long"
+      },
+      "combined_pnl": 2.54,
+      "combined_trades": 22,
+      "per_coin": {
+        "BTC": {
+          "trades": 0,
+          "win_rate": null,
+          "pnl": 0,
+          "max_dd_pct": 0.0,
+          "funding_pnl": 0
+        },
+        "ETH": {
+          "trades": 6,
+          "win_rate": 0.5,
+          "pnl": -4.12,
+          "max_dd_pct": 4.79,
+          "funding_pnl": 0.06
+        },
+        "HYPE": {
+          "trades": 16,
+          "win_rate": 0.625,
+          "pnl": 6.66,
+          "max_dd_pct": 2.41,
+          "funding_pnl": 0.01
+        }
+      }
+    },
+    {
+      "params": {
+        "entry_apr": -0.2,
+        "exit_apr": -0.05,
+        "stop_pct": 0.03,
+        "timeout_h": 48,
+        "side": "long"
+      },
+      "combined_pnl": 2.54,
+      "combined_trades": 22,
+      "per_coin": {
+        "BTC": {
+          "trades": 0,
+          "win_rate": null,
+          "pnl": 0,
+          "max_dd_pct": 0.0,
+          "funding_pnl": 0
+        },
+        "ETH": {
+          "trades": 6,
+          "win_rate": 0.5,
+          "pnl": -4.12,
+          "max_dd_pct": 4.79,
+          "funding_pnl": 0.06
+        },
+        "HYPE": {
+          "trades": 16,
+          "win_rate": 0.625,
+          "pnl": 6.66,
+          "max_dd_pct": 2.41,
+          "funding_pnl": 0.01
         }
       }
     },
@@ -654,97 +722,29 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": 2.6,
+      "combined_pnl": 2.53,
       "combined_trades": 27,
       "per_coin": {
         "BTC": {
           "trades": 2,
           "win_rate": 0.0,
-          "pnl": -6.03,
-          "max_dd_pct": 6.03,
-          "funding_pnl": 0.11
+          "pnl": -6.04,
+          "max_dd_pct": 6.04,
+          "funding_pnl": 0.1
         },
         "ETH": {
           "trades": 6,
           "win_rate": 0.667,
-          "pnl": 8.62,
-          "max_dd_pct": 2.87,
-          "funding_pnl": 0.2
+          "pnl": 8.61,
+          "max_dd_pct": 2.88,
+          "funding_pnl": 0.19
         },
         "HYPE": {
           "trades": 19,
           "win_rate": 0.526,
-          "pnl": 0.01,
-          "max_dd_pct": 21.21,
-          "funding_pnl": 0.94
-        }
-      }
-    },
-    {
-      "params": {
-        "entry_apr": -0.2,
-        "exit_apr": -0.05,
-        "stop_pct": 0.03,
-        "timeout_h": 24,
-        "side": "long"
-      },
-      "combined_pnl": 2.55,
-      "combined_trades": 22,
-      "per_coin": {
-        "BTC": {
-          "trades": 0,
-          "win_rate": null,
-          "pnl": 0,
-          "max_dd_pct": 0.0,
-          "funding_pnl": 0
-        },
-        "ETH": {
-          "trades": 6,
-          "win_rate": 0.5,
-          "pnl": -4.11,
-          "max_dd_pct": 4.78,
-          "funding_pnl": 0.07
-        },
-        "HYPE": {
-          "trades": 16,
-          "win_rate": 0.625,
-          "pnl": 6.66,
-          "max_dd_pct": 2.41,
-          "funding_pnl": 0.01
-        }
-      }
-    },
-    {
-      "params": {
-        "entry_apr": -0.2,
-        "exit_apr": -0.05,
-        "stop_pct": 0.03,
-        "timeout_h": 48,
-        "side": "long"
-      },
-      "combined_pnl": 2.55,
-      "combined_trades": 22,
-      "per_coin": {
-        "BTC": {
-          "trades": 0,
-          "win_rate": null,
-          "pnl": 0,
-          "max_dd_pct": 0.0,
-          "funding_pnl": 0
-        },
-        "ETH": {
-          "trades": 6,
-          "win_rate": 0.5,
-          "pnl": -4.11,
-          "max_dd_pct": 4.78,
-          "funding_pnl": 0.07
-        },
-        "HYPE": {
-          "trades": 16,
-          "win_rate": 0.625,
-          "pnl": 6.66,
-          "max_dd_pct": 2.41,
-          "funding_pnl": 0.01
+          "pnl": -0.04,
+          "max_dd_pct": 21.26,
+          "funding_pnl": 0.89
         }
       }
     },
@@ -756,7 +756,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 2.15,
+      "combined_pnl": 2.09,
       "combined_trades": 31,
       "per_coin": {
         "BTC": {
@@ -769,16 +769,16 @@
         "ETH": {
           "trades": 6,
           "win_rate": 0.667,
-          "pnl": 7.03,
-          "max_dd_pct": 2.92,
-          "funding_pnl": 0.14
+          "pnl": 7.02,
+          "max_dd_pct": 2.93,
+          "funding_pnl": 0.13
         },
         "HYPE": {
           "trades": 22,
           "win_rate": 0.636,
-          "pnl": -2.04,
-          "max_dd_pct": 18.93,
-          "funding_pnl": 0.83
+          "pnl": -2.09,
+          "max_dd_pct": 18.98,
+          "funding_pnl": 0.78
         }
       }
     },
@@ -790,29 +790,29 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": 1.97,
+      "combined_pnl": 1.9,
       "combined_trades": 40,
       "per_coin": {
         "BTC": {
           "trades": 2,
           "win_rate": 0.0,
-          "pnl": -6.03,
-          "max_dd_pct": 6.03,
-          "funding_pnl": 0.11
+          "pnl": -6.04,
+          "max_dd_pct": 6.04,
+          "funding_pnl": 0.1
         },
         "ETH": {
           "trades": 8,
           "win_rate": 0.625,
-          "pnl": 2.39,
-          "max_dd_pct": 4.49,
-          "funding_pnl": 0.21
+          "pnl": 2.38,
+          "max_dd_pct": 4.5,
+          "funding_pnl": 0.2
         },
         "HYPE": {
           "trades": 30,
           "win_rate": 0.5,
-          "pnl": 5.61,
-          "max_dd_pct": 21.09,
-          "funding_pnl": 0.94
+          "pnl": 5.56,
+          "max_dd_pct": 21.14,
+          "funding_pnl": 0.89
         }
       }
     },
@@ -824,7 +824,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 1.65,
+      "combined_pnl": 1.62,
       "combined_trades": 29,
       "per_coin": {
         "BTC": {
@@ -844,9 +844,9 @@
         "HYPE": {
           "trades": 21,
           "win_rate": 0.714,
-          "pnl": -3.22,
-          "max_dd_pct": 18.32,
-          "funding_pnl": 0.88
+          "pnl": -3.25,
+          "max_dd_pct": 18.35,
+          "funding_pnl": 0.85
         }
       }
     },
@@ -858,7 +858,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 1.52,
+      "combined_pnl": 1.46,
       "combined_trades": 44,
       "per_coin": {
         "BTC": {
@@ -871,16 +871,16 @@
         "ETH": {
           "trades": 8,
           "win_rate": 0.625,
-          "pnl": 0.8,
-          "max_dd_pct": 4.56,
-          "funding_pnl": 0.14
+          "pnl": 0.79,
+          "max_dd_pct": 4.57,
+          "funding_pnl": 0.13
         },
         "HYPE": {
           "trades": 33,
           "win_rate": 0.576,
-          "pnl": 3.56,
-          "max_dd_pct": 18.81,
-          "funding_pnl": 0.83
+          "pnl": 3.51,
+          "max_dd_pct": 18.85,
+          "funding_pnl": 0.78
         }
       }
     },
@@ -892,29 +892,29 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": 0.82,
+      "combined_pnl": 0.75,
       "combined_trades": 93,
       "per_coin": {
         "BTC": {
           "trades": 11,
           "win_rate": 0.364,
-          "pnl": -5.9,
-          "max_dd_pct": 6.95,
+          "pnl": -5.91,
+          "max_dd_pct": 6.96,
           "funding_pnl": 0.13
         },
         "ETH": {
           "trades": 18,
           "win_rate": 0.5,
-          "pnl": -0.93,
-          "max_dd_pct": 9.08,
-          "funding_pnl": 0.23
+          "pnl": -0.94,
+          "max_dd_pct": 9.09,
+          "funding_pnl": 0.22
         },
         "HYPE": {
           "trades": 64,
           "win_rate": 0.516,
-          "pnl": 7.65,
-          "max_dd_pct": 22.93,
-          "funding_pnl": 0.95
+          "pnl": 7.6,
+          "max_dd_pct": 22.97,
+          "funding_pnl": 0.9
         }
       }
     },
@@ -926,7 +926,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": 0.37,
+      "combined_pnl": 0.3,
       "combined_trades": 97,
       "per_coin": {
         "BTC": {
@@ -934,21 +934,21 @@
           "win_rate": 0.417,
           "pnl": -2.71,
           "max_dd_pct": 3.77,
-          "funding_pnl": 0.13
+          "funding_pnl": 0.12
         },
         "ETH": {
           "trades": 18,
           "win_rate": 0.5,
-          "pnl": -2.52,
-          "max_dd_pct": 9.21,
-          "funding_pnl": 0.16
+          "pnl": -2.54,
+          "max_dd_pct": 9.22,
+          "funding_pnl": 0.15
         },
         "HYPE": {
           "trades": 67,
           "win_rate": 0.552,
-          "pnl": 5.6,
-          "max_dd_pct": 20.67,
-          "funding_pnl": 0.84
+          "pnl": 5.55,
+          "max_dd_pct": 20.72,
+          "funding_pnl": 0.79
         }
       }
     },
@@ -960,7 +960,7 @@
         "timeout_h": 24,
         "side": "long"
       },
-      "combined_pnl": -0.09,
+      "combined_pnl": -0.11,
       "combined_trades": 80,
       "per_coin": {
         "BTC": {
@@ -973,15 +973,15 @@
         "ETH": {
           "trades": 17,
           "win_rate": 0.412,
-          "pnl": -7.92,
-          "max_dd_pct": 10.03,
-          "funding_pnl": 0.08
+          "pnl": -7.94,
+          "max_dd_pct": 10.04,
+          "funding_pnl": 0.07
         },
         "HYPE": {
           "trades": 53,
           "win_rate": 0.566,
           "pnl": 6.99,
-          "max_dd_pct": 5.78,
+          "max_dd_pct": 5.79,
           "funding_pnl": 0.02
         }
       }
@@ -994,7 +994,7 @@
         "timeout_h": 48,
         "side": "long"
       },
-      "combined_pnl": -0.09,
+      "combined_pnl": -0.11,
       "combined_trades": 80,
       "per_coin": {
         "BTC": {
@@ -1007,15 +1007,15 @@
         "ETH": {
           "trades": 17,
           "win_rate": 0.412,
-          "pnl": -7.92,
-          "max_dd_pct": 10.03,
-          "funding_pnl": 0.08
+          "pnl": -7.94,
+          "max_dd_pct": 10.04,
+          "funding_pnl": 0.07
         },
         "HYPE": {
           "trades": 53,
           "win_rate": 0.566,
           "pnl": 6.99,
-          "max_dd_pct": 5.78,
+          "max_dd_pct": 5.79,
           "funding_pnl": 0.02
         }
       }
@@ -1028,29 +1028,29 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -0.43,
+      "combined_pnl": -0.5,
       "combined_trades": 40,
       "per_coin": {
         "BTC": {
           "trades": 2,
           "win_rate": 0.0,
-          "pnl": -6.03,
-          "max_dd_pct": 6.03,
-          "funding_pnl": 0.11
+          "pnl": -6.04,
+          "max_dd_pct": 6.04,
+          "funding_pnl": 0.1
         },
         "ETH": {
           "trades": 8,
           "win_rate": 0.625,
-          "pnl": 2.22,
-          "max_dd_pct": 4.5,
-          "funding_pnl": 0.21
+          "pnl": 2.21,
+          "max_dd_pct": 4.51,
+          "funding_pnl": 0.2
         },
         "HYPE": {
           "trades": 30,
           "win_rate": 0.5,
-          "pnl": 3.38,
-          "max_dd_pct": 21.54,
-          "funding_pnl": 0.94
+          "pnl": 3.33,
+          "max_dd_pct": 21.58,
+          "funding_pnl": 0.89
         }
       }
     },
@@ -1062,7 +1062,7 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": -0.88,
+      "combined_pnl": -0.95,
       "combined_trades": 44,
       "per_coin": {
         "BTC": {
@@ -1075,16 +1075,16 @@
         "ETH": {
           "trades": 8,
           "win_rate": 0.625,
-          "pnl": 0.63,
-          "max_dd_pct": 4.57,
-          "funding_pnl": 0.14
+          "pnl": 0.62,
+          "max_dd_pct": 4.58,
+          "funding_pnl": 0.13
         },
         "HYPE": {
           "trades": 33,
           "win_rate": 0.576,
-          "pnl": 1.33,
-          "max_dd_pct": 19.26,
-          "funding_pnl": 0.83
+          "pnl": 1.27,
+          "max_dd_pct": 19.3,
+          "funding_pnl": 0.78
         }
       }
     },
@@ -1096,7 +1096,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -2.87,
+      "combined_pnl": -2.91,
       "combined_trades": 38,
       "per_coin": {
         "BTC": {
@@ -1116,9 +1116,9 @@
         "HYPE": {
           "trades": 29,
           "win_rate": 0.483,
-          "pnl": -6.86,
-          "max_dd_pct": 31.55,
-          "funding_pnl": 1.0
+          "pnl": -6.9,
+          "max_dd_pct": 31.59,
+          "funding_pnl": 0.96
         }
       }
     },
@@ -1130,7 +1130,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -3.09,
+      "combined_pnl": -3.15,
       "combined_trades": 98,
       "per_coin": {
         "BTC": {
@@ -1143,16 +1143,16 @@
         "ETH": {
           "trades": 19,
           "win_rate": 0.474,
-          "pnl": -1.6,
-          "max_dd_pct": 9.45,
-          "funding_pnl": 0.23
+          "pnl": -1.61,
+          "max_dd_pct": 9.46,
+          "funding_pnl": 0.21
         },
         "HYPE": {
           "trades": 67,
           "win_rate": 0.522,
-          "pnl": 3.71,
-          "max_dd_pct": 24.95,
-          "funding_pnl": 0.95
+          "pnl": 3.66,
+          "max_dd_pct": 25.0,
+          "funding_pnl": 0.9
         }
       }
     },
@@ -1164,7 +1164,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -3.38,
+      "combined_pnl": -3.42,
       "combined_trades": 90,
       "per_coin": {
         "BTC": {
@@ -1184,9 +1184,9 @@
         "HYPE": {
           "trades": 62,
           "win_rate": 0.516,
-          "pnl": -3.91,
-          "max_dd_pct": 32.35,
-          "funding_pnl": 1.01
+          "pnl": -3.95,
+          "max_dd_pct": 32.39,
+          "funding_pnl": 0.96
         }
       }
     },
@@ -1198,29 +1198,29 @@
         "timeout_h": 24,
         "side": "both"
       },
-      "combined_pnl": -3.54,
+      "combined_pnl": -3.62,
       "combined_trades": 102,
       "per_coin": {
         "BTC": {
           "trades": 13,
           "win_rate": 0.462,
-          "pnl": -2.0,
-          "max_dd_pct": 3.02,
+          "pnl": -2.01,
+          "max_dd_pct": 3.03,
           "funding_pnl": 0.12
         },
         "ETH": {
           "trades": 19,
           "win_rate": 0.474,
-          "pnl": -3.19,
-          "max_dd_pct": 9.59,
-          "funding_pnl": 0.16
+          "pnl": -3.21,
+          "max_dd_pct": 9.6,
+          "funding_pnl": 0.15
         },
         "HYPE": {
           "trades": 70,
           "win_rate": 0.557,
-          "pnl": 1.65,
-          "max_dd_pct": 22.69,
-          "funding_pnl": 0.84
+          "pnl": 1.6,
+          "max_dd_pct": 22.74,
+          "funding_pnl": 0.79
         }
       }
     },
@@ -1232,7 +1232,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -4.79,
+      "combined_pnl": -4.83,
       "combined_trades": 95,
       "per_coin": {
         "BTC": {
@@ -1252,9 +1252,9 @@
         "HYPE": {
           "trades": 66,
           "win_rate": 0.515,
-          "pnl": -8.17,
-          "max_dd_pct": 34.69,
-          "funding_pnl": 1.0
+          "pnl": -8.21,
+          "max_dd_pct": 34.73,
+          "funding_pnl": 0.96
         }
       }
     },
@@ -1266,7 +1266,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -5.32,
+      "combined_pnl": -5.36,
       "combined_trades": 25,
       "per_coin": {
         "BTC": {
@@ -1286,9 +1286,9 @@
         "HYPE": {
           "trades": 18,
           "win_rate": 0.5,
-          "pnl": -10.14,
-          "max_dd_pct": 31.13,
-          "funding_pnl": 1.0
+          "pnl": -10.18,
+          "max_dd_pct": 31.17,
+          "funding_pnl": 0.96
         }
       }
     },
@@ -1300,7 +1300,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -5.58,
+      "combined_pnl": -5.62,
       "combined_trades": 38,
       "per_coin": {
         "BTC": {
@@ -1320,9 +1320,9 @@
         "HYPE": {
           "trades": 29,
           "win_rate": 0.483,
-          "pnl": -9.4,
-          "max_dd_pct": 32.95,
-          "funding_pnl": 0.99
+          "pnl": -9.44,
+          "max_dd_pct": 32.99,
+          "funding_pnl": 0.95
         }
       }
     },
@@ -1334,7 +1334,7 @@
         "timeout_h": 48,
         "side": "both"
       },
-      "combined_pnl": -7.95,
+      "combined_pnl": -7.99,
       "combined_trades": 25,
       "per_coin": {
         "BTC": {
@@ -1354,9 +1354,9 @@
         "HYPE": {
           "trades": 18,
           "win_rate": 0.5,
-          "pnl": -12.77,
-          "max_dd_pct": 33.25,
-          "funding_pnl": 0.99
+          "pnl": -12.81,
+          "max_dd_pct": 33.29,
+          "funding_pnl": 0.95
         }
       }
     }
@@ -1438,15 +1438,15 @@
         "timeout_h": 24,
         "side": "long"
       },
-      "combined_pnl": 35.23,
-      "combined_trades": 92,
+      "combined_pnl": 35.37,
+      "combined_trades": 88,
       "per_coin": {
         "BTC": {
-          "trades": 22,
-          "win_rate": 0.545,
-          "pnl": 2.56,
-          "max_dd_pct": 2.37,
-          "funding_pnl": 0.14
+          "trades": 21,
+          "win_rate": 0.571,
+          "pnl": 3.01,
+          "max_dd_pct": 2.25,
+          "funding_pnl": 0.13
         },
         "ETH": {
           "trades": 21,
@@ -1456,11 +1456,11 @@
           "funding_pnl": 0.16
         },
         "HYPE": {
-          "trades": 49,
-          "win_rate": 0.592,
-          "pnl": 18.12,
-          "max_dd_pct": 2.84,
-          "funding_pnl": 0.08
+          "trades": 46,
+          "win_rate": 0.609,
+          "pnl": 17.81,
+          "max_dd_pct": 2.85,
+          "funding_pnl": 0.07
         }
       }
     }
