@@ -12,7 +12,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.5.9, 2026-11-16. Paper/backtest only.
+Version 0.6.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets).
 
 ## What this is
 
@@ -24,15 +24,33 @@ trade here?
 
 It covers five ideas, all on public data, all paper/backtest only.
 
+---
+
+## How to use this skill with your AI agent
+
+This repository is structured as an **Agent Skill** (`SKILL.md` + `SOUL.md`). You or anyone who clones this repo can give it directly to an AI Agent to act as an autonomous quantitative arbitrage analyst.
+
+### What the Agent can do right now:
+1. **Autonomous Live Scanning:** Run `python3 scripts/multivenue_scan.py` to fetch current funding rates across Hyperliquid, Lighter, Aster, OKX, Binance, and Bybit.
+2. **Point-In-Time Scoring:** Evaluate signals 0–10 using `scripts/score.py` (with automatic trap filters for illiquid books).
+3. **Meme Coin Scale Matching (New in v0.6.0):** Automatically bridges 1,000x multiplier contracts (Hyperliquid `kPEPE`, `kBONK`, `kSHIB`, `kFLOKI` $\leftrightarrow$ Binance/Bybit/Lighter/OKX `1000PEPE`, `1000BONK`, `1000SHIB`, `1000FLOKI`).
+4. **Structured Trade Tickets & Rollback Execution:** Run `python3 scripts/execute.py` to generate complete execution tickets with lock-quality ratings and stop-loss brackets (add `--mode paper` to simulate the two-leg fills). The ticket states the rollback rule; live rollback is not implemented and live mode is disabled.
+5. **Human-in-the-Loop Sign-Off:** The agent never trades blind. It presents trade tickets to the operator for verification and paper recording.
+
+### Typical Agent Prompt:
+> *"Load SKILL.md and SOUL.md. Run `scripts/multivenue_scan.py` to find current funding dislocations, score candidates using `scripts/score.py`, and run `scripts/execute.py --mode ticket` to present actionable trade tickets."*
+
+---
+
 ## What it covers
 
 | Strategy | Status |
 |---|---|
 | **A. Funding harvest (long-only)** | ✅ Validated — the default |
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits, including the net-edge formula ([`SKILL.md`](SKILL.md) §8) |
-| C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), execution not backtested |
+| C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), scale aliases supported |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py)) — paper only; live execution needs accounts + API access on ≥2 venues (not set up yet) |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py), [`scripts/execute.py`](scripts/execute.py)) — paper only; live mode is disabled in the code |
 
 **Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -52,14 +70,16 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | File | What it is |
 |---|---|
 | [`SKILL.md`](SKILL.md) | The full skill: workflow, pipeline, scoring rubric, all five strategies, data sources, run commands, rules. Start here. |
-| [`README.md`](README.md) | This file — the short version. |
+| [`SOUL.md`](SOUL.md) | The analytical mindset and risk-manager persona of the agent. |
+| [`README.md`](README.md) | This file — overview & quick start. |
 | [`LICENSE`](LICENSE) | MIT. |
+| [`scripts/execute.py`](scripts/execute.py) | **Unified Execution Engine & Trade Ticket Generator** (§16): lock classification, sizing, brackets, paper execution, and the two-leg rollback rule (stated on the ticket). |
+| [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py) | Strategy E live scanner (HL + Lighter + Aster + OKX + Binance/Bybit via Lighter) with meme coin scale mapping. |
 | [`scripts/score.py`](scripts/score.py) | Score one signal 0–10 (six weighted dimensions + liquidity gate). |
 | [`scripts/scan.py`](scripts/scan.py) | Live scan of all Hyperliquid perps, ranked table + JSON/markdown report. |
-| [`scripts/cross_venue.py`](scripts/cross_venue.py) | Cross-venue funding-spread matcher (HL vs OKX, Binance/Bybit best-effort). Detection only. |
+| [`scripts/cross_venue.py`](scripts/cross_venue.py) | Cross-venue funding-spread matcher (HL vs OKX, Binance/Bybit best-effort) with scale alias support. |
 | [`scripts/backtest_funding.py`](scripts/backtest_funding.py) | Strategy A backtest + `--min-score` scored variant. |
 | [`scripts/sweep.py`](scripts/sweep.py) | 48-combo parameter sweep + out-of-sample validation. |
-| [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py) | Strategy E live scanner (HL + Lighter + Aster + OKX). |
 | [`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py) | Strategy E backtest (HL vs Lighter). |
 | [`scripts/ccxt_funding.py`](scripts/ccxt_funding.py) | Current funding APR via CCXT — Hyperliquid only on this VM; needs `pip install ccxt`. Optional; the core scripts stay stdlib-only. |
 | [`results/`](results/) | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |

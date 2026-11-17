@@ -66,18 +66,27 @@ def hl_post(payload, retries=2):
 
 def okx_funding(coin):
     """OKX funding APR (fraction) for COIN-USDT-SWAP, or None if the coin
-    is not listed / the request fails. Public endpoint, no key."""
-    url = f"{OKX_API}?instId={coin}-USDT-SWAP"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "perpetual-arb-scan/0.3"})
-        with urllib.request.urlopen(req, timeout=15) as r:
-            d = json.load(r)
-        if d.get("code") != "0" or not d.get("data"):
-            return None
-        # OKX funds every 8h: APR = 8h rate * 3 * 365
-        return float(d["data"][0]["fundingRate"]) * 3 * 365
-    except Exception:
-        return None
+    is not listed / the request fails. Public endpoint, no key.
+    Supports scale aliases (kPEPE -> PEPE, 1000PEPE -> PEPE)."""
+    candidates = [coin]
+    if coin.startswith("k") and len(coin) > 1:
+        candidates.append(coin[1:])
+    elif coin.startswith("1000") and len(coin) > 4:
+        candidates.append(coin[4:])
+    elif coin.upper().startswith("K") and len(coin) > 1:
+        candidates.append(coin[1:])
+    for c in candidates:
+        url = f"{OKX_API}?instId={c}-USDT-SWAP"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "perpetual-arb-scan/0.3"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                d = json.load(r)
+            if d.get("code") == "0" and d.get("data"):
+                # OKX funds every 8h: APR = 8h rate * 3 * 365
+                return float(d["data"][0]["fundingRate"]) * 3 * 365
+        except Exception:
+            continue
+    return None
 
 
 def fetch_funding_history(coin, start_ms, end_ms):

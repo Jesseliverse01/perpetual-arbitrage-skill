@@ -87,15 +87,27 @@ PER_LEG_VOLUME_MIN_USD = 250_000
 APR_RATIO_1H_TO_24H_MAX = 5
 APR_RATIO_24H_TO_7D_MAX = 3
 
+SCALE_ALIAS_MAP = {
+    "KPEPE": "1000PEPE",
+    "KBONK": "1000BONK",
+    "KSHIB": "1000SHIB",
+    "KFLOKI": "1000FLOKI",
+    "KLUNC": "1000LUNC",
+    "KDOGS": "1000DOGS",
+    "KNEIRO": "1000NEIRO",
+    "KNOT": "1000NOT",
+    "KTOSHI": "1000TOSHI",
+}
+
 
 def normalize_symbol(sym):
-    """'BTC-USDT-SWAP' / 'BTCUSDT' / 'BTC' -> 'BTC'."""
+    """'BTC-USDT-SWAP' / 'BTCUSDT' / 'BTC' / 'kPEPE' -> canonical symbol."""
     s = sym.upper()
     for suffix in ("-USDT-SWAP", "-USD-SWAP", "USDT", "USD"):
         if s.endswith(suffix) and len(s) > len(suffix):
             s = s[:-len(suffix)]
             break
-    return s
+    return SCALE_ALIAS_MAP.get(s, s)
 
 
 def lighter_funding_rates():
@@ -114,7 +126,8 @@ def lighter_funding_rates():
             try:
                 # rate is 8h-normalized for every venue (verified live):
                 # APR = rate * 3 * 365.
-                out[(row["exchange"], row["symbol"])] = float(row["rate"]) * 3 * 365
+                canon = normalize_symbol(row["symbol"])
+                out[(row["exchange"], canon)] = float(row["rate"]) * 3 * 365
             except (KeyError, ValueError, TypeError):
                 continue
         return out, None
@@ -197,14 +210,15 @@ def hl_funding_history(coin, start_ms, end_ms):
             for r in rows]
 
 
-def spread_history_stats(long_venue, short_venue, coin, market_id, now_ms):
+def spread_history_stats(long_venue, short_venue, coin, market_id, now_ms, hl_raw_coin=None):
     """Trailing spread stats for an HL<->Lighter pair, or None if the
     history cannot be computed. Returns dict with apr_1h, apr_24h,
     apr_7d (fractions) — point-in-time, last 7d only."""
     if {long_venue, short_venue} != {"hyperliquid", "lighter"}:
         return None
     try:
-        hl = hl_funding_history(coin, now_ms - 7 * 24 * HOUR, now_ms)
+        hl_target = hl_raw_coin if hl_raw_coin else coin
+        hl = hl_funding_history(hl_target, now_ms - 7 * 24 * HOUR, now_ms)
         li = lighter_fundings_history(market_id, now_ms - 7 * 24 * HOUR, now_ms)
     except Exception as e:
         print(f"  [{coin}] spread history failed: {e}", flush=True)
@@ -251,11 +265,14 @@ def main():
     meta, ctxs = hl_post({"type": "metaAndAssetCtxs"})
     hl = {}
     for m, c in zip(meta["universe"], ctxs):
-        hl[m["name"]] = {
+        raw_name = m["name"]
+        canon = normalize_symbol(raw_name)
+        hl[canon] = {
             "apr": float(c["funding"]) * 24 * 365,
             "mark": float(c["markPx"]),
             "volume_usd": float(c["dayNtlVlm"]),
             "oi_usd": float(c["openInterest"]) * float(c["markPx"]),
+            "raw_name": raw_name,
         }
     venue_status["hyperliquid"] = {"ok": True, "coins": len(hl)}
 
@@ -316,7 +333,8 @@ def main():
             d = json.load(r)
         for o in d.get("order_books", []):
             if o.get("market_type") == "perp":
-                market_ids[o["symbol"]] = o["market_id"]
+                canon = normalize_symbol(o["symbol"])
+                market_ids[canon] = o["market_id"]
     except Exception as e:
         print(f"orderBooks failed ({e}) — spread history unavailable",
               flush=True)
@@ -379,8 +397,9 @@ def main():
         hist_note = None
         if {long_venue, short_venue} == {"hyperliquid", "lighter"} and coin in market_ids:
             print(f"[{coin}] fetching 7d spread history ...", flush=True)
+            raw_hl = hl.get(coin, {}).get("raw_name", coin)
             hist = spread_history_stats(long_venue, short_venue, coin,
-                                        market_ids[coin], now_ms)
+                                        market_ids[coin], now_ms, hl_raw_coin=raw_hl)
             if hist is None:
                 hist_note = "spread history unavailable"
             else:

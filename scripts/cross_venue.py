@@ -55,14 +55,28 @@ HOUR = 3600_000
 MAJORS = ["BTC", "ETH", "HYPE", "SOL"]
 
 
+SCALE_ALIAS_MAP = {
+    "KPEPE": "1000PEPE",
+    "KBONK": "1000BONK",
+    "KSHIB": "1000SHIB",
+    "KFLOKI": "1000FLOKI",
+    "KLUNC": "1000LUNC",
+    "KDOGS": "1000DOGS",
+    "KNEIRO": "1000NEIRO",
+    "KNOT": "1000NOT",
+    "KTOSHI": "1000TOSHI",
+}
+
+
 def normalize_symbol(sym):
-    """Strip venue suffixes so 'BTC-USDT-SWAP', 'BTCUSDT', 'BTC' all -> 'BTC'."""
+    """Strip venue suffixes and map scale aliases so 'BTC-USDT-SWAP',
+    'BTCUSDT', 'BTC' all -> 'BTC', and 'kPEPE' / '1000PEPEUSDT' -> '1000PEPE'."""
     s = sym.upper()
     for suffix in ("-USDT-SWAP", "-USD-SWAP", "USDT", "USD"):
         if s.endswith(suffix) and len(s) > len(suffix):
             s = s[:-len(suffix)]
             break
-    return s
+    return SCALE_ALIAS_MAP.get(s, s)
 
 
 def binance_funding_map():
@@ -133,7 +147,7 @@ def main():
     meta, ctxs = hl_post({"type": "metaAndAssetCtxs"})
     hl = {}
     for m, c in zip(meta["universe"], ctxs):
-        hl[m["name"]] = float(c["funding"]) * 24 * 365
+        hl[normalize_symbol(m["name"])] = float(c["funding"]) * 24 * 365
 
     interesting = sorted({c for c, a in hl.items() if a < -0.10 or a > 0.30}
                          | set(MAJORS))
