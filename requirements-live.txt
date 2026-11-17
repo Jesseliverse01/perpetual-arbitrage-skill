@@ -4,3 +4,7 @@
 #   python3 -m venv .venv && .venv/bin/pip install -r requirements-live.txt
 hyperliquid-python-sdk==0.24.0
 lighter-sdk==1.1.8
+dydx-v4-client==1.1.6
+derive-py==0.1.5
+requests==2.34.2
+eth-account==0.14.0

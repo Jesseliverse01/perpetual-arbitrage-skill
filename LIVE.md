@@ -1,12 +1,12 @@
-# Live version (v0.8.0)
+# Live version (v0.9.0)
 
 This is the live version of the skill: the same paper-first research
-tool, plus a real execution path for the venues it backtests.
-Hyperliquid and Lighter are the two working adapters; dYdX, Aster
-and Derive ship as stubs you can fill in, and any venue can be added
-with the template in `scripts/live/custom_venue.py`. Nothing here
-trades on its own. Every live order needs a human yes for that exact
-ticket, and the default is testnet, not mainnet.
+tool, plus a real execution path for the venues it backtests. All
+five venues have working adapters now: Hyperliquid, Lighter, dYdX,
+Aster and Derive. Any venue can still be added with the template in
+`scripts/live/custom_venue.py`. Nothing here trades on its own.
+Every live order needs a human yes for that exact ticket, and the
+default is testnet, not mainnet.
 
 ## What live can and cannot do
 
@@ -26,8 +26,18 @@ a real cancel that cleared both legs, and a reduce-only close that
 left the account flat. On Hyperliquid testnet, the adapter did public
 reads, dry runs, refusal gates, and a real signed order submission
 that the venue received and rejected (the throwaway address was
-unfunded). What was NOT verified: a filled order on Hyperliquid, and
-the two-leg live rollback, which needs both venues funded at once.
+unfunded). On dYdX testnet, the adapter did public reads and dry
+runs, and a live signed market order was received and rejected
+on-chain (unfunded subaccount, equity tier limit 0), which proves
+the full write path up to the chain. On Aster testnet, the adapter
+did public reads and dry runs, and a signed request reached the
+venue and got a parsed auth error, which proves the signature path.
+On Derive testnet, the adapter did public reads and dry runs. What
+was NOT verified: a filled order on Hyperliquid, dYdX, Aster or
+Derive; a resting bracket, a real cancel, or a reduce-only close on
+those four; and the two-leg live rollback, which needs both venues
+funded at once. Mainnet is wired for all five venues but NOT
+verified: no mainnet order was placed, no mainnet key was used.
 Run the funded testnet steps yourself before you trust live mode
 with real money.
 
@@ -59,27 +69,60 @@ throwaway keys and a tiny size: connect, read the mark price and
 the funding rate, dry run, one small live order, a bracket, a
 cancel, a reduce-only close.
 
-Three stubs ship with the skill, each naming only what is verified
-about its venue and refusing to connect until filled in:
+The five adapters that ship with the skill, and what is verified
+about each:
 
-- dYdX (`scripts/live/dydx_client.py`): testnet app
-  https://v4.testnet.dydx.exchange, faucet via the app (300 test
-  USDC) and the faucet API https://faucet.v4testnet.dydx.exchange.
-  Testnet indexer returned 404 from this VM, so the funding
-  endpoint is not yet verified. All perps USDC-settled; auth is an
+- Hyperliquid (`scripts/live/hyperliquid_client.py`): official
+  `hyperliquid-python-sdk` (0.24.0). Testnet verified: public
+  reads, dry runs, refusal gates, and a real signed order
+  submission the venue received and rejected (unfunded throwaway
+  address). A filled order, a resting bracket, a real cancel, and
+  the live rollback were NOT observed.
+- Lighter (`scripts/live/lighter_client.py`): official
+  `lighter-sdk` (1.1.8). Testnet verified on a funded account: a
+  market order that filled, a bracket whose entry filled with the
+  stop-loss and take-profit legs resting on the venue, a real
+  cancel that cleared both legs, and a reduce-only close that left
+  the account flat. The two-leg live rollback is still NOT
+  observed.
+- dYdX (`scripts/live/dydx_client.py`): official `dydx-v4-client`
+  (1.1.6). Testnet app https://v4.testnet.dydx.exchange, indexer
+  at /v4/perpetualMarkets (226 markets). Funding is hourly, so APR
+  is rate times 24 times 365 times 100. Public reads and dry runs
+  verified live; a live signed market order was received and
+  rejected on-chain (unfunded subaccount). A filled order, a
+  resting bracket, a real cancel, and a reduce-only close were NOT
+  observed. The faucet API returns 202 but its USDC leg did not
+  land for fresh addresses; fund a testnet subaccount in the
+  browser first (deposit/recharge, 300 test USDC). Auth is an
   Ethereum wallet signature; testnet chain id dydx-testnet-4; gas
   token DV4TNT from the same faucet.
-- Aster (`scripts/live/aster_client.py`): the scanner already reads
-  Aster funding via premiumIndex. Testnet futures REST
-  https://fapi.asterdex-testnet.com verified HTTP 200 (ping,
-  exchangeInfo, premiumIndex). The testnet app URL and the faucet
-  are NOT verified. Chain id 714 comes from the official demo
-  script via a third-party guide; re-check it before using it.
-- Derive (`scripts/live/derive_client.py`): testnet app
-  https://testnet.derive.xyz, USDC faucet in the dashboard, trading
-  is gasless, deposit/withdraw needs gas (ETH, OP Stack L2). Demo
-  API host api-demo.lyra.finance; individual API paths are not yet
-  verified. Auth via EIP-712 signed messages / session keys.
+- Aster (`scripts/live/aster_client.py`): raw HTTP plus
+  `eth-account` (no maintained official V3 Python SDK exists).
+  Auth is EIP-712 agent signing, not an API key and secret: set
+  ASTER_TESTNET_SIGNER (the API wallet address) and
+  ASTER_TESTNET_SIGNER_PRIVATE_KEY (its private key). Testnet app
+  https://www.asterdex-testnet.com. Public reads verified live
+  (21 symbols, mark price, funding rates; funding interval read
+  live per symbol, 8h for BTC). Dry runs simulate, and a signed
+  request reached the venue and got a parsed auth error, which
+  proves the signature path. A filled order, a resting bracket, a
+  real cancel, and a reduce-only close were NOT observed. A funded
+  testnet account plus a registered API wallet can only be created
+  in the browser. Watch for venue code -5050 (deposit gate, in
+  force since 1 Sep 2026): if testnet returns it on the first
+  signed call, signed calls are blocked until the venue lifts it.
+  Chain id 714 testnet, 1666 mainnet.
+- Derive (`scripts/live/derive_client.py`): implemented on the
+  official `derive-py` SDK (0.1.5, MIT), v3 API
+  https://testnet.api.derive.xyz/v3. Public reads verified live on
+  testnet (20 perps, mark price, per-hour funding as APR); writes
+  are code-complete with the usual dry-run and confirm gates but NOT
+  yet verified on a funded account. That needs Jesse to fund a
+  testnet account in the app and mint a session key first (exact
+  steps in `~/workspace/live-build/VERIFY-derive.md`). Funding is
+  quoted per hour, so APR = rate * 24 * 365 * 100. The old v2 demo
+  host api-demo.lyra.finance is not used.
 
 ## Install the skill in your agent
 
@@ -96,8 +139,10 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements-live.txt
 ```
 
-That installs `hyperliquid-python-sdk` 0.24.0 and `lighter-sdk`
-1.1.8, the official SDKs. Run the scripts with the venv Python
+That installs `hyperliquid-python-sdk` 0.24.0, `lighter-sdk`
+1.1.8, `dydx-v4-client` 1.1.6, and `derive-py` 0.1.5, the official
+SDKs, plus `requests` and `eth-account` for the Aster adapter.
+Run the scripts with the venv Python
 (`.venv/bin/python3 scripts/execute.py ...`).
 
 ## Keys (environment only)
@@ -111,6 +156,12 @@ export HL_TESTNET_PRIVATE_KEY=0x...
 export LIGHTER_TESTNET_PRIVATE_KEY=0x...
 export LIGHTER_TESTNET_ACCOUNT_INDEX=1
 export LIGHTER_TESTNET_API_KEY_INDEX=3
+export DYDX_TESTNET_PRIVATE_KEY=0x...
+export ASTER_TESTNET_SIGNER=0x...
+export ASTER_TESTNET_SIGNER_PRIVATE_KEY=0x...
+export DERIVE_TESTNET_PRIVATE_KEY=0x...
+export DERIVE_TESTNET_WALLET=0x...
+export DERIVE_TESTNET_SUBACCOUNT_ID=1234
 ```
 
 The Lighter API key index is the number the app assigned your key;
@@ -122,13 +173,32 @@ above it.
 
 For mainnet the names drop the `TESTNET_` part
 (`HL_PRIVATE_KEY`, `LIGHTER_PRIVATE_KEY`,
-`LIGHTER_ACCOUNT_INDEX`).
+`LIGHTER_ACCOUNT_INDEX`, `DYDX_PRIVATE_KEY`, `ASTER_SIGNER`,
+`ASTER_SIGNER_PRIVATE_KEY`, `DERIVE_PRIVATE_KEY`,
+`DERIVE_WALLET`, `DERIVE_SUBACCOUNT_ID`). dYdX also accepts a
+mnemonic instead of a private key
+(`DYDX_TESTNET_MNEMONIC` / `DYDX_MNEMONIC`); a private key wins
+when both are set. Aster has no API key or secret: the signer is
+an API wallet you register in the app, and its address goes in
+ASTER_TESTNET_SIGNER while its private key goes in
+ASTER_TESTNET_SIGNER_PRIVATE_KEY.
 
 How to get them: on Hyperliquid, create an API wallet in the app
 (Settings, API Wallet) and use its private key; the API wallet can
 only trade, it cannot withdraw. On Lighter, register an API key with
 the adapter's `register_api_key()` or the official `system_setup.py`
-from the Lighter SDK examples; it needs a funded account first.
+from the Lighter SDK examples; it needs a funded account first. On
+dYdX, use a wallet private key (or its mnemonic) for the account
+that holds the testnet subaccount; the key signs orders, it cannot
+withdraw. On Aster, connect a wallet in the testnet app, create an
+API wallet on the API wallet page (trade permission, no withdraw),
+and use its address and private key as the signer. On Derive, fund
+a testnet account in the app first (Deposit, then Mint test USDC),
+then mint a session key in the app (Settings, Session Keys) with the
+trade scope on your subaccount and use its private key; the session
+key can only trade on that subaccount, and it expires. The wallet
+address and subaccount id go in DERIVE_TESTNET_WALLET and
+DERIVE_TESTNET_SUBACCOUNT_ID.
 
 ## Testnet first
 
@@ -137,7 +207,19 @@ faucet only serves addresses that already exist on mainnet, so a
 brand new address gets refused; use an address that has deposited on
 mainnet before, or fund it from mainnet first. On Lighter, connect a
 wallet in the testnet app at testnet.app.lighter.xyz and it credits
-test USDC; there is no faucet API.
+test USDC; there is no faucet API. On dYdX, connect a wallet in the
+testnet app at https://v4.testnet.dydx.exchange and press
+deposit/recharge; it credits 300 test USDC automatically. The
+faucet API (POST https://faucet.v4testnet.dydx.exchange/faucet/tokens)
+returns 202 but its USDC leg did not land for fresh addresses, so
+use the app button. On Aster, connect a wallet at
+https://www.asterdex-testnet.com and claim the faucet, then create
+an API wallet on the API wallet page. On Derive, get Sepolia ETH for
+gas (any Sepolia faucet), open https://testnet.app.derive.xyz,
+connect a wallet, click Deposit then Mint to mint test USDC, and
+deposit. The first deposit creates the account and its first
+subaccount, and the subaccount id shows up about two minutes later.
+There is no faucet API for the deposit step; it needs the browser.
 
 Then rehearse the whole live path without sending anything:
 
@@ -171,10 +253,9 @@ missing or corrupt, live mode stops rather than trading from memory.
 ## Risks, plainly
 
 Funding spreads are thin and move fast. The backtests are paper, the
-live path has seen filled orders on Lighter testnet but not yet on
-Hyperliquid, and a venue can reject, delay, or partially fill a leg.
-The rollback guard covers the half-leg case, but it cannot cover a
-venue outage or a market that moves past the stop while both legs are
-open. Never trade money you cannot afford to lose, and never paste
-your main key anywhere; use an API wallet or API key with no
-withdrawal rights.
+live path has seen filled orders on Lighter testnet only, and a venue
+can reject, delay, or partially fill a leg. The rollback guard covers
+the half-leg case, but it cannot cover a venue outage or a market
+that moves past the stop while both legs are open. Never trade money
+you cannot afford to lose, and never paste your main key anywhere;
+use an API wallet or API key with no withdrawal rights.

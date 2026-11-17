@@ -37,17 +37,17 @@ REGISTRY = {
     "dydx": {
         "module": "dydx_client",
         "env_prefix": "DYDX_",
-        "status": "stub",
+        "status": "live",
     },
     "aster": {
         "module": "aster_client",
         "env_prefix": "ASTER_",
-        "status": "stub",
+        "status": "live",
     },
     "derive": {
         "module": "derive_client",
         "env_prefix": "DERIVE_",
-        "status": "stub",
+        "status": "live",
     },
     "custom": {
         "module": "custom_venue",

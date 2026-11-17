@@ -14,7 +14,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.8.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
+Version 0.9.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
 
 ## What this is
 

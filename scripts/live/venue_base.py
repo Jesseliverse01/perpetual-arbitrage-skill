@@ -235,10 +235,16 @@ class VenueAdapter:
 
     def reduce_only_close(self, symbol, side, size, dry_run=True,
                           confirm=False):
-        """Reduce-only market close of `size` base units. `side` is
-        the side of the leg being closed: a long closes with a sell,
-        a short with a buy. This is the half-leg rollback primitive.
-        If it fails, surface it and stop the cycle."""
+        """Reduce-only market close of `size` base units. `side`
+        accepts both spellings the callers use: "buy"/"sell" is
+        already the closing order side (the spelling execute.py
+        passes), while "long"/"short" names the leg being closed (a
+        long closes with a sell, a short with a buy. That is the spelling
+        rollback_close passes). An adapter must map both to the same
+        closing order; passing "long" through as a buy, or "sell"
+        through as a buy, leaves the position open instead of
+        closing it. This is the half-leg rollback primitive. If it
+        fails, surface it and stop the cycle."""
         raise NotImplementedError(
             f"{self.venue_name}.reduce_only_close is not implemented."
         )

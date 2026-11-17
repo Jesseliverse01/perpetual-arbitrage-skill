@@ -5,7 +5,7 @@ One venue adapter with the same shape as a Hyperliquid adapter, so the
 skill's unified execution cycle (SKILL.md §13/§14/§16) can run a
 Strategy E leg on Lighter. Stdlib + the official Lighter Python SDK
 (`lighter-sdk`, https://github.com/elliottech/lighter-python,
-Apache-2.0) only. No raw signing code is implemented here — every
+Apache-2.0) only. No raw signing code is implemented here. Every
 write goes through `lighter.SignerClient`.
 
 Safety gates (no exceptions):
@@ -20,14 +20,14 @@ Safety gates (no exceptions):
     from LIGHTER_TESTNET_PRIVATE_KEY (testnet) or LIGHTER_PRIVATE_KEY
     (mainnet). The L1 ETH private key is NEVER needed for trading; it
     is only used once, passed explicitly to ``register_api_key()``, to
-    register a new API key — and it is never stored.
+    register a new API key, and it is never stored.
   * No mainnet order is ever placed by this module's demo, and the
     module never touches deposit / withdraw / transfer / leverage.
 
 Venue quirks, from SKILL.md §14 (verified against the official SDK):
   * Lighter ignores ``clientOrderId`` when a bracket is present, so
     bracket legs are matched in reconcile by (baseSymbol, side,
-    size) — see ``reconcile_key()``. ``cancel_order()`` takes the
+    size). See ``reconcile_key()``. ``cancel_order()`` takes the
     client order index for plain orders; for bracket legs use
     ``find_active_order()`` + ``cancel_all_orders(symbol)``.
   * A write failing with 401 means stale credentials: the cycle
@@ -37,7 +37,7 @@ Venue quirks, from SKILL.md §14 (verified against the official SDK):
     (LighterServerError carries the venue message verbatim).
   * Half-leg risk: if one leg of a two-venue arb fills and the other
     fails, roll back immediately with a reduce-only market close of
-    the filled leg — ``reduce_only_close()`` is that primitive. If
+    the filled leg. ``reduce_only_close()`` is that primitive. If
     the rollback itself fails, surface it and STOP the cycle.
   * Testnet and mainnet have DIFFERENT market indices (testnet ETH
     perp is 4095; mainnet ETH perp is 0). Market indices are always
@@ -60,7 +60,7 @@ Environment (all optional except as noted):
 Without keys the client still connects and serves public reads
 (markets, mark price, funding). Writes without keys raise
 LighterNotSignedInError. One-time setup for a fresh account (needs a
-funded account first — on testnet that means connecting a wallet in
+funded account first. On testnet that means connecting a wallet in
 https://testnet.app.lighter.xyz, which credits $500 test USDC):
 ``register_api_key(eth_private_key, api_key_index)`` prints the new
 API private key once; put it in the env var yourself.
@@ -213,7 +213,7 @@ class LighterClient(VenueAdapter):
                 # check_client() fetches /apikeys through the NATIVE signer
                 # binary, which does its own HTTP and ignores proxy env vars:
                 # on a proxied VM it fails at the TLS handshake even for a
-                # valid key. It is advisory only — the first signed write
+                # valid key. It is advisory only. The first signed write
                 # (submitted via aiohttp, which honours the proxy) is the
                 # real check. Never let it block a connection.
                 err = self._signer.check_client()
@@ -227,7 +227,7 @@ class LighterClient(VenueAdapter):
                 )
         else:
             logger.warning(
-                "No %sPRIVATE_KEY in the environment — read-only mode. "
+                "No %sPRIVATE_KEY in the environment. Read-only mode. "
                 "Writes will raise LighterNotSignedInError.",
                 self._env_prefix,
             )
@@ -274,7 +274,7 @@ class LighterClient(VenueAdapter):
             )
         if status is not None and 500 <= status < 600:
             return LighterServerError(
-                f"{status} from Lighter, NOT auto-retried — the order may already "
+                f"{status} from Lighter, NOT auto-retried. The order may already "
                 f"have committed on-venue. Venue message verbatim: {body[:500]}"
             )
         return LighterError(f"Lighter API error (status {status}): {body[:500]}")
@@ -356,6 +356,23 @@ class LighterClient(VenueAdapter):
         if side in ("sell", "short"):
             return True
         raise LighterConfigError(f"side must be buy/long or sell/short, got {side!r}")
+
+    @staticmethod
+    def _closing_side(side: str) -> str:
+        """The order side that closes a leg. Accepts both spellings
+        the callers use: "buy"/"sell" is already the closing side,
+        while "long"/"short" names the leg being closed (a long closes
+        with a sell, a short with a buy)."""
+        s = str(side).strip().lower()
+        if s in ("buy", "sell"):
+            return s
+        if s == "long":
+            return "sell"
+        if s == "short":
+            return "buy"
+        raise LighterConfigError(
+            f"side must be buy/sell (or long/short), got {side!r}"
+        )
 
     def _base_amount(self, market: MarketInfo, size: float) -> int:
         if size <= 0:
@@ -450,7 +467,7 @@ class LighterClient(VenueAdapter):
     def get_active_orders(self, symbol: str | None = None) -> list[dict]:
         """Resting orders for the account (needs the API key: the auth
         token is signed with it). Bracket legs are matched by
-        (symbol, side, size) — see reconcile_key()."""
+        (symbol, side, size). See reconcile_key()."""
         self._require_signed()
         market_id = self._market(symbol).market_id if symbol else None
         try:
@@ -505,8 +522,8 @@ class LighterClient(VenueAdapter):
     @staticmethod
     def reconcile_key(order: dict) -> tuple:
         """Match key for an order. Lighter ignores clientOrderId when a
-        bracket is present (§14), so reconcile on (symbol, side, size)
-        — never on the client order id alone."""
+        bracket is present (§14), so reconcile on (symbol, side, size),
+        never on the client order id alone."""
         return (
             str(order.get("symbol", "")).upper(),
             str(order.get("side", "")).lower(),
@@ -514,7 +531,7 @@ class LighterClient(VenueAdapter):
         )
 
     def find_active_order(self, symbol: str, side: str, size: float) -> dict | None:
-        """Find a resting order by (symbol, side, size) — the only
+        """Find a resting order by (symbol, side, size), the only
         reliable match for bracket legs. Returns None when absent."""
         want = (symbol.upper(), side.lower(), float(size))
         for order in self.get_active_orders(symbol):
@@ -569,7 +586,7 @@ class LighterClient(VenueAdapter):
         return (float(bids[0].price) + float(asks[0].price)) / 2
 
     # ------------------------------------------------------------------
-    # writes — dry_run=True by default; live needs dry_run=False + confirm
+    # writes: dry_run=True by default; live needs dry_run=False + confirm
     # ------------------------------------------------------------------
     def place_market_order(
         self,
@@ -730,7 +747,7 @@ class LighterClient(VenueAdapter):
         entry plus a reduce-only stop-loss and take-profit for the whole
         executed size (BaseAmount=0, like the official example). The
         SL/TP limit prices sit 0.2% beyond their triggers so a trigger
-        still fills. Reconcile the legs by (symbol, side, size) — the
+        still fills. Reconcile the legs by (symbol, side, size). The
         client order ids are ignored by Lighter on bracket orders.
         Parameter order follows the adapter interface: entry, then
         take-profit, then stop-loss."""
@@ -836,7 +853,7 @@ class LighterClient(VenueAdapter):
         confirm: bool = False,
     ) -> dict:
         """Cancel one order by its CLIENT order index (the index given
-        at creation — the official example cancels the same way). For
+        at creation. The official example cancels the same way). For
         bracket legs, whose client ids Lighter ignores, find the leg
         with find_active_order() and cancel the whole market with
         cancel_all_orders(symbol) instead."""
@@ -926,13 +943,16 @@ class LighterClient(VenueAdapter):
         dry_run: bool = True,
         confirm: bool = False,
     ) -> dict:
-        """Reduce-only market close — the half-leg rollback primitive
-        (§14/§16 step 9). ``side`` is the side of the leg being closed
-        (a long is closed with a sell). If this fails, surface it and
+        """Reduce-only market close, the half-leg rollback primitive
+        (§14/§16 step 9). ``side`` accepts both spellings the callers
+        use: "buy"/"sell" is already the closing order side, while
+        "long"/"short" names the leg being closed (a long closes with
+        a sell, a short with a buy). If this fails, surface it and
         STOP the cycle; never leave a one-legged trade."""
+        closing_side = self._closing_side(side)
         return self.place_market_order(
             symbol,
-            side,
+            closing_side,
             size,
             slippage_pct=slippage_pct,
             dry_run=dry_run,
@@ -947,8 +967,8 @@ class LighterClient(VenueAdapter):
         """Register a fresh API key for this account (official
         system_setup.py flow). The L1 ETH private key is passed
         explicitly, used only to sign the ChangePubKey transaction,
-        and never stored anywhere. Returns the new API private key —
-        put it in LIGHTER_TESTNET_PRIVATE_KEY / LIGHTER_PRIVATE_KEY
+        and never stored anywhere. Returns the new API private key.
+        Put it in LIGHTER_TESTNET_PRIVATE_KEY / LIGHTER_PRIVATE_KEY
         yourself. Requires a funded account (on testnet: connect a
         wallet in https://testnet.app.lighter.xyz first)."""
         if self.account_index is None:
@@ -958,7 +978,7 @@ class LighterClient(VenueAdapter):
             )
         index = api_key_index if api_key_index is not None else self.api_key_index
         if index == 0:
-            raise LighterConfigError("API key index 0 belongs to the web app — use another slot (e.g. 3).")
+            raise LighterConfigError("API key index 0 belongs to the web app. Use another slot (e.g. 3).")
         private_key, public_key, err = lighter.create_api_key()
         if err is not None:
             raise LighterError(f"Could not generate API key pair: {err}")

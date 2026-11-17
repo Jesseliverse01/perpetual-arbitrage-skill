@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.8.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
+Version 0.9.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
 
 ## Please read this first
 
@@ -974,24 +974,22 @@ across venues. It is wired in since v0.7.0: the adapters live in
 
 Custom venues, since v0.8.0: the execution engine no longer knows
 only Hyperliquid and Lighter. Any venue can be added by writing one
-adapter file that implements the interface below. Hyperliquid and
-Lighter are the two working adapters. dYdX, Aster and Derive ship
-as stubs: they are importable, they name what is verified about the
-venue, and they refuse to connect until someone fills them in. A
-ticket whose venue has no working adapter is refused with a clear
-message, never half-run. That is the whole point: test the agent on
-the testnet of the venue you pick, with your own credentials, before
-you run live arbitrage anywhere.
+adapter file that implements the interface below. Since v0.9.0 all
+five venues have working adapters: Hyperliquid, Lighter, dYdX,
+Aster and Derive. A ticket whose venue has no working adapter is
+refused with a clear message, never half-run. That is the whole
+point: test the agent on the testnet of the venue you pick, with
+your own credentials, before you run live arbitrage anywhere.
 
 **What it needs (all three, no exceptions):**
 
-1. **Accounts with balance on at least two venues** (Hyperliquid +
-   Lighter today; any two working adapters once more exist).
-2. **API access to that unified API** (credentials for the account).
+1. Accounts with balance on at least two venues (any two of
+   the five working adapters).
+2. API access to that unified API (credentials for the account).
    Whoever runs live mode needs their own; never ask anyone to paste
    a credential in chat. Reads need the credentials too — there is no
    public/keyless mode for execution.
-3. The user's **explicit per-action approval** for each exact plan. Their
+3. The user's explicit per-action approval for each exact plan. Their
    standing rule governs every real order.
 
 ### The adapter interface
@@ -1020,7 +1018,12 @@ and network.
   pay longs. Convert the venue per-interval rate with APR% = rate
   times intervals per year times 100. For an 8h rate that is rate
   times 3 times 365 times 100; forgetting the final times 100
-  understates the APR by 100x.
+  understates the APR by 100x. Not every venue quotes per 8h:
+  dYdX and Derive quote per hour, so their APR is rate times 24
+  times 365 times 100, and Aster quotes per symbol (8h for BTC,
+  other symbols settle 4h or hourly), so the adapter reads the
+  interval live and falls back to 8h only when that read fails.
+  The scanner must not apply its 8h factor to a Derive or dYdX row.
 - `fetch_mark_price(symbol)`: the current mark price as a float.
   Raise when the venue does not list the symbol on this network.
 - `place_market_order(symbol, side, size, dry_run, confirm)`,
@@ -1035,6 +1038,11 @@ and network.
   cancel each one) and a default rollback (find the position, work
   out its side, reduce-only close it). A venue overrides them only
   when it has a native call that does the same thing.
+  `reduce_only_close` accepts both spellings for the side:
+  "buy"/"sell" is already the closing order side, and "long"/"short"
+  names the leg being closed (a long closes with a sell, a short
+  with a buy). Both callers use it: the execution engine passes the
+  order side, the base rollback passes the position side.
 
 ### Add your own venue
 
@@ -1056,37 +1064,77 @@ and network.
    discussed, and mainnet still needs `--mainnet` plus a yes per
    ticket.
 
-### What is verified about each stub venue
+### What is verified about each venue
 
-- dYdX: testnet app https://v4.testnet.dydx.exchange (HTTP 200).
-  Faucet via the app deposit/recharge button (300 test USDC
-  automatically) and the faucet API
-  https://faucet.v4testnet.dydx.exchange (POST /faucet/tokens).
-  Testnet indexer returned 404 from this VM on 2026-11-17, so the
-  funding endpoint is not yet verified. All perps USDC-settled.
-  Auth is an Ethereum wallet signature. Testnet chain id
-  dydx-testnet-4. Gas token DV4TNT on testnet, from the same faucet.
-- Aster: the scanner already reads Aster funding live via
-  premiumIndex (750 coins). Testnet futures REST
-  https://fapi.asterdex-testnet.com verified HTTP 200 (ping,
-  exchangeInfo, premiumIndex all answer). The testnet app URL and
-  the faucet are NOT verified; the stub says so. Chain id 714 for
-  testnet comes from the official demo script via a third-party
-  guide; re-check it before using it.
-- Derive: testnet app https://testnet.derive.xyz (HTTP 200,
-  redirects to /trade/options). USDC faucet in the dashboard.
+- dYdX: implemented on the official `dydx-v4-client` SDK (1.1.6).
+  Testnet app https://v4.testnet.dydx.exchange (HTTP 200). The
+  testnet indexer works from this VM at /v4/perpetualMarkets (226
+  markets); the earlier 404 was the wrong path (/v4/markets does
+  not exist). Funding is hourly, so APR is rate times 24 times 365
+  times 100. Public reads verified live (mark price, funding,
+  balance, positions, orders) and dry runs simulate. A live signed
+  market order was received and rejected on-chain (unfunded
+  subaccount, equity tier limit 0), which proves key derivation,
+  order construction, signing, broadcast and chain processing. NOT
+  verified: a filled order, a resting bracket, a real cancel, a
+  reduce-only close, the two-leg rollback. The faucet API returns
+  202 but its USDC leg did not land for three fresh addresses after
+  15 to 60 minutes; the native gas faucet works (10 DV4TNT). Fund
+  a testnet subaccount in the browser first (deposit/recharge,
+  300 test USDC). All perps USDC-settled. Auth is an Ethereum
+  wallet signature. Testnet chain id dydx-testnet-4.
+- Aster: implemented as raw HTTP plus `eth-account` (no maintained
+  official V3 Python SDK exists). Auth is EIP-712 agent signing,
+  not an API key and secret: set ASTER_TESTNET_SIGNER (the API
+  wallet address) and ASTER_TESTNET_SIGNER_PRIVATE_KEY (its private
+  key). Testnet app https://www.asterdex-testnet.com (HTTP 200).
+  Public reads verified live (ping, exchangeInfo with 21 symbols,
+  premiumIndex, funding rates; funding interval read live per
+  symbol, 8h for BTC). Dry runs simulate, and a signed request
+  reached the venue and got a parsed auth error ("No agent
+  found"), which proves the signature path works. NOT verified: a
+  filled order, a resting bracket, a real cancel, a reduce-only
+  close, the two-leg rollback. A funded testnet account plus a
+  registered API wallet can only be created in the browser. Watch
+  for venue code -5050 (deposit gate, in force since 1 Sep 2026):
+  if testnet returns it on the first signed call, signed calls are
+  blocked until the venue lifts it. Chain id 714 testnet, 1666
+  mainnet. The scanner already reads Aster funding live via
+  premiumIndex (750 coins).
+- Derive: implemented on the official `derive-py` SDK (0.1.5, MIT),
+  v3 API https://testnet.api.derive.xyz/v3. Testnet app
+  https://testnet.derive.xyz (HTTP 200). Public reads verified live
+  on testnet (20 perps, mark price, per-hour funding as APR);
+  writes are code-complete with the usual dry-run and confirm
+  gates but NOT yet verified on a funded account. Funding is
+  quoted per hour, so APR is rate times 24 times 365 times 100.
   Trading is gasless (off-chain signed orders); deposit/withdraw
-  needs gas (ETH, OP Stack L2). Demo API host
-  api-demo.lyra.finance; individual API paths are not yet verified.
-  Auth via EIP-712 signed messages / session keys.
+  needs gas (ETH, OP Stack L2). Auth via session keys: set
+  DERIVE_TESTNET_PRIVATE_KEY (session key), DERIVE_TESTNET_WALLET
+  (owner wallet) and DERIVE_TESTNET_SUBACCOUNT_ID. The old v2 demo
+  host api-demo.lyra.finance is not used.
 - Lighter testnet: app https://testnet.app.lighter.xyz, host
   testnet.zklighter.elliot.ai, only 8 perps on testnet (AKBNKB,
   ASELS, ASELSB, BTC, ETH, SOL, THYAOB, TUPRSB). 10 dollar minimum
   notional per order. The API key index is set by the app (default
-  3 in the adapter).
+  3 in the adapter). Verified on a funded account: a market order
+  that filled, a bracket whose entry filled with the stop-loss and
+  take-profit legs resting on the venue, a real cancel that cleared
+  both legs, and a reduce-only close that left the account flat.
+  The two-leg live rollback is still NOT observed; it needs both
+  venues funded at once.
 - Hyperliquid testnet: app https://app.hyperliquid-testnet.xyz.
   The drip gives 1,000 mock USDC via a gasless API claim, only for
-  addresses that deposited on mainnet.
+  addresses that deposited on mainnet. Verified: public reads, dry
+  runs, refusal gates, and a real signed order submission that the
+  venue received and rejected (unfunded throwaway address). A
+  filled order, a resting bracket, a real cancel, and the live
+  rollback were NOT observed.
+
+Mainnet is wired for all five venues and documented in LIVE.md,
+but it is NOT verified: no mainnet order was placed, no mainnet
+key was used. Mainnet is for the user's own keys, verified by the
+user with small size after a full testnet cycle works.
 
 **Capabilities a unified API must expose for the cycle (§13):**
 
