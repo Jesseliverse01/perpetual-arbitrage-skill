@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.7.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
+Version 0.7.1, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
 
 ## Please read this first
 

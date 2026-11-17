@@ -657,6 +657,14 @@ class LighterClient:
             raise LighterConfigError(f"time_in_force must be GTT, IOC or PO, got {time_in_force!r}")
         if post_only:
             tif = lighter.SignerClient.ORDER_TIME_IN_FORCE_POST_ONLY
+        # IOC orders need order_expiry 0 (DEFAULT_IOC_EXPIRY); the SDK
+        # default (-1, 28-day) is rejected by the signer for IOC with
+        # "OrderExpiry is invalid". GTT and PO keep the 28-day default.
+        order_expiry = (
+            lighter.SignerClient.DEFAULT_IOC_EXPIRY
+            if tif == lighter.SignerClient.ORDER_TIME_IN_FORCE_IMMEDIATE_OR_CANCEL
+            else lighter.SignerClient.DEFAULT_28_DAY_ORDER_EXPIRY
+        )
         params = {
             "venue": "lighter",
             "testnet": self.testnet,
@@ -686,6 +694,7 @@ class LighterClient:
                     time_in_force=tif,
                     reduce_only=False,
                     trigger_price=0,
+                    order_expiry=order_expiry,
                     nonce=nonce,
                     api_key_index=api_key_index,
                 )

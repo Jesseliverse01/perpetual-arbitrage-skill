@@ -1,4 +1,4 @@
-# Live version (v0.7.0)
+# Live version (v0.7.1)
 
 This is the live version of the skill: the same paper-first research
 tool, plus a real execution path for the two venues it backtests
@@ -16,14 +16,17 @@ the max hold live in the ticket and in the state file, and the cycle
 scores closes on the next run. Only Hyperliquid and Lighter legs run
 live. A ticket with any other venue is refused, never half-run.
 
-What was verified, honestly: on testnet, both adapters did public
+What was verified, honestly: on a funded Lighter testnet account,
+the adapter placed a market order that filled, a bracket whose entry
+filled with the stop-loss and take-profit legs resting on the venue,
+a real cancel that cleared both legs, and a reduce-only close that
+left the account flat. On Hyperliquid testnet, the adapter did public
 reads, dry runs, refusal gates, and a real signed order submission
-that the venue received and rejected (the throwaway addresses were
-unfunded). What was NOT verified: a market order that actually
-fills, a bracket resting on the venue, a real cancel, and the live
-rollback. Those need a funded testnet account, and funding one is a
-human step (below). Run the funded testnet steps yourself before you
-trust live mode with real money.
+that the venue received and rejected (the throwaway address was
+unfunded). What was NOT verified: a filled order on Hyperliquid, and
+the two-leg live rollback, which needs both venues funded at once.
+Run the funded testnet steps yourself before you trust live mode
+with real money.
 
 ## Install the skill in your agent
 
@@ -54,7 +57,15 @@ one. The adapters never log a key.
 export HL_TESTNET_PRIVATE_KEY=0x...
 export LIGHTER_TESTNET_PRIVATE_KEY=0x...
 export LIGHTER_TESTNET_ACCOUNT_INDEX=1
+export LIGHTER_TESTNET_API_KEY_INDEX=3
 ```
+
+The Lighter API key index is the number the app assigned your key;
+the default is 3, set it if yours differs (the app shows it on the
+API Keys page). Lighter also enforces a minimum notional of 10
+dollars per order, so a tiny test size can be refused or silently
+not fill; the Strategy E default of 50 dollars per leg is safely
+above it.
 
 For mainnet the names drop the `TESTNET_` part
 (`HL_PRIVATE_KEY`, `LIGHTER_PRIVATE_KEY`,
@@ -73,7 +84,7 @@ faucet only serves addresses that already exist on mainnet, so a
 brand new address gets refused; use an address that has deposited on
 mainnet before, or fund it from mainnet first. On Lighter, connect a
 wallet in the testnet app at testnet.app.lighter.xyz and it credits
-500 test USDC; there is no faucet API.
+test USDC; there is no faucet API.
 
 Then rehearse the whole live path without sending anything:
 
@@ -107,9 +118,10 @@ missing or corrupt, live mode stops rather than trading from memory.
 ## Risks, plainly
 
 Funding spreads are thin and move fast. The backtests are paper, the
-live path has not yet seen a filled order, and a venue can reject,
-delay, or partially fill a leg. The rollback guard covers the
-half-leg case, but it cannot cover a venue outage or a market that
-moves past the stop while both legs are open. Never trade money you
-cannot afford to lose, and never paste your main key anywhere; use
-an API wallet or API key with no withdrawal rights.
+live path has seen filled orders on Lighter testnet but not yet on
+Hyperliquid, and a venue can reject, delay, or partially fill a leg.
+The rollback guard covers the half-leg case, but it cannot cover a
+venue outage or a market that moves past the stop while both legs are
+open. Never trade money you cannot afford to lose, and never paste
+your main key anywhere; use an API wallet or API key with no
+withdrawal rights.
