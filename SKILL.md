@@ -846,12 +846,9 @@ listed mid-window).
 This run is in-sample: the parameters and the window are the same
 ones the strategy was developed on, and there is no out-of-sample
 validation of the Strategy E parameter set yet (Strategy A has one,
-§6). Two 104-day half-window runs
-(`results/backtest-strategy-e-2026-08-04-104d.json` and
-`results/backtest-strategy-e-2026-11-16-104d.json`) check whether the
-result is stable across halves — a stability check, not out-of-sample
-validation. Quote the headline total as in-sample until a fresh
-window exists.
+§6). A half-window stability check was planned but not run — the E
+re-runs were skipped. Quote the headline total as in-sample until a
+fresh window exists.
 
 The §13 portfolio caps (max 12 open arbs, max 3 new opens per hour)
 are enforced by a greedy chronological filter on the per-coin
