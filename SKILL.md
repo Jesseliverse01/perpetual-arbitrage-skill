@@ -1,11 +1,11 @@
 ---
 name: perpetual-arbitrage
-description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only — no keys, no live trading. Use when the user asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
+description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only. Live execution is an explicit opt-in through scripts/live/ (testnet by default; see LIVE.md). Use when the user asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
 ---
 
 # Perpetual Arbitrage
 
-Version 0.5.9, 2026-11-16. Paper/backtest only.
+Version 0.7.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
 
 ## Please read this first
 
@@ -13,8 +13,11 @@ This is **not financial advice**. It is a research tool — a way to study
 how funding rates behave and to test ideas on old data before you risk
 anything real.
 
-- **Nothing here trades live.** Every script reads public data and
-  writes a report. No orders, no wallet, no keys.
+- **Live trading is off by default.** Every core script reads public
+  data and writes a report. Live mode (`scripts/live/`,
+  `execute.py --mode live`) places orders only with `--live-confirm`
+  and a yes per ticket, on testnet unless `--mainnet` is passed.
+  Keys come from the environment only.
 - **A backtest is not a promise.** Past results do not predict what
   happens next. A strategy that made money on old data can lose money
   tomorrow.
@@ -959,21 +962,23 @@ spike filters need spread history, which is only computable for
 HL↔Lighter pairs, and none of these nine has its best pair on
 HL↔Lighter. WATCH means "worth watching", not "open now".
 
-## 14. Unified execution (optional, future)
+## 14. Unified execution (optional, live since v0.7.0)
 
 Strategy E's live execution path is a **unified multi-venue execution
 API** — one API for the venues, with ranked funding strategies, batch
-order placement, and margin visibility across venues. It is documented
-here, **not wired in**, and not available now.
+order placement, and margin visibility across venues. It is wired in
+since v0.7.0: the adapters live in `scripts/live/` (Hyperliquid +
+Lighter), `scripts/execute.py --mode live` runs them, and `LIVE.md`
+is the setup guide. Testnet by default; mainnet needs `--mainnet`.
 
 **What it needs (all three, no exceptions):**
 
 1. **Accounts with balance on at least two venues** (Hyperliquid +
    Lighter; Aster as a third venue where supported).
 2. **API access to that unified API** (credentials for the account).
-   The user has none set up; never ask them to paste a credential in
-   chat. Reads need the credentials too — there is no public/keyless
-   mode for execution.
+   Whoever runs live mode needs their own; never ask anyone to paste
+   a credential in chat. Reads need the credentials too — there is no
+   public/keyless mode for execution.
 3. The user's **explicit per-action approval** for each exact plan. Their
    standing rule governs every real order.
 

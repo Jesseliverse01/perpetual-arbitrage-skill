@@ -14,8 +14,11 @@ Modes:
   --mode ticket  : (Default) Read scan results, generate structured trade tickets, and exit.
   --mode paper   : Record paper execution into state ledger (no slippage
                    or fee simulation yet).
-  --mode live    : Live execution blueprint. Requires pre-funded venue accounts, API keys,
-                   and explicit user confirmation per cycle (SKILL.md §12/§14/§16).
+  --mode live    : Live two-leg execution through scripts/live/
+                   (Hyperliquid + Lighter adapters, SKILL.md §14/§16).
+                   Testnet by default; mainnet needs --mainnet. Every
+                   live ticket needs --live-confirm AND a per-ticket
+                   yes. --auto-approve is refused in live mode.
 
 Usage:
   python3 execute.py [--scan-file ../results/multivenue-scan-latest.json]
@@ -23,8 +26,14 @@ Usage:
                      [--notional 100.0]
                      [--leverage 5.0]
                      [--state-file ../results/live-watch-state.json]
+                     [--live-confirm] [--mainnet] [--dry-run-live]
                      [--dry-run]
 
+Live keys come from the environment only, never from a file or chat:
+  HL_TESTNET_PRIVATE_KEY / HL_PRIVATE_KEY,
+  LIGHTER_TESTNET_PRIVATE_KEY / LIGHTER_PRIVATE_KEY (+ account index).
+See LIVE.md. The core skill stays stdlib-only; live mode needs the
+optional SDKs in requirements-live.txt.
 Stdlib only, safe by default.
 """
 import argparse
@@ -66,7 +75,7 @@ def load_state(state_file):
                 return d
         except Exception as e:
             # Per SKILL.md §16 rule 1: a corrupt state file means stop,
-            # never trade from memory. (A missing file is fine — first
+            # never trade from memory. (A missing file is fine: first
             # run starts fresh with no positions.)
             print(f"Error: state file {state_file} is corrupt ({e}). Stopping.")
             sys.exit(1)
@@ -94,7 +103,7 @@ def classify_lock_quality(row):
     - Synthetic edge: Single-leg directional or unhedged tailwind.
     """
     if "venue" in row:  # Single venue scan (Strategy A)
-        return "synthetic_edge", "Directional long with funding tailwind (Strategy A — unhedged)"
+        return "synthetic_edge", "Directional long with funding tailwind (Strategy A, unhedged)"
 
     long_v = row.get("long_venue")
     short_v = row.get("short_venue")
@@ -214,8 +223,150 @@ def print_ticket(ticket):
     print(f" Safe Floor   : {ticket['brackets']['safe_floor_apr_pct']:.1f}% APR")
     print(f" Hold Horizon : {ticket['brackets']['min_hold_hours']}h min / {ticket['brackets']['max_hold_hours']}h max")
     print("-" * 65)
-    print(" Rollback rule: Leg 1 auto-closes if Leg 2 fails within 3s (live mode only; live mode is disabled)")
+    print(" Rollback rule: if Leg 2 fails, Leg 1 closes at once (reduce-only).")
+    print(" Live mode: testnet by default; mainnet needs --mainnet + --live-confirm.")
     print("=" * 65 + "\n")
+
+
+# -- live execution (SKILL.md §14/§16) ------------------------------------
+# Only the venues with an adapter in scripts/live/ can run live.
+# A ticket whose legs sit on any other venue is refused, never half-run.
+LIVE_VENUES = {"hyperliquid", "lighter"}
+
+
+def venue_symbol(coin, venue):
+    """Canonical scan symbol -> the symbol a venue lists.
+
+    Meme coins are the only split: Hyperliquid lists the k-form
+    (kPEPE) while Lighter lists the 1000-form (1000PEPE). Every other
+    coin is listed under the same symbol on both venues.
+    """
+    if venue == "hyperliquid" and coin.startswith("1000") and len(coin) > 4:
+        return "k" + coin[4:]
+    return coin
+
+
+def load_live_clients(testnet):
+    """Connect the live adapters. Raises a plain error when the optional
+    live SDKs are not installed, or when a venue key is missing."""
+    live_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "live")
+    if live_dir not in sys.path:
+        sys.path.insert(0, live_dir)
+    try:
+        import hyperliquid_client
+        import lighter_client
+    except ImportError as e:
+        raise SystemExit(
+            "Live mode needs the optional live SDKs: "
+            "pip install -r requirements-live.txt "
+            f"(import failed: {e})"
+        )
+    clients = {}
+    clients["hyperliquid"] = hyperliquid_client.connect(testnet=testnet)
+    clients["lighter"] = lighter_client.LighterClient.connect(testnet=testnet)
+    return clients
+
+
+def _mark_price(client, venue, symbol):
+    """Mark price as a float, whatever the adapter returns."""
+    px = client.fetch_mark_price(symbol)
+    if isinstance(px, dict):
+        return float(px.get("mark_price") or px.get("markPx"))
+    return float(px)
+
+
+def _place_leg(client, venue, symbol, is_buy, size, dry_run):
+    """One market leg through the venue adapter. Live needs confirm=True;
+    dry_run=True simulates (no venue write)."""
+    if venue == "hyperliquid":
+        return client.place_market_order(symbol, is_buy, size,
+                                         dry_run=dry_run, confirm=True)
+    return client.place_market_order(symbol, "buy" if is_buy else "sell",
+                                     size, dry_run=dry_run, confirm=True)
+
+
+def _rollback_leg(client, venue, symbol, is_buy, size, dry_run):
+    """Close one filled leg at once, reduce-only (§14 half-leg rule).
+    `is_buy` is the side of the leg that filled."""
+    if venue == "hyperliquid":
+        return client.rollback_close(symbol, sz=size,
+                                     dry_run=dry_run, confirm=True)
+    # Lighter: a long closes with a sell, a short with a buy.
+    return client.reduce_only_close(symbol, "sell" if is_buy else "buy",
+                                    size, dry_run=dry_run, confirm=True)
+
+
+def execute_live_order(ticket, state, clients, testnet, dry_run_live):
+    """Place both legs of one ticket live (or rehearse them with
+    dry_run_live). Returns True when both legs are placed, False when
+    the ticket was refused, and "STOP" when the cycle must stop at
+    once (a leg failed and the rollback could not be confirmed)."""
+    network = "testnet" if testnet else "MAINNET"
+    long_v = ticket["pair"]["long_leg"]["venue"].lower()
+    short_v = ticket["pair"]["short_leg"]["venue"].lower()
+    coin = ticket["coin"]
+    for v in (long_v, short_v):
+        if v not in LIVE_VENUES:
+            print(f"  [REFUSED] {coin}: venue '{v}' has no live adapter "
+                  "(live supports Hyperliquid + Lighter only). Ticket only.")
+            return False
+
+    long_client = clients[long_v]
+    short_client = clients[short_v]
+    long_sym = venue_symbol(coin, long_v)
+    short_sym = venue_symbol(coin, short_v)
+    try:
+        long_sz = ticket["pair"]["long_leg"]["notional_usd"] / _mark_price(long_client, long_v, long_sym)
+        short_sz = ticket["pair"]["short_leg"]["notional_usd"] / _mark_price(short_client, short_v, short_sym)
+    except Exception as e:
+        # A venue that cannot price the coin (not listed on that
+        # network, testnet universe is smaller than mainnet) means
+        # this ticket cannot run live. Nothing was placed.
+        print(f"  [FAILED] Cannot price {coin} on both venues: {e}")
+        print("  Nothing is open. STOP the cycle and check the venue.")
+        return "STOP"
+    print(f"\n[LIVE EXECUTION] {coin} on {network} "
+          f"(dry run: {dry_run_live}). Long {long_v} {long_sz:.4f} {long_sym}, "
+          f"short {short_v} {short_sz:.4f} {short_sym}")
+
+    # Leg 1 (long).
+    try:
+        leg1 = _place_leg(long_client, long_v, long_sym, True, long_sz, dry_run_live)
+    except Exception as e:
+        print(f"  [FAILED] Leg 1 (long {long_v}) did not place: {e}")
+        print("  Nothing is open. STOP the cycle and check the venue.")
+        return "STOP"
+    print(f"  Leg 1 placed: {leg1}")
+
+    # Leg 2 (short). If it fails, roll Leg 1 back at once (§14).
+    try:
+        leg2 = _place_leg(short_client, short_v, short_sym, False, short_sz, dry_run_live)
+    except Exception as e:
+        print(f"  [FAILED] Leg 2 (short {short_v}) did not place: {e}")
+        print("  Rolling Leg 1 back at once (reduce-only close)...")
+        try:
+            rb = _rollback_leg(long_client, long_v, long_sym, True, long_sz, dry_run_live)
+            print(f"  Rollback done: {rb}")
+            print("  Position is flat. STOP the cycle and check the venue.")
+        except Exception as rb_e:
+            print(f"  [EMERGENCY] Rollback ALSO failed: {rb_e}")
+            print("  The long leg may still be open and one-legged. "
+                  "STOP the cycle and unwind it manually.")
+        return "STOP"
+    print(f"  Leg 2 placed: {leg2}")
+
+    record = {
+        "id": f"{coin}-{int(time.time())}",
+        "coin": coin,
+        "network": network,
+        "opened_at": int(time.time() * 1000),
+        "ticket": ticket,
+        "legs": {"long": leg1, "short": leg2},
+        "status": "OPEN",
+    }
+    state["open_positions"][record["id"]] = record
+    print(f"[LIVE EXECUTION SUCCESS] Position recorded as {record['id']}.\n")
+    return True
 
 
 def main():
@@ -227,6 +378,12 @@ def main():
     parser.add_argument("--leverage", type=float, default=DEFAULT_LEVERAGE, help="Target leverage per leg")
     parser.add_argument("--state-file", default=None, help="Path to state json file")
     parser.add_argument("--auto-approve", action="store_true", help="Auto-approve paper orders without prompting")
+    parser.add_argument("--live-confirm", action="store_true",
+                        help="Required for --mode live: confirms live orders are intended")
+    parser.add_argument("--mainnet", action="store_true",
+                        help="Live mode runs on testnet by default; pass this for mainnet")
+    parser.add_argument("--dry-run-live", action="store_true",
+                        help="Live mode rehearsal: connect and simulate both legs, no venue writes")
     args = parser.parse_args()
 
     here = os.path.dirname(os.path.abspath(__file__))
@@ -268,6 +425,7 @@ def main():
         actionable = sorted(pool, key=lambda x: x.get("net_apr_pct", 0), reverse=True)[:1]
 
     state = load_state(state_file)
+    clients = None  # live adapters, connected once, on first live ticket
 
     for cand in actionable[:3]:  # Max 3 plans per cycle (SKILL.md §16 rule 5)
         ticket = generate_trade_ticket(cand, notional_usd=args.notional, leverage=args.leverage)
@@ -286,12 +444,35 @@ def main():
             save_state(state_file, state)
 
         elif args.mode == "live":
-            print("\n[SAFETY GATE] Live execution requested.")
-            print("Per SKILL.md §12/§14/§16, live execution requires:")
-            print("  1. Funded accounts on both designated venues.")
-            print("  2. API credentials configured in secure environment variables.")
-            print("  3. Operator sign-off for each specific ticket.")
-            print("Status: LIVE ORDERS DISABLED IN REPOSITORY SANDBOX. Use --mode paper for simulation.")
+            if args.auto_approve:
+                print("Error: --auto-approve is refused in live mode. "
+                      "Every live ticket needs a human yes.")
+                sys.exit(2)
+            if not args.live_confirm:
+                print("\n[SAFETY GATE] Live execution requested.")
+                print("Per SKILL.md §12/§14/§16, live execution requires:")
+                print("  1. Funded accounts on both designated venues.")
+                print("  2. API credentials configured in secure environment variables.")
+                print("  3. Operator sign-off for each specific ticket.")
+                print("Re-run with --live-confirm (testnet by default; "
+                      "--mainnet for mainnet). Nothing was sent.")
+                sys.exit(0)
+            if clients is None:
+                testnet = not args.mainnet
+                print(f"\nConnecting live adapters "
+                      f"({'testnet' if testnet else 'MAINNET'})...")
+                clients = load_live_clients(testnet=testnet)
+            ans = input(f"Approve LIVE trade for {ticket['coin']}? (y/N): ").strip().lower()
+            if ans != "y":
+                print(f"Skipped {ticket['coin']}.")
+                continue
+            result = execute_live_order(ticket, state, clients,
+                                        testnet=not args.mainnet,
+                                        dry_run_live=args.dry_run_live)
+            save_state(state_file, state)
+            if result == "STOP":
+                print("Cycle stopped. Check the venue before running again.")
+                sys.exit(1)
 
 
 if __name__ == "__main__":

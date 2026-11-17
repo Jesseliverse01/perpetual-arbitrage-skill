@@ -1,0 +1,6 @@
+# Optional live-only dependencies for scripts/live/ and
+# scripts/execute.py --mode live. The core skill is stdlib-only and
+# needs none of these. Install in a venv:
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements-live.txt
+hyperliquid-python-sdk==0.24.0
+lighter-sdk==1.1.8

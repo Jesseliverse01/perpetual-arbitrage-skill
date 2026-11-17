@@ -2,8 +2,10 @@
 
 > **Disclaimer — please read this first.** This is not financial advice.
 > It is a research tool for studying how funding rates behave
-> and testing ideas on old data. Nothing here trades live — no orders,
-> no wallet, no keys. A backtest is not a promise: past results do not
+> and testing ideas on old data. Live trading exists since v0.7.0
+> (see LIVE.md), but it is off by default: no orders, no wallet, no
+> keys unless you turn live mode on with --live-confirm, and testnet
+> comes first. A backtest is not a promise: past results do not
 > predict what happens next. Funding rates can flip every hour, and a
 > -4,000% APR is one hour annualized, not a year's return. You can lose
 > money fast — liquidation, a venue going down, one leg of a two-leg
@@ -12,7 +14,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.6.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets).
+Version 0.7.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
 
 ## What this is
 
@@ -22,7 +24,8 @@ people are short, shorts pay longs — and the rate goes deeply negative.
 This skill watches those payments and asks one question: is there a
 trade here?
 
-It covers five ideas, all on public data, all paper/backtest only.
+It covers five ideas, all on public data. Paper and backtest first;
+live execution is an explicit opt-in (see LIVE.md).
 
 ---
 
@@ -34,7 +37,7 @@ This repository is structured as an **Agent Skill** (`SKILL.md` + `SOUL.md`). Yo
 1. **Autonomous Live Scanning:** Run `python3 scripts/multivenue_scan.py` to fetch current funding rates across Hyperliquid, Lighter, Aster, OKX, Binance, and Bybit.
 2. **Point-In-Time Scoring:** Evaluate signals 0–10 using `scripts/score.py` (with automatic trap filters for illiquid books).
 3. **Meme Coin Scale Matching (New in v0.6.0):** Automatically bridges 1,000x multiplier contracts (Hyperliquid `kPEPE`, `kBONK`, `kSHIB`, `kFLOKI` $\leftrightarrow$ Binance/Bybit/Lighter/OKX `1000PEPE`, `1000BONK`, `1000SHIB`, `1000FLOKI`).
-4. **Structured Trade Tickets & Rollback Execution:** Run `python3 scripts/execute.py` to generate complete execution tickets with lock-quality ratings and stop-loss brackets (add `--mode paper` to simulate the two-leg fills). The ticket states the rollback rule; live rollback is not implemented and live mode is disabled.
+4. **Structured Trade Tickets & Rollback Execution:** Run `python3 scripts/execute.py` to generate complete execution tickets with lock-quality ratings and stop-loss brackets (add `--mode paper` to simulate the two-leg fills, or `--mode live --live-confirm` to place them for real on testnet; mainnet needs `--mainnet`). If Leg 2 fails, Leg 1 closes at once (reduce-only).
 5. **Human-in-the-Loop Sign-Off:** The agent never trades blind. It presents trade tickets to the operator for verification and paper recording.
 
 ### Typical Agent Prompt:
@@ -50,7 +53,7 @@ This repository is structured as an **Agent Skill** (`SKILL.md` + `SOUL.md`). Yo
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits, including the net-edge formula ([`SKILL.md`](SKILL.md) §8) |
 | C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), scale aliases supported |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py), [`scripts/execute.py`](scripts/execute.py)) — paper only; live mode is disabled in the code |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py), [`scripts/execute.py`](scripts/execute.py)) — live via [`scripts/live/`](scripts/live/) (Hyperliquid + Lighter), testnet by default; see [`LIVE.md`](LIVE.md) |
 
 **Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -73,7 +76,10 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | [`SOUL.md`](SOUL.md) | The analytical mindset and risk-manager persona of the agent. |
 | [`README.md`](README.md) | This file — overview & quick start. |
 | [`LICENSE`](LICENSE) | MIT. |
-| [`scripts/execute.py`](scripts/execute.py) | **Unified Execution Engine & Trade Ticket Generator** (§16): lock classification, sizing, brackets, paper execution, and the two-leg rollback rule (stated on the ticket). |
+| [`scripts/execute.py`](scripts/execute.py) | **Unified Execution Engine & Trade Ticket Generator** (§16): lock classification, sizing, brackets, paper execution, and the two-leg rollback rule (enforced in live mode). |
+| [`scripts/live/`](scripts/live/) | Live execution adapters (§14): Hyperliquid + Lighter clients, dry-run default, keys from the environment only. |
+| [`requirements-live.txt`](requirements-live.txt) | Optional live-only SDKs (hyperliquid-python-sdk, lighter-sdk). |
+| [`LIVE.md`](LIVE.md) | Live setup guide: install, keys, testnet first, mainnet rules, risks. |
 | [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py) | Strategy E live scanner (HL + Lighter + Aster + OKX + Binance/Bybit via Lighter) with meme coin scale mapping. |
 | [`scripts/score.py`](scripts/score.py) | Score one signal 0–10 (six weighted dimensions + liquidity gate). |
 | [`scripts/scan.py`](scripts/scan.py) | Live scan of all Hyperliquid perps, ranked table + JSON/markdown report. |
