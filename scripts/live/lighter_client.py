@@ -83,6 +83,8 @@ from dataclasses import dataclass
 import lighter
 from lighter.signer_client import CreateOrderTxReq
 
+from venue_base import VenueAdapter
+
 logger = logging.getLogger("lighter_client")
 
 MAINNET_URL = "https://mainnet.zklighter.elliot.ai"
@@ -126,15 +128,20 @@ class MarketInfo:
     mark_price: float | None = None
 
 
-class LighterClient:
+class LighterClient(VenueAdapter):
     """Sync wrapper around the official async Lighter SDK.
 
     Public reads work without keys. Writes are dry-run by default and
     need dry_run=False + confirm=True to touch the venue.
     """
 
+    venue_name = "lighter"
+    testnet_url = TESTNET_URL
+    mainnet_url = MAINNET_URL
+    env_prefix = "LIGHTER_"
+
     def __init__(self, testnet: bool = False):
-        self.testnet = testnet
+        super().__init__(testnet)
         self.base_url = TESTNET_URL if testnet else MAINNET_URL
         self._env_prefix = "LIGHTER_TESTNET_" if testnet else "LIGHTER_"
         self._loop = asyncio.new_event_loop()
@@ -477,6 +484,18 @@ class LighterClient:
             )
         return out
 
+    def symbol_for(self, coin: str) -> str:
+        """The symbol Lighter lists for one canonical coin. Lighter
+        lists the 1000-form meme coins as-is (1000PEPE), so the coin
+        is returned unchanged."""
+        return coin
+
+    def get_open_orders(self, symbol: str | None = None) -> list[dict]:
+        """Outstanding orders (uniform name for the adapter interface).
+        Delegates to get_active_orders, which is the original method
+        name in this adapter."""
+        return self.get_active_orders(symbol)
+
     def _symbol_for_market(self, market_id: int) -> str:
         for market in self._markets.values():
             if market.market_id == market_id:
@@ -503,13 +522,15 @@ class LighterClient:
                 return order
         return None
 
-    def fetch_funding_rate(self, symbol: str, exchange: str = "lighter") -> dict:
-        """Current funding rate for a symbol on an exchange.
+    def fetch_funding_rate(self, symbol: str, exchange: str = "lighter") -> float:
+        """Current funding APR for a symbol, as a float in percent.
 
         Lighter's /funding-rates rows are 8h-normalized, so
-        APR = rate * 3 * 365 (the same conversion the skill's scanner
-        uses). ``exchange`` defaults to Lighter itself; pass
+        APR% = rate * 3 * 365 * 100 (the same conversion the skill's
+        scanner uses). ``exchange`` defaults to Lighter itself; pass
         "hyperliquid" / "binance" / "bybit" for the cross-venue legs.
+        Positive means longs pay shorts; negative means shorts pay
+        longs.
         """
         market = self._market(symbol)
         try:
@@ -521,30 +542,18 @@ class LighterClient:
                 continue
             if str(row.exchange).lower() != exchange.lower():
                 continue
-            rate = float(row.rate)
-            return {
-                "venue": "lighter",
-                "symbol": market.symbol,
-                "market_id": market.market_id,
-                "exchange": str(row.exchange),
-                "rate_8h": rate,
-                "apr_pct": rate * FUNDING_APR_FACTOR * 100,
-            }
+            return float(row.rate) * FUNDING_APR_FACTOR * 100
         raise LighterError(
             f"No funding row for {market.symbol} (market {market.market_id}) "
             f"on exchange {exchange!r}"
         )
 
-    def fetch_mark_price(self, symbol: str) -> dict:
-        """Mark price for a perp from orderBookDetails (live, keyless)."""
+    def fetch_mark_price(self, symbol: str) -> float:
+        """Mark price for a perp, as a float. From orderBookDetails
+        (live, keyless); falls back to the mid of the top of book."""
         market = self._market(symbol)
         if market.mark_price is not None:
-            return {
-                "venue": "lighter",
-                "symbol": market.symbol,
-                "market_id": market.market_id,
-                "mark_price": market.mark_price,
-            }
+            return market.mark_price
         try:
             resp = self._run(self._order_api.order_books(market_id=market.market_id))
         except Exception as err:
@@ -557,13 +566,7 @@ class LighterClient:
         asks = getattr(book, "asks", []) or []
         if not bids or not asks:
             raise LighterError(f"Empty book for {market.symbol}")
-        mid = (float(bids[0].price) + float(asks[0].price)) / 2
-        return {
-            "venue": "lighter",
-            "symbol": market.symbol,
-            "market_id": market.market_id,
-            "mark_price": mid,
-        }
+        return (float(bids[0].price) + float(asks[0].price)) / 2
 
     # ------------------------------------------------------------------
     # writes — dry_run=True by default; live needs dry_run=False + confirm
@@ -585,7 +588,7 @@ class LighterClient:
         market = self._market(symbol)
         is_ask = self._side_is_ask(side)
         base_amount = self._base_amount(market, size)
-        mark = self.fetch_mark_price(symbol)["mark_price"]
+        mark = self.fetch_mark_price(symbol)
         worst = mark * (1 + slippage_pct / 100) if not is_ask else mark * (1 - slippage_pct / 100)
         worst_int = self._price_int(market, worst)
         params = {
@@ -717,8 +720,8 @@ class LighterClient:
         side: str,
         size: float,
         entry_price: float,
-        stop_loss: float,
         take_profit: float,
+        stop_loss: float,
         *,
         dry_run: bool = True,
         confirm: bool = False,
@@ -728,7 +731,9 @@ class LighterClient:
         executed size (BaseAmount=0, like the official example). The
         SL/TP limit prices sit 0.2% beyond their triggers so a trigger
         still fills. Reconcile the legs by (symbol, side, size) — the
-        client order ids are ignored by Lighter on bracket orders."""
+        client order ids are ignored by Lighter on bracket orders.
+        Parameter order follows the adapter interface: entry, then
+        take-profit, then stop-loss."""
         market = self._market(symbol)
         is_ask = self._side_is_ask(side)
         base_amount = self._base_amount(market, size)
@@ -986,6 +991,14 @@ class LighterClient:
         }
 
 
+def connect(testnet: bool = False) -> "LighterClient":
+    """Module-level connect, so the registry can load every venue the
+    same way. Delegates to LighterClient.connect. Default is mainnet
+    (testnet=False), matching the class; the registry always passes
+    testnet explicitly, so pass it every time."""
+    return LighterClient.connect(testnet=testnet)
+
+
 def _demo() -> None:
     """Read-only demo: public reads + simulated writes. Never live."""
     import argparse
@@ -999,8 +1012,8 @@ def _demo() -> None:
 
     with LighterClient.connect(testnet=not args.mainnet) as client:
         print(f"Markets on {'testnet' if client.testnet else 'mainnet'}: {len(client._markets)} perps")
-        print("Mark price:", json.dumps(client.fetch_mark_price(args.symbol), indent=2))
-        print("Funding (lighter):", json.dumps(client.fetch_funding_rate(args.symbol), indent=2))
+        print("Mark price:", client.fetch_mark_price(args.symbol))
+        print("Funding APR % (lighter):", client.fetch_funding_rate(args.symbol))
         try:
             print("Balance:", json.dumps(client.get_balance(), indent=2))
             print("Positions:", json.dumps(client.get_positions(), indent=2))
@@ -1009,7 +1022,7 @@ def _demo() -> None:
         print("Simulated market order:",
               json.dumps(client.place_market_order(args.symbol, "buy", 0.01), indent=2))
         print("Simulated bracket:",
-              json.dumps(client.place_bracket(args.symbol, "buy", 0.01, 1800.0, 1700.0, 1900.0), indent=2))
+              json.dumps(client.place_bracket(args.symbol, "buy", 0.01, 1800.0, 1900.0, 1700.0), indent=2))
 
 
 if __name__ == "__main__":

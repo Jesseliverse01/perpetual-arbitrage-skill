@@ -1,10 +1,12 @@
-# Live version (v0.7.1)
+# Live version (v0.8.0)
 
 This is the live version of the skill: the same paper-first research
-tool, plus a real execution path for the two venues it backtests
-(Hyperliquid and Lighter). Nothing here trades on its own. Every live
-order needs a human yes for that exact ticket, and the default is
-testnet, not mainnet.
+tool, plus a real execution path for the venues it backtests.
+Hyperliquid and Lighter are the two working adapters; dYdX, Aster
+and Derive ship as stubs you can fill in, and any venue can be added
+with the template in `scripts/live/custom_venue.py`. Nothing here
+trades on its own. Every live order needs a human yes for that exact
+ticket, and the default is testnet, not mainnet.
 
 ## What live can and cannot do
 
@@ -13,8 +15,9 @@ venue, short the other), records the position in the state file, and
 rolls the first leg back at once if the second leg fails. It does not
 place per-leg stop triggers yet; the hard stop, the safe floor, and
 the max hold live in the ticket and in the state file, and the cycle
-scores closes on the next run. Only Hyperliquid and Lighter legs run
-live. A ticket with any other venue is refused, never half-run.
+scores closes on the next run. Only legs on a venue with a working
+adapter run live. A ticket with any other venue is refused, never
+half-run.
 
 What was verified, honestly: on a funded Lighter testnet account,
 the adapter placed a market order that filled, a bracket whose entry
@@ -27,6 +30,56 @@ unfunded). What was NOT verified: a filled order on Hyperliquid, and
 the two-leg live rollback, which needs both venues funded at once.
 Run the funded testnet steps yourself before you trust live mode
 with real money.
+
+## Custom venues
+
+Live mode is not tied to Hyperliquid and Lighter. Pick the venue you
+want to test on, add its adapter, and run the same testnet-first
+cycle there. The execution engine connects only the venues in the
+ticket it is running, through the registry in
+`scripts/live/registry.py`.
+
+The adapter interface is one class, `VenueAdapter` in
+`scripts/live/venue_base.py`: connect, balance, positions, open
+orders, funding rate (as APR in percent), mark price, market order,
+limit order, bracket, cancel, cancel-all, and a reduce-only close
+for the half-leg rollback. Every write defaults to dry run, and a
+live write needs dry run off AND confirm on. Credentials come from
+environment variables only, with the venue name as the prefix:
+`HL_TESTNET_PRIVATE_KEY` for Hyperliquid testnet,
+`LIGHTER_TESTNET_PRIVATE_KEY` for Lighter testnet, and the same
+shape for any venue you add.
+
+To add a venue, copy `scripts/live/custom_venue.py` to
+`scripts/live/<venue>_client.py`, fill in each method (every one
+carries a comment saying what it needs), register the module name
+and env prefix in `scripts/live/registry.py`, and add its SDK to
+`requirements-live.txt` when it has one. Then test on testnet with
+throwaway keys and a tiny size: connect, read the mark price and
+the funding rate, dry run, one small live order, a bracket, a
+cancel, a reduce-only close.
+
+Three stubs ship with the skill, each naming only what is verified
+about its venue and refusing to connect until filled in:
+
+- dYdX (`scripts/live/dydx_client.py`): testnet app
+  https://v4.testnet.dydx.exchange, faucet via the app (300 test
+  USDC) and the faucet API https://faucet.v4testnet.dydx.exchange.
+  Testnet indexer returned 404 from this VM, so the funding
+  endpoint is not yet verified. All perps USDC-settled; auth is an
+  Ethereum wallet signature; testnet chain id dydx-testnet-4; gas
+  token DV4TNT from the same faucet.
+- Aster (`scripts/live/aster_client.py`): the scanner already reads
+  Aster funding via premiumIndex. Testnet futures REST
+  https://fapi.asterdex-testnet.com verified HTTP 200 (ping,
+  exchangeInfo, premiumIndex). The testnet app URL and the faucet
+  are NOT verified. Chain id 714 comes from the official demo
+  script via a third-party guide; re-check it before using it.
+- Derive (`scripts/live/derive_client.py`): testnet app
+  https://testnet.derive.xyz, USDC faucet in the dashboard, trading
+  is gasless, deposit/withdraw needs gas (ETH, OP Stack L2). Demo
+  API host api-demo.lyra.finance; individual API paths are not yet
+  verified. Auth via EIP-712 signed messages / session keys.
 
 ## Install the skill in your agent
 

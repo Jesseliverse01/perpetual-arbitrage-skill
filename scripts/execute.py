@@ -229,95 +229,87 @@ def print_ticket(ticket):
 
 
 # -- live execution (SKILL.md §14/§16) ------------------------------------
-# Only the venues with an adapter in scripts/live/ can run live.
-# A ticket whose legs sit on any other venue is refused, never half-run.
-LIVE_VENUES = {"hyperliquid", "lighter"}
-
-
-def venue_symbol(coin, venue):
-    """Canonical scan symbol -> the symbol a venue lists.
-
-    Meme coins are the only split: Hyperliquid lists the k-form
-    (kPEPE) while Lighter lists the 1000-form (1000PEPE). Every other
-    coin is listed under the same symbol on both venues.
-    """
-    if venue == "hyperliquid" and coin.startswith("1000") and len(coin) > 4:
-        return "k" + coin[4:]
-    return coin
-
-
-def load_live_clients(testnet):
-    """Connect the live adapters. Raises a plain error when the optional
-    live SDKs are not installed, or when a venue key is missing."""
+# Venues are loaded lazily from the registry (scripts/live/registry.py):
+# only the venues in the ticket being executed are connected, and only
+# when that ticket runs. A ticket whose venue has no adapter, or whose
+# adapter is a stub that raises NotImplementedError at connect, is
+# refused with a clear message. It is never half-run.
+def _registry():
+    """The venue registry, imported lazily so ticket/paper mode never
+    needs the live SDKs. Raises a plain error when they are missing."""
     live_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "live")
     if live_dir not in sys.path:
         sys.path.insert(0, live_dir)
     try:
-        import hyperliquid_client
-        import lighter_client
+        import registry
     except ImportError as e:
         raise SystemExit(
             "Live mode needs the optional live SDKs: "
             "pip install -r requirements-live.txt "
             f"(import failed: {e})"
         )
-    clients = {}
-    clients["hyperliquid"] = hyperliquid_client.connect(testnet=testnet)
-    clients["lighter"] = lighter_client.LighterClient.connect(testnet=testnet)
-    return clients
+    return registry
 
 
-def _mark_price(client, venue, symbol):
-    """Mark price as a float, whatever the adapter returns."""
-    px = client.fetch_mark_price(symbol)
-    if isinstance(px, dict):
-        return float(px.get("mark_price") or px.get("markPx"))
-    return float(px)
+def _mark_price(client, symbol):
+    """Mark price as a float. Every adapter returns a float."""
+    return float(client.fetch_mark_price(symbol))
 
 
-def _place_leg(client, venue, symbol, is_buy, size, dry_run):
+def _place_leg(client, symbol, is_buy, size, dry_run):
     """One market leg through the venue adapter. Live needs confirm=True;
     dry_run=True simulates (no venue write)."""
-    if venue == "hyperliquid":
-        return client.place_market_order(symbol, is_buy, size,
-                                         dry_run=dry_run, confirm=True)
     return client.place_market_order(symbol, "buy" if is_buy else "sell",
                                      size, dry_run=dry_run, confirm=True)
 
 
-def _rollback_leg(client, venue, symbol, is_buy, size, dry_run):
+def _rollback_leg(client, symbol, is_buy, size, dry_run):
     """Close one filled leg at once, reduce-only (§14 half-leg rule).
-    `is_buy` is the side of the leg that filled."""
-    if venue == "hyperliquid":
-        return client.rollback_close(symbol, sz=size,
-                                     dry_run=dry_run, confirm=True)
-    # Lighter: a long closes with a sell, a short with a buy.
+    `is_buy` is the side of the leg that filled: a long closes with a
+    sell, a short with a buy."""
     return client.reduce_only_close(symbol, "sell" if is_buy else "buy",
                                     size, dry_run=dry_run, confirm=True)
 
 
-def execute_live_order(ticket, state, clients, testnet, dry_run_live):
+def execute_live_order(ticket, state, testnet, dry_run_live):
     """Place both legs of one ticket live (or rehearse them with
     dry_run_live). Returns True when both legs are placed, False when
     the ticket was refused, and "STOP" when the cycle must stop at
-    once (a leg failed and the rollback could not be confirmed)."""
+    once (a leg failed and the rollback could not be confirmed, or a
+    live venue could not be connected)."""
     network = "testnet" if testnet else "MAINNET"
     long_v = ticket["pair"]["long_leg"]["venue"].lower()
     short_v = ticket["pair"]["short_leg"]["venue"].lower()
     coin = ticket["coin"]
+    reg = _registry()
+    clients = {}
     for v in (long_v, short_v):
-        if v not in LIVE_VENUES:
-            print(f"  [REFUSED] {coin}: venue '{v}' has no live adapter "
-                  "(live supports Hyperliquid + Lighter only). Ticket only.")
+        try:
+            clients[v] = reg.get_adapter(v, testnet=testnet)
+        except reg.UnknownVenueError as e:
+            print(f"  [REFUSED] {coin}: {e}")
+            print("  Ticket only. Nothing was placed.")
             return False
+        except NotImplementedError as e:
+            print(f"  [REFUSED] {coin}: venue '{v}' is not implemented "
+                  f"yet: {e}")
+            print("  Ticket only. Nothing was placed.")
+            return False
+        except SystemExit:
+            raise
+        except Exception as e:
+            print(f"  [FAILED] Could not connect to venue '{v}': {e}")
+            print("  Nothing is open. STOP the cycle and check the venue "
+                  "and the credentials.")
+            return "STOP"
 
     long_client = clients[long_v]
     short_client = clients[short_v]
-    long_sym = venue_symbol(coin, long_v)
-    short_sym = venue_symbol(coin, short_v)
+    long_sym = long_client.symbol_for(coin)
+    short_sym = short_client.symbol_for(coin)
     try:
-        long_sz = ticket["pair"]["long_leg"]["notional_usd"] / _mark_price(long_client, long_v, long_sym)
-        short_sz = ticket["pair"]["short_leg"]["notional_usd"] / _mark_price(short_client, short_v, short_sym)
+        long_sz = ticket["pair"]["long_leg"]["notional_usd"] / _mark_price(long_client, long_sym)
+        short_sz = ticket["pair"]["short_leg"]["notional_usd"] / _mark_price(short_client, short_sym)
     except Exception as e:
         # A venue that cannot price the coin (not listed on that
         # network, testnet universe is smaller than mainnet) means
@@ -331,7 +323,7 @@ def execute_live_order(ticket, state, clients, testnet, dry_run_live):
 
     # Leg 1 (long).
     try:
-        leg1 = _place_leg(long_client, long_v, long_sym, True, long_sz, dry_run_live)
+        leg1 = _place_leg(long_client, long_sym, True, long_sz, dry_run_live)
     except Exception as e:
         print(f"  [FAILED] Leg 1 (long {long_v}) did not place: {e}")
         print("  Nothing is open. STOP the cycle and check the venue.")
@@ -340,12 +332,12 @@ def execute_live_order(ticket, state, clients, testnet, dry_run_live):
 
     # Leg 2 (short). If it fails, roll Leg 1 back at once (§14).
     try:
-        leg2 = _place_leg(short_client, short_v, short_sym, False, short_sz, dry_run_live)
+        leg2 = _place_leg(short_client, short_sym, False, short_sz, dry_run_live)
     except Exception as e:
         print(f"  [FAILED] Leg 2 (short {short_v}) did not place: {e}")
         print("  Rolling Leg 1 back at once (reduce-only close)...")
         try:
-            rb = _rollback_leg(long_client, long_v, long_sym, True, long_sz, dry_run_live)
+            rb = _rollback_leg(long_client, long_sym, True, long_sz, dry_run_live)
             print(f"  Rollback done: {rb}")
             print("  Position is flat. STOP the cycle and check the venue.")
         except Exception as rb_e:
@@ -425,7 +417,6 @@ def main():
         actionable = sorted(pool, key=lambda x: x.get("net_apr_pct", 0), reverse=True)[:1]
 
     state = load_state(state_file)
-    clients = None  # live adapters, connected once, on first live ticket
 
     for cand in actionable[:3]:  # Max 3 plans per cycle (SKILL.md §16 rule 5)
         ticket = generate_trade_ticket(cand, notional_usd=args.notional, leverage=args.leverage)
@@ -457,16 +448,11 @@ def main():
                 print("Re-run with --live-confirm (testnet by default; "
                       "--mainnet for mainnet). Nothing was sent.")
                 sys.exit(0)
-            if clients is None:
-                testnet = not args.mainnet
-                print(f"\nConnecting live adapters "
-                      f"({'testnet' if testnet else 'MAINNET'})...")
-                clients = load_live_clients(testnet=testnet)
             ans = input(f"Approve LIVE trade for {ticket['coin']}? (y/N): ").strip().lower()
             if ans != "y":
                 print(f"Skipped {ticket['coin']}.")
                 continue
-            result = execute_live_order(ticket, state, clients,
+            result = execute_live_order(ticket, state,
                                         testnet=not args.mainnet,
                                         dry_run_live=args.dry_run_live)
             save_state(state_file, state)

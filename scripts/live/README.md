@@ -1,10 +1,20 @@
-# Live execution adapters (optional, v0.7.1)
+# Live execution adapters (optional, v0.8.0)
 
-Two venue adapters that wire SKILL.md §14 into `scripts/execute.py
+Venue adapters that wire SKILL.md §14 into `scripts/execute.py
 --mode live`. The core skill stays stdlib-only and paper-first; these
 files are the only place that talks to a venue with a key, and they
 only run when live mode is asked for explicitly.
 
+- `venue_base.py`: the `VenueAdapter` interface every adapter
+  implements, plus the shared defaults (dry-run default, cancel-all
+  by looping open orders, rollback by finding the position and
+  reduce-only closing it).
+- `registry.py`: venue name to adapter module and credential env
+  prefix. `get_adapter(venue, testnet)` connects only the venue a
+  ticket needs, cached per venue and network.
+- `custom_venue.py`: the template to copy when adding a venue.
+  Every method raises `NotImplementedError` with a comment saying
+  what to fill in.
 - `hyperliquid_client.py`: Hyperliquid, via the official
   `hyperliquid-python-sdk` (0.24.0). Testnet verified: public reads,
   dry runs, refusal gates, price rounding, and a real signed order
@@ -26,6 +36,12 @@ only run when live mode is asked for explicitly.
   `LIGHTER_TESTNET_API_KEY_INDEX` to the number the app assigned
   your key (default 3). Lighter enforces a minimum notional of 10
   dollars per order.
+- `dydx_client.py`, `aster_client.py`, `derive_client.py`: stubs.
+  Importable, but every method raises `NotImplementedError` and
+  `connect()` fails loudly before any order is placed. Each header
+  names only what is verified about its venue. Fill them in from
+  the template, then register them (they are already listed in the
+  registry as stubs).
 
 ## Safety gates (both adapters, no exceptions)
 
@@ -48,8 +64,11 @@ only run when live mode is asked for explicitly.
 `--live-confirm` plus a yes per ticket, and it refuses
 `--auto-approve`. Mainnet needs `--mainnet` on top of that.
 `--dry-run-live` rehearses the whole live path (connect + simulate
-both legs) without sending anything. Only Hyperliquid + Lighter legs
-run live; any other venue is refused, never half-run.
+both legs) without sending anything. Only legs on a venue with a
+working adapter run live; a ticket on a stub or unregistered venue
+is refused with a clear message, never half-run. To add a venue,
+copy `custom_venue.py`, fill it in, and register it in
+`registry.py`; see SKILL.md §14 for the full steps.
 
 Venue quirks the adapters already handle: Hyperliquid bracket prices
 are rounded to 5 sig figs; Lighter bracket legs reconcile by

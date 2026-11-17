@@ -14,7 +14,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.7.1, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
+Version 0.8.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
 
 ## What this is
 
@@ -53,7 +53,7 @@ This repository is structured as an **Agent Skill** (`SKILL.md` + `SOUL.md`). Yo
 | B. Basis / cash-and-carry (two-leg) | Blueprint with honest limits, including the net-edge formula ([`SKILL.md`](SKILL.md) §8) |
 | C. Cross-exchange funding spread | ✅ Detection implemented ([`scripts/cross_venue.py`](scripts/cross_venue.py)), scale aliases supported |
 | D. Funding squeeze | Experimental (backtest was negative) |
-| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py), [`scripts/execute.py`](scripts/execute.py)) — live via [`scripts/live/`](scripts/live/) (Hyperliquid + Lighter), testnet by default; see [`LIVE.md`](LIVE.md) |
+| **E. Delta-neutral cross-venue funding harvest** | ✅ Backtested + live scanner ([`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py), [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py), [`scripts/execute.py`](scripts/execute.py)) — live via [`scripts/live/`](scripts/live/) (Hyperliquid + Lighter working, dYdX/Aster/Derive as stubs, any venue addable via the template), testnet by default; see [`LIVE.md`](LIVE.md) |
 
 **Strategy A — the validated setup:** buy a perp when funding APR is
 deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
@@ -77,7 +77,7 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | [`README.md`](README.md) | This file — overview & quick start. |
 | [`LICENSE`](LICENSE) | MIT. |
 | [`scripts/execute.py`](scripts/execute.py) | **Unified Execution Engine & Trade Ticket Generator** (§16): lock classification, sizing, brackets, paper execution, and the two-leg rollback rule (enforced in live mode). |
-| [`scripts/live/`](scripts/live/) | Live execution adapters (§14): Hyperliquid + Lighter clients, dry-run default, keys from the environment only. |
+| [`scripts/live/`](scripts/live/) | Live execution adapters (§14): Hyperliquid + Lighter clients, dYdX/Aster/Derive stubs, custom-venue template, dry-run default, keys from the environment only. |
 | [`requirements-live.txt`](requirements-live.txt) | Optional live-only SDKs (hyperliquid-python-sdk, lighter-sdk). |
 | [`LIVE.md`](LIVE.md) | Live setup guide: install, keys, testnet first, mainnet rules, risks. |
 | [`scripts/multivenue_scan.py`](scripts/multivenue_scan.py) | Strategy E live scanner (HL + Lighter + Aster + OKX + Binance/Bybit via Lighter) with meme coin scale mapping. |

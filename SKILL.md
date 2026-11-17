@@ -5,7 +5,7 @@ description: "Perpetual futures arbitrage on Hyperliquid (and other venues): fun
 
 # Perpetual Arbitrage
 
-Version 0.7.1, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
+Version 0.8.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
 
 ## Please read this first
 
@@ -964,23 +964,129 @@ HL↔Lighter. WATCH means "worth watching", not "open now".
 
 ## 14. Unified execution (optional, live since v0.7.0)
 
-Strategy E's live execution path is a **unified multi-venue execution
-API** — one API for the venues, with ranked funding strategies, batch
-order placement, and margin visibility across venues. It is wired in
-since v0.7.0: the adapters live in `scripts/live/` (Hyperliquid +
-Lighter), `scripts/execute.py --mode live` runs them, and `LIVE.md`
-is the setup guide. Testnet by default; mainnet needs `--mainnet`.
+Strategy E's live execution path is a unified multi-venue execution
+API: one interface every venue adapter implements, with ranked
+funding strategies, batch order placement, and margin visibility
+across venues. It is wired in since v0.7.0: the adapters live in
+`scripts/live/`, `scripts/execute.py --mode live` runs them, and
+`LIVE.md` is the setup guide. Testnet by default; mainnet needs
+`--mainnet`.
+
+Custom venues, since v0.8.0: the execution engine no longer knows
+only Hyperliquid and Lighter. Any venue can be added by writing one
+adapter file that implements the interface below. Hyperliquid and
+Lighter are the two working adapters. dYdX, Aster and Derive ship
+as stubs: they are importable, they name what is verified about the
+venue, and they refuse to connect until someone fills them in. A
+ticket whose venue has no working adapter is refused with a clear
+message, never half-run. That is the whole point: test the agent on
+the testnet of the venue you pick, with your own credentials, before
+you run live arbitrage anywhere.
 
 **What it needs (all three, no exceptions):**
 
 1. **Accounts with balance on at least two venues** (Hyperliquid +
-   Lighter; Aster as a third venue where supported).
+   Lighter today; any two working adapters once more exist).
 2. **API access to that unified API** (credentials for the account).
    Whoever runs live mode needs their own; never ask anyone to paste
    a credential in chat. Reads need the credentials too — there is no
    public/keyless mode for execution.
 3. The user's **explicit per-action approval** for each exact plan. Their
    standing rule governs every real order.
+
+### The adapter interface
+
+Every adapter is a subclass of `VenueAdapter`
+(`scripts/live/venue_base.py`) and implements the same methods.
+`scripts/live/registry.py` maps a venue name to its adapter module
+and its credential env prefix, and `get_adapter(venue, testnet)`
+connects only the venues a ticket actually needs, cached per venue
+and network.
+
+- `connect(testnet)`: build the client from environment variables
+  only. Testnet credentials use the `TESTNET` infix, for example
+  `HL_TESTNET_PRIVATE_KEY` on testnet and `HL_PRIVATE_KEY` on
+  mainnet. Never put a key in a file, never paste one in chat,
+  never log one.
+- `symbol_for(coin)`: the symbol the venue lists for one canonical
+  scanner coin. The scanner uses the 1000-form for meme coins
+  (1000PEPE); Hyperliquid lists the k-form (kPEPE), Lighter lists
+  the 1000-form as-is.
+- `get_balance()`, `get_positions()`, `get_open_orders()`: account
+  state. Positions carry the side, size and entry price, plus
+  funding accrued when the venue reports it.
+- `fetch_funding_rate(symbol)`: the current funding APR as a float
+  in percent. Positive means longs pay shorts; negative means shorts
+  pay longs. Convert the venue per-interval rate with APR% = rate
+  times intervals per year times 100. For an 8h rate that is rate
+  times 3 times 365 times 100; forgetting the final times 100
+  understates the APR by 100x.
+- `fetch_mark_price(symbol)`: the current mark price as a float.
+  Raise when the venue does not list the symbol on this network.
+- `place_market_order(symbol, side, size, dry_run, confirm)`,
+  `place_limit_order(...)`, `place_bracket(...)`: every write
+  defaults to `dry_run=True` and touches nothing. A live write
+  needs `dry_run=False` AND `confirm=True`, enforced before any
+  network traffic. Side is the string "buy" or "sell"; size is in
+  base units.
+- `cancel_order(...)`, `cancel_all_orders()`, `reduce_only_close(...)`
+  / `rollback_close(...)`: the cancel and unwind primitives. The
+  base class supplies a default cancel-all (loop open orders,
+  cancel each one) and a default rollback (find the position, work
+  out its side, reduce-only close it). A venue overrides them only
+  when it has a native call that does the same thing.
+
+### Add your own venue
+
+1. Copy `scripts/live/custom_venue.py` to
+   `scripts/live/<venue>_client.py` and rename the class. Every
+   method raises `NotImplementedError` with a comment saying what
+   to fill in: auth, endpoints, signing, symbol mapping, testnet
+   URL. Fill them in one at a time; a method you leave raising
+   simply refuses that operation with a plain reason.
+2. Register it in `scripts/live/registry.py`: the module name and
+   the credential env prefix. Add its SDK to
+   `requirements-live.txt` when it has one. The core skill stays
+   stdlib-only; only `scripts/live/` may need extra packages.
+3. Test on testnet first, with throwaway keys and a tiny size:
+   connect, read the mark price and the funding rate, place a dry
+   run, then one small live order, then a bracket, then a cancel,
+   then a reduce-only close. Watch every step on the venue itself.
+   Only after a full cycle works on testnet should mainnet even be
+   discussed, and mainnet still needs `--mainnet` plus a yes per
+   ticket.
+
+### What is verified about each stub venue
+
+- dYdX: testnet app https://v4.testnet.dydx.exchange (HTTP 200).
+  Faucet via the app deposit/recharge button (300 test USDC
+  automatically) and the faucet API
+  https://faucet.v4testnet.dydx.exchange (POST /faucet/tokens).
+  Testnet indexer returned 404 from this VM on 2026-11-17, so the
+  funding endpoint is not yet verified. All perps USDC-settled.
+  Auth is an Ethereum wallet signature. Testnet chain id
+  dydx-testnet-4. Gas token DV4TNT on testnet, from the same faucet.
+- Aster: the scanner already reads Aster funding live via
+  premiumIndex (750 coins). Testnet futures REST
+  https://fapi.asterdex-testnet.com verified HTTP 200 (ping,
+  exchangeInfo, premiumIndex all answer). The testnet app URL and
+  the faucet are NOT verified; the stub says so. Chain id 714 for
+  testnet comes from the official demo script via a third-party
+  guide; re-check it before using it.
+- Derive: testnet app https://testnet.derive.xyz (HTTP 200,
+  redirects to /trade/options). USDC faucet in the dashboard.
+  Trading is gasless (off-chain signed orders); deposit/withdraw
+  needs gas (ETH, OP Stack L2). Demo API host
+  api-demo.lyra.finance; individual API paths are not yet verified.
+  Auth via EIP-712 signed messages / session keys.
+- Lighter testnet: app https://testnet.app.lighter.xyz, host
+  testnet.zklighter.elliot.ai, only 8 perps on testnet (AKBNKB,
+  ASELS, ASELSB, BTC, ETH, SOL, THYAOB, TUPRSB). 10 dollar minimum
+  notional per order. The API key index is set by the app (default
+  3 in the adapter).
+- Hyperliquid testnet: app https://app.hyperliquid-testnet.xyz.
+  The drip gives 1,000 mock USDC via a gasless API claim, only for
+  addresses that deposited on mainnet.
 
 **Capabilities a unified API must expose for the cycle (§13):**
 

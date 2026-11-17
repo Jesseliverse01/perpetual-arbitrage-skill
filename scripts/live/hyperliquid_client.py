@@ -64,7 +64,7 @@ Usage
     c = connect(testnet=True)
     print(c.get_balance())
     print(c.fetch_mark_price('HYPE'))
-    print(c.place_market_order('HYPE', is_buy=True, sz=1.0))  # dry run
+    print(c.place_market_order('HYPE', side="buy", sz=1.0))  # dry run
     "
 
 Dependencies: hyperliquid-python-sdk 0.24.0 (and its deps) only.
@@ -78,6 +78,8 @@ from hyperliquid.exchange import Exchange
 from hyperliquid.info import Info
 from hyperliquid.utils import constants
 from hyperliquid.utils.signing import OrderType
+
+from venue_base import VenueAdapter, normalize_side
 
 logger = logging.getLogger(__name__)
 
@@ -146,16 +148,30 @@ def round_size_down(sz, sz_decimals):
     return float(Decimal(repr(sz)).quantize(quantum, rounding=ROUND_DOWN))
 
 
-class HyperliquidClient:
+class HyperliquidClient(VenueAdapter):
     """One Hyperliquid account on one network (testnet or mainnet)."""
 
+    venue_name = "hyperliquid"
+    testnet_url = constants.TESTNET_API_URL
+    mainnet_url = constants.MAINNET_API_URL
+    env_prefix = "HL_"
+
     def __init__(self, testnet, address, info, exchange):
-        self.testnet = testnet
-        self.network = "testnet" if testnet else "mainnet"
+        super().__init__(testnet)
         self.address = address
         self._info = info
         self._exchange = exchange
         self._meta = None  # cached {coin: {"szDecimals": int, "maxLeverage": int}}
+
+    def symbol_for(self, coin):
+        """The symbol Hyperliquid lists for one canonical coin.
+
+        Meme coins are the only split: the scanner uses the 1000-form
+        (1000PEPE) and Hyperliquid lists the k-form (kPEPE). Every
+        other coin is listed under the same symbol."""
+        if coin.startswith("1000") and len(coin) > 4:
+            return "k" + coin[4:]
+        return coin
 
     # -- setup -----------------------------------------------------
 
@@ -266,22 +282,18 @@ class HyperliquidClient:
         return float(mids[coin])
 
     def fetch_funding_rate(self, coin):
-        """Current hourly funding rate and its APR for one asset.
+        """Current funding APR for one asset, as a float in percent.
 
-        Returns dict: coin, funding_rate_hourly, funding_apr_pct.
-        APR = hourly rate x 24 x 365 (Hyperliquid funds hourly).
-        """
+        Hyperliquid funds hourly, so APR% = hourly rate x 24 x 365
+        x 100. Positive means longs pay shorts; negative means shorts
+        pay longs."""
         _meta, ctxs = self._info.meta_and_asset_ctxs()
         universe = self._load_meta()
         if coin not in universe:
             raise HyperliquidError(f"unknown asset on {self.network}: {coin}")
         idx = list(universe.keys()).index(coin)
         rate = float(ctxs[idx].get("funding", 0.0))
-        return {
-            "coin": coin,
-            "funding_rate_hourly": rate,
-            "funding_apr_pct": rate * 24 * 365 * 100,
-        }
+        return rate * 24 * 365 * 100
 
     # -- writes ----------------------------------------------------
     # Every write defaults to dry_run=True and requires confirm=True
@@ -339,14 +351,16 @@ class HyperliquidClient:
             )
         return result
 
-    def place_market_order(self, coin, is_buy, sz, dry_run=True, confirm=False,
+    def place_market_order(self, coin, side, sz, dry_run=True, confirm=False,
                            slippage=DEFAULT_SLIPPAGE):
         """Market order, filled at the current book with `slippage`
         worst-case tolerance. `sz` is in base units (e.g. 1.0 HYPE).
+        `side` is "buy" or "sell" (a bool still works: True is buy).
 
         Dry run: logs the would-be order, returns a simulated result.
         Live: requires confirm=True.
         """
+        is_buy = normalize_side(side) == "buy"
         meta = self.asset_meta(coin)
         sz = round_size_down(sz, meta["szDecimals"])
         if sz <= 0:
@@ -368,13 +382,15 @@ class HyperliquidClient:
         )
         return self._order_result(result, coin, side, sz, "market")
 
-    def place_limit_order(self, coin, is_buy, sz, price, dry_run=True,
+    def place_limit_order(self, coin, side, sz, price, dry_run=True,
                           confirm=False, tif="Gtc"):
         """Limit order at `price` (rounded to 5 sig figs for the asset).
+        `side` is "buy" or "sell" (a bool still works: True is buy).
 
         Dry run: logs the would-be order, returns a simulated result.
         Live: requires confirm=True.
         """
+        is_buy = normalize_side(side) == "buy"
         meta = self.asset_meta(coin)
         sz = round_size_down(sz, meta["szDecimals"])
         price = round_price_for_asset(price, meta["szDecimals"])
@@ -397,11 +413,12 @@ class HyperliquidClient:
         )
         return self._order_result(result, coin, side, sz, "limit", price)
 
-    def place_bracket(self, coin, is_buy, sz, entry_px=None,
+    def place_bracket(self, coin, side, sz, entry_px=None,
                       take_profit_px=None, stop_loss_px=None,
                       dry_run=True, confirm=False,
                       slippage=DEFAULT_SLIPPAGE):
         """Bracket: entry + take-profit trigger + stop-loss trigger.
+        `side` is "buy" or "sell" (a bool still works: True is buy).
 
         - Entry: market order when entry_px is None, else a limit
           order at entry_px.
@@ -418,6 +435,7 @@ class HyperliquidClient:
         Dry run: returns the would-be bracket (no venue calls).
         Live: requires confirm=True.
         """
+        is_buy = normalize_side(side) == "buy"
         meta = self.asset_meta(coin)
         sz = round_size_down(sz, meta["szDecimals"])
         if sz <= 0:
@@ -541,6 +559,16 @@ class HyperliquidClient:
         )
         return {"network": self.network, "action": "cancel_order",
                 "coin": coin, "oid": oid, "status": "ok", "venue": result}
+
+    def reduce_only_close(self, symbol, side, size, dry_run=True,
+                          confirm=False, slippage=DEFAULT_SLIPPAGE):
+        """Reduce-only market close of a position (the uniform
+        half-leg rollback primitive). Hyperliquid closes the position
+        outright, so the side is accepted for interface uniformity and
+        the close itself needs none: it sells a long and buys back a
+        short. Delegates to rollback_close, unchanged."""
+        return self.rollback_close(symbol, sz=size, dry_run=dry_run,
+                                   confirm=confirm, slippage=slippage)
 
     def rollback_close(self, coin, sz=None, dry_run=True, confirm=False,
                        slippage=DEFAULT_SLIPPAGE):
