@@ -1,11 +1,11 @@
 ---
 name: perpetual-arbitrage
-description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py) on public APIs only. Live execution is an explicit opt-in through scripts/live/ (testnet by default; see LIVE.md). Use when the user asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
+description: "Perpetual futures arbitrage on Hyperliquid (and other venues): funding-rate harvest, spot-perp basis / cash-and-carry, cross-exchange funding spread, funding-squeeze setups, and delta-neutral cross-venue funding harvest (Strategy E). Includes a staged evaluation workflow (Scan -> Verify -> Score -> Debate -> Decide -> Report), a multi-agent evaluation pipeline, a 0-10 signal scorer (scripts/score.py), a live scanner (scripts/scan.py), a cross-venue funding-spread matcher (scripts/cross_venue.py), a live multi-venue scanner (scripts/multivenue_scan.py), and runnable backtests (scripts/backtest_funding.py, scripts/sweep.py, scripts/backtest_strategy_e.py, scripts/backtest_basis.py) on public APIs only. Live execution is an explicit opt-in through scripts/live/ (testnet by default; see LIVE.md). Use when the user asks about perp arbitrage, funding-rate trading, basis trades, or wants a backtest or a live scan run."
 ---
 
 # Perpetual Arbitrage
 
-Version 0.9.0, 2026-11-17. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
+Version 0.10.0, 2026-11-21. Paper/backtest first; live is an explicit opt-in (see LIVE.md).
 
 ## Please read this first
 
@@ -379,19 +379,69 @@ behind it.
 
 ## 8. Other strategies (not the default)
 
-### B. Basis / cash-and-carry (two-leg, NOT single-leg)
+### B. Basis / cash-and-carry (two-leg, hedged)
 
 True basis arb is hedged: long perp + short spot when perp trades at a
 discount to spot (basis < 0), or short perp + long spot when perp trades
 at a premium (basis > 0). You earn the basis as the legs converge, plus
 funding on the perp leg. Basis = (perp_mark - spot_mid) / spot_mid.
 
-Honest limits: a single-leg engine cannot run paired hedged trades.
-A single-leg template is a **directional read**, not a hedge — one
-public backtest of that shape produced **0 trades** (no spot leg in
-the engine). Hyperliquid spot books exist only for a few coins
-(BTC, ETH, SOL…). The hedged version needs a multi-leg runtime and spot
-borrow/short access. Do not run it without one.
+The hedged backtest now exists: scripts/backtest_basis.py. It fetches
+perp and spot hourly candles plus funding history from the public
+Hyperliquid API, resolves each coin's spot pair at runtime from
+spotMeta (UBTC/USDC, UETH/USDC, USOL/USDC), and simulates both legs
+at $100 notional, 1x, with every cost line in: taker fees on all four
+fills, funding accrued hourly on the perp leg (signed), and a borrow
+cost parameter for the short-spot direction. Entry at |basis| above
+20 bps, exit on convergence to 5 bps, a 72h timeout, or an adverse
+stop at 40 bps, plus a hard stop at -$1.00 net. Entries need the
+basis beyond the threshold on 2 consecutive closes, filled at the
+second close.
+
+Why the confirmation filter matters: the first version entered on a
+single close and showed +$5.66 on 53 trades with a 100% win rate.
+That was not an edge. Spot closes are last-trade prices, and one hour
+can print a transient spike that reverts the next hour. The worst case
+was a -100.6 bps BTC print on 2026-07-08 that vanished in one hour
+and alone contributed +$0.90. That run is kept as
+results/backtest-basis-2026-11-16-naive.json to show why the filter
+exists. Do not quote its total as a result.
+
+Validation, 203 days (2026-04-26 -> 2026-11-16; spot history starts
+2026-04-26, so the window is 203 days even though 208 were
+requested), $100 notional per leg, 1x. Results in
+results/backtest-basis-2026-11-16.json. Re-run verified identical.
+
+| Coin | Trades | Win | PnL | Price | Funding | Borrow | Fees |
+|---|---|---|---|---|---|---|---|
+| BTC | 0 | — | $0 | $0 | $0 | $0 | $0 |
+| ETH | 0 | — | $0 | $0 | $0 | $0 | $0 |
+| SOL | 2 | 100% | +$0.13 | +$0.41 | +$0.00 | -$0.00 | -$0.28 |
+| Combined | 2 | 100% | +$0.13 | +$0.41 | +$0.00 | -$0.00 | -$0.28 |
+
+The honest result: on the three majors the strategy barely trades.
+BTC and ETH saw zero confirmed dislocations in 203 days; SOL saw
+two, both converged within 3-7 hours, for +$0.13 combined. The 100%
+win rate means nothing on two trades. The basis on majors is thin
+(median |basis| about 4.5 bps) and the 14 bps round-trip fee eats
+almost every move. Funding contributed about $0.00. Like Strategy E
+on majors, this is a working machine, not a return stream. The
+opportunity set, if there is one, is the wider universe of spot
+pairs, which this backtest does not cover yet.
+
+Live feasibility: the short-perp + long-spot direction (perp at a
+premium, roughly 70% of hours in the window) is feasible on
+Hyperliquid alone. Spot long is a cash buy and perp short is a normal
+short, but it needs cash for the spot leg plus margin for the perp
+leg, about $200 capital per $100-notional trade. The long-perp +
+short-spot direction is not feasible on Hyperliquid alone: spot
+cannot be shorted without borrowing the asset on a lending venue. The
+backtest prices borrow at 5% APR by default (--borrow-apr) but no
+borrow source is wired up. That direction stays a live blocker, not a
+solved problem. Both directions also need both legs filled at the same
+time; a fill on one leg without the other leaves a naked directional
+position. Slippage is not modeled, so treat every PnL number as an
+upper bound.
 
 The net edge, when you do size one:
 
@@ -574,6 +624,10 @@ python3 scripts/backtest_strategy_e.py --days 208 --end 2026-11-16 \
     --coins BTC ETH HYPE --out results/backtest-strategy-e-YYYY-MM-DD.json
                                             # Strategy E backtest (HL vs Lighter, close rules)
 
+python3 scripts/backtest_basis.py --days 208 --end 2026-11-16 \
+    --coins BTC ETH SOL --out results/backtest-basis-2026-11-16.json
+                                            # Strategy B hedged two-leg backtest (§8 B)
+
 python3 scripts/ccxt_funding.py              # current funding APR via CCXT (Hyperliquid only)
                                             # -> prints a table; needs `pip install ccxt` (§15)
 ```
@@ -583,6 +637,29 @@ python3 scripts/ccxt_funding.py              # current funding APR via CCXT (Hyp
   Hyperliquid on this VM.) Entry/exit evaluated at hourly closes
   (no lookahead: the decision uses the funding rate of the hour just
   closed, fill at that close).
+- `backtest_basis.py` fetches through curl (subprocess) so it works
+  behind an authenticated egress proxy as well as on a plain
+  connection. It takes about 40 seconds on first run and accepts
+  `--cache-dir DIR` to reuse raw API responses on re-runs. A
+  successful run prints one line per coin plus the output path:
+
+```text
+[BTC] spot pair @142, fetching perp + spot + funding ...
+[BTC] 4878 perp candles, 4877 spot candles, 4992 funding rows
+[BTC] trades=0 pnl=$0 return=0.0% win=None signals=6
+[ETH] spot pair @151, fetching perp + spot + funding ...
+[ETH] 4878 perp candles, 4876 spot candles, 4992 funding rows
+[ETH] trades=0 pnl=$0 return=0.0% win=None signals=20
+[SOL] spot pair @156, fetching perp + spot + funding ...
+[SOL] 4878 perp candles, 4876 spot candles, 4992 funding rows
+[SOL] trades=2 pnl=$0.13 return=0.13% win=1.0 signals=30
+wrote results/backtest-basis-2026-11-16.json
+```
+
+  The window end is fixed by `--end`, so a fresh clone reproduces
+  these counts. `trades=0` on BTC and ETH is the expected result,
+  not an error: no confirmed dislocation cleared the 20 bps entry
+  in 203 days (see §8 B).
 - `backtest_funding.py` accepts `--entry-apr`, `--exit-apr`, `--stop`,
   `--timeout`, `--side`, `--end YYYY-MM-DD` to test other setups — but
   changing the defaults needs a fresh sweep + out-of-sample check first.

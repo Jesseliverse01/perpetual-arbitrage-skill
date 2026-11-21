@@ -1,0 +1,183 @@
+{
+  "strategy": "B basis / cash-and-carry (hedged two-leg)",
+  "window_days_requested": 208,
+  "start_requested": "2026-04-22",
+  "end": "2026-11-16",
+  "leverage": "1x",
+  "taker_fee_per_side": 0.00035,
+  "params": {
+    "entry_bps": 20.0,
+    "exit_bps": 5.0,
+    "adverse_bps": 40.0,
+    "timeout_h": 72,
+    "borrow_apr": 0.05,
+    "notional_usd": 100.0,
+    "confirm_hours": 2
+  },
+  "notes": [
+    "Spot history starts 2026-04-26, so the effective window is ~203 days even when 208 are requested; see data_start per coin.",
+    "Entries need the basis beyond the entry threshold on confirm_hours consecutive closes (default 2). The 1-close version harvests transient last-trade prints and overstates PnL; see the module docstring.",
+    "Spot candle closes are used as the spot mid proxy; no historical order-book data exists, so slippage is NOT modeled and fills use hour closes. PnL is an upper bound.",
+    "long_perp_short_spot needs borrowed spot assets. Borrow is priced at --borrow-apr but no borrow source is wired up; that direction is a live blocker, not a runnable trade on Hyperliquid alone.",
+    "A hedged trade ties up about 2x notional in capital (cash for the spot leg plus margin for the perp leg)."
+  ],
+  "pairs": {
+    "BTC": {
+      "coin": "BTC",
+      "trades": 0,
+      "win_rate": null,
+      "total_pnl_usd": 0,
+      "return_pct": 0.0,
+      "profit_factor": null,
+      "sharpe_per_trade": null,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": null,
+      "price_pnl_usd": 0,
+      "funding_pnl_usd": 0,
+      "borrow_cost_usd": 0,
+      "fees_usd": 0,
+      "exit_reasons": {
+        "converged": 0,
+        "timeout": 0,
+        "adverse": 0,
+        "hard_stop": 0,
+        "eod": 0
+      },
+      "signals_seen": 6,
+      "by_direction": {
+        "short_perp_long_spot": {
+          "trades": 0,
+          "pnl_usd": 0,
+          "win_rate": null
+        },
+        "long_perp_short_spot": {
+          "trades": 0,
+          "pnl_usd": 0,
+          "win_rate": null
+        }
+      },
+      "trade_list": [],
+      "data_start": "2026-04-26 20:00",
+      "data_hours": 4877,
+      "buy_and_hold_perp_pct": -17.0
+    },
+    "ETH": {
+      "coin": "ETH",
+      "trades": 0,
+      "win_rate": null,
+      "total_pnl_usd": 0,
+      "return_pct": 0.0,
+      "profit_factor": null,
+      "sharpe_per_trade": null,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": null,
+      "price_pnl_usd": 0,
+      "funding_pnl_usd": 0,
+      "borrow_cost_usd": 0,
+      "fees_usd": 0,
+      "exit_reasons": {
+        "converged": 0,
+        "timeout": 0,
+        "adverse": 0,
+        "hard_stop": 0,
+        "eod": 0
+      },
+      "signals_seen": 20,
+      "by_direction": {
+        "short_perp_long_spot": {
+          "trades": 0,
+          "pnl_usd": 0,
+          "win_rate": null
+        },
+        "long_perp_short_spot": {
+          "trades": 0,
+          "pnl_usd": 0,
+          "win_rate": null
+        }
+      },
+      "trade_list": [],
+      "data_start": "2026-04-26 21:00",
+      "data_hours": 4876,
+      "buy_and_hold_perp_pct": -23.35
+    },
+    "SOL": {
+      "coin": "SOL",
+      "trades": 2,
+      "win_rate": 1.0,
+      "total_pnl_usd": 0.13,
+      "return_pct": 0.13,
+      "profit_factor": null,
+      "sharpe_per_trade": 1.57,
+      "max_drawdown_pct": 0.0,
+      "avg_hours": 5.0,
+      "price_pnl_usd": 0.41,
+      "funding_pnl_usd": 0.0,
+      "borrow_cost_usd": -0.0,
+      "fees_usd": -0.28,
+      "exit_reasons": {
+        "converged": 2,
+        "timeout": 0,
+        "adverse": 0,
+        "hard_stop": 0,
+        "eod": 0
+      },
+      "signals_seen": 30,
+      "by_direction": {
+        "short_perp_long_spot": {
+          "trades": 1,
+          "pnl_usd": 0.04,
+          "win_rate": 1.0
+        },
+        "long_perp_short_spot": {
+          "trades": 1,
+          "pnl_usd": 0.1,
+          "win_rate": 1.0
+        }
+      },
+      "trade_list": [
+        {
+          "coin": "SOL",
+          "direction": "short_perp_long_spot",
+          "entry_time": 1793318400000,
+          "exit_time": 1793343600000,
+          "entry_basis_bps": 21.9,
+          "exit_basis_bps": 4.9,
+          "hours": 7,
+          "reason": "converged",
+          "price_pnl": 0.1747,
+          "funding_pnl": 0.0019,
+          "borrow_cost": -0.0,
+          "fees": -0.14,
+          "pnl": 0.0367
+        },
+        {
+          "coin": "SOL",
+          "direction": "long_perp_short_spot",
+          "entry_time": 1794708000000,
+          "exit_time": 1794718800000,
+          "entry_basis_bps": -22.4,
+          "exit_basis_bps": 0.3,
+          "hours": 3,
+          "reason": "converged",
+          "price_pnl": 0.2369,
+          "funding_pnl": 0.0015,
+          "borrow_cost": -0.0017,
+          "fees": -0.14,
+          "pnl": 0.0967
+        }
+      ],
+      "data_start": "2026-04-26 21:00",
+      "data_hours": 4876,
+      "buy_and_hold_perp_pct": -17.25
+    }
+  },
+  "combined": {
+    "trades": 2,
+    "total_pnl_usd": 0.13,
+    "price_pnl_usd": 0.41,
+    "funding_pnl_usd": 0.0,
+    "borrow_cost_usd": 0.0,
+    "fees_usd": -0.28,
+    "win_rate": 1.0
+  }
+}

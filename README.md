@@ -14,7 +14,7 @@
 > risk. No returns are guaranteed. Do your own research, paper-trade
 > first, and never trade money you cannot afford to lose.
 
-Version 0.9.0, 2026-11-17. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
+Version 0.10.0, 2026-11-21. Quantitative Signal & Research Assistant (Paper/Simulation/Tickets/Live).
 
 ## What this is
 
@@ -87,6 +87,7 @@ deeply negative (shorts pay longs), exit when funding flips back to ≥ 0.
 | [`scripts/backtest_funding.py`](scripts/backtest_funding.py) | Strategy A backtest + `--min-score` scored variant. |
 | [`scripts/sweep.py`](scripts/sweep.py) | 48-combo parameter sweep + out-of-sample validation. |
 | [`scripts/backtest_strategy_e.py`](scripts/backtest_strategy_e.py) | Strategy E backtest (HL vs Lighter). |
+| [`scripts/backtest_basis.py`](scripts/backtest_basis.py) | Strategy B hedged two-leg basis backtest (perp + spot, all costs modeled). |
 | [`scripts/ccxt_funding.py`](scripts/ccxt_funding.py) | Current funding APR via CCXT — Hyperliquid only on this VM; needs `pip install ccxt`. Optional; the core scripts stay stdlib-only. |
 | [`results/`](results/) | Every result file: backtests, sweeps, scans, frequency data. Nothing is deleted; old runs stay for the record. |
 
@@ -126,6 +127,37 @@ pulled out so any multi-venue trade can use it — load state,
 reconcile, score closes, score opens, bracket, plan, wait for yes,
 closes first, persist. Procedure only; live runs still need §14's
 three requirements.
+## Strategy B backtest — honest result
+
+`results/backtest-basis-2026-11-16.json`, run with
+`python3 scripts/backtest_basis.py --days 208 --end 2026-11-16 --coins BTC ETH SOL`.
+Data: Hyperliquid perp + spot hourly candles and fundingHistory (all
+public, no keys, no lookahead). Spot history starts 2026-04-26, so the
+effective window is 203 days. Entry at |basis| above 20 bps confirmed
+on 2 consecutive closes, exit on convergence to 5 bps, 72h timeout,
+or an adverse stop at 40 bps. Every cost line is modeled: taker fees
+on all four fills, funding accrued hourly on the perp leg, borrow at
+5% APR on the short-spot leg.
+
+| Coin | Trades | Win | PnL | Price | Funding | Borrow | Fees |
+|---|---|---|---|---|---|---|---|
+| BTC | 0 | — | $0 | $0 | $0 | $0 | $0 |
+| ETH | 0 | — | $0 | $0 | $0 | $0 | $0 |
+| SOL | 2 | 100% | +$0.13 | +$0.41 | +$0.00 | -$0.00 | -$0.28 |
+| Combined | 2 | 100% | +$0.13 | +$0.41 | +$0.00 | -$0.00 | -$0.28 |
+
+**On the three majors the strategy barely trades** — BTC and ETH saw
+zero confirmed dislocations in 203 days. The 100% win rate means
+nothing on two trades. The naive 1-close version showed +$5.66 on 53
+trades, but that was close-price noise: a single -100.6 bps BTC print
+that vanished in one hour contributed +$0.90 on its own. It is kept as
+`results/backtest-basis-2026-11-16-naive.json` to show why the
+2-close confirmation filter exists. Do not quote its total.
+**+$0.13 in 203 days is not a return stream, it is proof the machinery
+works.** Live, the short-perp + long-spot direction is feasible on
+Hyperliquid alone; the long-perp + short-spot direction needs a borrow
+source that does not exist yet. Full rules are in [`SKILL.md`](SKILL.md) §8 B.
+
 **On the three majors the 70% threshold almost never triggers** —
 mean net APR is only ~5% (p99 22–54%); BTC's max spread in 208 days
 was 111.7% for a single hour, ETH never reached 70% (max 67.2%).
